@@ -17,8 +17,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-console.info("this is a test");
-
 /**
  * The underlying JSON data to feed the bubble tree with.
  */
