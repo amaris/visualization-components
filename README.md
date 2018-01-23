@@ -1,5 +1,5 @@
 # visualization-components
-A set of D3.js-based visualization components
+This project contains a set of D3.js-based visualization components for data science. These components are designed to be easily reusable in any web project. They are developped in TypeScript, but users do not need the TypeScript source to integrate the component in their projets.
 
 ## Getting started
 
