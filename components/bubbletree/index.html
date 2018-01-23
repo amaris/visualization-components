@@ -1,0 +1,22 @@
+<!-- This HTML file shows how to embed a bubbletree component in a regular HTML page -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="arnd_bubbletree.css" />
+<style>
+</style>
+</head>
+<body>
+<button onclick="c.select('1s3').select('1s2', 0.5).select('1s1', 0.1)">CLICK</button>
+
+<svg width="960" height="960" id="bubbletree"></svg>
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="arnd_bubbletree.js"></script>
+
+<script>
+c = new BubbleTree();
+c.build({container: document.getElementById("bubbletree"), url:"data.json"});
+</script>
+</body>
