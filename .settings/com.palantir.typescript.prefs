@@ -1,6 +1,6 @@
 compiler.codeGenTarget=ECMASCRIPT5
 compiler.compileOnSave=true
-compiler.generateDeclarationFiles=false
+compiler.generateDeclarationFiles=true
 compiler.inlineSourceMap=false
 compiler.inlineSources=false
 compiler.jsx=NONE
