@@ -103,7 +103,10 @@ class BubbleTree {
     private rootData: Data;
 
     private update() {
-        this.diameter = Math.min(this.config.container.parentElement.clientWidth, this.config.container.parentElement.clientHeight) - (this.config.margin * 2);
+        this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight) - (this.config.margin * 2);
+        if(NaN == this.diameter || this.diameter <= 0) {
+            this.diameter = 1000;
+        }
     }
     
     /**
@@ -113,6 +116,8 @@ class BubbleTree {
      */
     build(config: BubbleTreeConfiguration) {
         this.config = config;
+        this.config.container.setAttribute("width", "100%");
+        this.config.container.setAttribute("height", "100%");
         if (!this.config.handlers) {
             this.config.handlers = {};
         }

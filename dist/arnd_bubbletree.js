@@ -24,7 +24,10 @@ var BubbleTree = (function () {
         this.selections = {};
     }
     BubbleTree.prototype.update = function () {
-        this.diameter = Math.min(this.config.container.parentElement.clientWidth, this.config.container.parentElement.clientHeight) - (this.config.margin * 2);
+        this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight) - (this.config.margin * 2);
+        if (NaN == this.diameter || this.diameter <= 0) {
+            this.diameter = 1000;
+        }
     };
     /**
      * Builds the buble tree diagram as specified by the given configuration.
@@ -34,6 +37,8 @@ var BubbleTree = (function () {
     BubbleTree.prototype.build = function (config) {
         var _this = this;
         this.config = config;
+        this.config.container.setAttribute("width", "100%");
+        this.config.container.setAttribute("height", "100%");
         if (!this.config.handlers) {
             this.config.handlers = {};
         }
