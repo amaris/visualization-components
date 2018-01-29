@@ -109,18 +109,23 @@ var BubbleTree = (function () {
                 }
             };
             // merge handlers
-            var _loop_1 = function(defaultHandler) {
-                if (_this.config.handlers[defaultHandler]) {
-                    var handler_1 = handlers[defaultHandler];
+            var _loop_1 = function(userHandler) {
+                if (handlers[userHandler]) {
+                    var handler_1 = handlers[userHandler];
                     // merge with user-defined handler
-                    handlers[defaultHandler] = function (d) {
+                    handlers[userHandler] = function (d) {
                         handler_1(d);
-                        _this.config.handlers[defaultHandler](d);
+                        _this.config.handlers[userHandler](d);
                     };
                 }
+                else {
+                    // install user handler
+                    handlers[userHandler] =
+                        _this.config.handlers[userHandler];
+                }
             };
-            for (var defaultHandler in handlers) {
-                _loop_1(defaultHandler);
+            for (var userHandler in _this.config.handlers) {
+                _loop_1(userHandler);
             }
             // apply all handlers
             for (var handler in handlers) {

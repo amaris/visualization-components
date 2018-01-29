@@ -22,7 +22,8 @@ c.build({container: document.getElementById("bubbletree"), url:"data.json",
 		"click": function(d) {
 			console.info(">> "+d.data);
 		},
-		"mouseover": function(d) { console.info("mouseover"); }
+		"mouseover": function(d) { console.info("mouseover"); },
+		"dblclick": function(d) { console.info("dblclick"); }
 	}
 });
 </script>
