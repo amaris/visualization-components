@@ -233,7 +233,9 @@ class BubbleTree {
 
             this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
 
-            this.config.onBuilt(this);
+            if (this.config.onBuilt) {
+                this.config.onBuilt(this);
+            }
         });
 
     }
@@ -303,7 +305,7 @@ class BubbleTree {
                 return t => this.zoomTo(i(t));
             });
 
-        transition.select("#"+this.config.container.id).selectAll("text")
+        transition.select("#" + this.config.container.id).selectAll("text")
             .filter(d => d.parent && d.parent === this.focus || this.nodeToText(d).style.display === "inline")
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
             .on("start", d => { if (d.parent === this.focus) this.nodeToText(d).style.display = "inline"; })
