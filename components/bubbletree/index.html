@@ -28,5 +28,18 @@ c.build({container: document.getElementById("bubbletree"), url:"data.json",
 		"dblclick": function(d) { console.info("dblclick"); }
 	}, showRoot: true
 });
+
+
+c = new BubbleTree();
+c.build({container: document.getElementById("bubbletree"), url:"data.json",
+	handlers: {
+		"click": function(d) {
+			console.info(">> "+d.data);
+		},
+		"mouseover": function(d) { console.info("mouseover"); },
+		"dblclick": function(d) { console.info("dblclick"); }
+	}, showRoot: true
+});
+
 </script>
 </body>

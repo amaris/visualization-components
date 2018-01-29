@@ -41,6 +41,7 @@ var BubbleTree = (function () {
     BubbleTree.prototype.build = function (config) {
         var _this = this;
         this.config = config;
+        this.config.container.innerHTML = "";
         this.config.container.setAttribute("width", "100%");
         this.config.container.setAttribute("height", "100%");
         if (!this.config.handlers) {
@@ -237,8 +238,11 @@ var BubbleTree = (function () {
     };
     BubbleTree.prototype.showText = function (d, show) {
         if (show === void 0) { show = true; }
-        this.nodeToText(d).style.fillOpacity = show ? "1" : "0";
-        this.nodeToText(d).style.display = show ? "inline" : "none";
+        var text = this.nodeToText(d);
+        if (text) {
+            text.style.fillOpacity = show ? "1" : "0";
+            text.style.display = show ? "inline" : "none";
+        }
     };
     BubbleTree.ID = 1;
     return BubbleTree;
