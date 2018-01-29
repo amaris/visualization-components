@@ -70,6 +70,8 @@ interface BubbleTreeConfiguration {
 declare class BubbleTree {
     private svg;
     private diameter;
+    private width;
+    private height;
     private g;
     private defaultColor;
     private pack;

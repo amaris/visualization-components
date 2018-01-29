@@ -24,9 +24,13 @@ var BubbleTree = (function () {
         this.selections = {};
     }
     BubbleTree.prototype.update = function () {
-        this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight) - (this.config.margin * 2);
+        this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
+        this.width = this.config.container.clientWidth;
+        this.height = this.config.container.clientHeight;
         if (NaN == this.diameter || this.diameter <= 0) {
             this.diameter = 1000;
+            this.width = 1000;
+            this.height = 1000;
         }
     };
     /**
@@ -49,7 +53,7 @@ var BubbleTree = (function () {
             this.config.margin = 20;
         this.update();
         console.info("diameter: " + this.diameter);
-        this.g = this.svg.append("g").attr("transform", "translate(" + this.diameter / 2 + "," + this.diameter / 2 + ")");
+        this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
         this.defaultColor = d3.scaleLinear()
             .domain([-1, 5])
             .range(["hsl(197,30%,98%)", "hsl(220,50%,88%)"])

@@ -88,6 +88,8 @@ class BubbleTree {
 
     private svg: d3.Selection<any>;
     private diameter: number;
+    private width: number;
+    private height: number;
     private g: d3.Selection<any>;
 
     private defaultColor: d3.scale.Linear<any, any>;
@@ -103,9 +105,13 @@ class BubbleTree {
     private rootData: Data;
 
     private update() {
-        this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight) - (this.config.margin * 2);
+        this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
+        this.width = this.config.container.clientWidth;
+        this.height = this.config.container.clientHeight;
         if (NaN == this.diameter || this.diameter <= 0) {
             this.diameter = 1000;
+            this.width = 1000;
+            this.height = 1000;
         }
     }
 
@@ -127,7 +133,7 @@ class BubbleTree {
         if (!this.config.margin) this.config.margin = 20;
         this.update();
         console.info("diameter: " + this.diameter);
-        this.g = this.svg.append("g").attr("transform", "translate(" + this.diameter / 2 + "," + this.diameter / 2 + ")");
+        this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
 
         this.defaultColor = d3.scaleLinear()
             .domain([-1, 5])
