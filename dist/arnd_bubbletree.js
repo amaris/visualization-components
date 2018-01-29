@@ -72,7 +72,6 @@ var BubbleTree = (function () {
                 .enter().append("circle").each(function (d) { if (d.data.uid === undefined)
                 d.data.uid = "__generated_" + (BubbleTree.ID++); })
                 .attr("class", function (d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-                .attr("class", function (d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
                 .attr("id", function (d) { return d.data.uid ? "circle_" + d.data.uid : null; })
                 .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
                 .style("fill", function (d) { return _this.nodeColor(d); });
@@ -207,7 +206,7 @@ var BubbleTree = (function () {
             var i = d3.interpolateZoom(_this.view, [_this.focus.x, _this.focus.y, _this.focus.r * 2 + _this.config.margin]);
             return function (t) { return _this.zoomTo(i(t)); };
         });
-        transition.selectAll("text")
+        transition.select("#" + this.config.container.id).selectAll("text")
             .filter(function (d) { return d.parent && d.parent === _this.focus || _this.nodeToText(d).style.display === "inline"; })
             .style("fill-opacity", function (d) { return d.parent === _this.focus ? 1 : 0; })
             .on("start", function (d) { if (d.parent === _this.focus)

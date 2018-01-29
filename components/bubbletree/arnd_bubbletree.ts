@@ -154,7 +154,6 @@ class BubbleTree {
                 .data<d3.pack.Node<Data>>(nodes)
                 .enter().append("circle").each(d => { if (d.data.uid === undefined) d.data.uid = "__generated_" + (BubbleTree.ID++); })
                 .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
-                .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
                 .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
                 .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
                 .style("fill", d => this.nodeColor(d));
@@ -293,7 +292,7 @@ class BubbleTree {
                 return t => this.zoomTo(i(t));
             });
 
-        transition.selectAll("text")
+        transition.select("#"+this.config.container.id).selectAll("text")
             .filter(d => d.parent && d.parent === this.focus || this.nodeToText(d).style.display === "inline")
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
             .on("start", d => { if (d.parent === this.focus) this.nodeToText(d).style.display = "inline"; })
