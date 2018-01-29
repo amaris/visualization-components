@@ -63,6 +63,10 @@ interface BubbleTreeConfiguration {
      * The margin size around the bubble tree.
      */
     margin?: number;
+    /**
+     * On built callback.
+     */
+    onBuilt: (bubbleTree: BubbleTree) => any;
 }
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.

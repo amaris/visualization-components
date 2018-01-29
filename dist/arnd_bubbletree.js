@@ -146,6 +146,7 @@ var BubbleTree = (function () {
                 .text(function (d) { return d.data.name; });
             _this.svg.on("click", function () { return _this.zoom(root); });
             _this.zoomTo([root.x, root.y, root.r * 2 + _this.config.margin]);
+            _this.config.onBuilt(_this);
         });
     };
     BubbleTree.prototype.leafColor = function (saturation) {

@@ -79,6 +79,10 @@ interface BubbleTreeConfiguration {
      * The margin size around the bubble tree.
      */
     margin?: number;
+    /**
+     * On built callback.
+     */
+    onBuilt: (bubbleTree: BubbleTree) => any;
 }
 
 /**
@@ -229,6 +233,7 @@ class BubbleTree {
 
             this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
 
+            this.config.onBuilt(this);
         });
 
     }
