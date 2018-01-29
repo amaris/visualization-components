@@ -23,6 +23,9 @@ var BubbleTree = (function () {
     function BubbleTree() {
         this.selections = {};
     }
+    BubbleTree.prototype.update = function () {
+        this.diameter = Math.min(this.config.container.parentElement.clientWidth, this.config.container.parentElement.clientHeight) - (this.config.margin * 2);
+    };
     /**
      * Builds the buble tree diagram as specified by the given configuration.
      *
@@ -31,18 +34,23 @@ var BubbleTree = (function () {
     BubbleTree.prototype.build = function (config) {
         var _this = this;
         this.config = config;
+        if (!this.config.handlers) {
+            this.config.handlers = {};
+        }
         this.config.showRoot = this.config.showRoot ? this.config.showRoot : false;
         this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 70;
         this.svg = d3.select(config.container);
-        this.margin = 20;
-        this.diameter = 1000; //+this.svg.attr("width");
+        if (!this.config.margin)
+            this.config.margin = 20;
+        this.update();
+        console.info("diameter: " + this.diameter);
         this.g = this.svg.append("g").attr("transform", "translate(" + this.diameter / 2 + "," + this.diameter / 2 + ")");
         this.defaultColor = d3.scaleLinear()
             .domain([-1, 5])
             .range(["hsl(197,30%,98%)", "hsl(220,50%,88%)"])
             .interpolate(d3.interpolateHcl);
         this.pack = d3.pack()
-            .size([this.diameter - this.margin, this.diameter - this.margin])
+            .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
             .padding(2);
         d3.json(config.url, function (error, rootData) {
             console.log(rootData);
@@ -62,29 +70,58 @@ var BubbleTree = (function () {
                 .attr("class", function (d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
                 .attr("id", function (d) { return d.data.uid ? "circle_" + d.data.uid : null; })
                 .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
-                .style("fill", function (d) { return _this.nodeColor(d); })
-                .on("click", function (d) { if (!d.children) {
-                _this.clearSelect().select(d.data.uid);
-                if (_this.config.onClick !== undefined) {
-                    _this.config.onClick(d);
+                .style("fill", function (d) { return _this.nodeColor(d); });
+            var handlers = {
+                "click": function (d) {
+                    if (!d.children) {
+                        if (_this.config.selectOnClick) {
+                            _this.clearSelect().select(d.data.uid);
+                        }
+                        if (_this.config.onClick !== undefined) {
+                            _this.config.onClick(d);
+                        }
+                        else {
+                            _this.zoom(d.parent);
+                        }
+                        d3.event.stopPropagation();
+                    }
+                    else if (_this.focus !== d) {
+                        _this.zoom(d);
+                        d3.event.stopPropagation();
+                    }
+                },
+                "mouseover": function (d) {
+                    if (!d.children) {
+                        _this.showText(d, true);
+                        _this.showText(d.parent, false);
+                    }
+                },
+                "mouseout": function (d) {
+                    if (d.parent !== _this.focus && !d.children) {
+                        _this.showText(d, false);
+                        _this.showText(d.parent, true);
+                    }
                 }
-                else {
-                    _this.zoom(d.parent);
+            };
+            // merge handlers
+            var _loop_1 = function(defaultHandler) {
+                if (_this.config.handlers[defaultHandler]) {
+                    var handler_1 = handlers[defaultHandler];
+                    // merge with user-defined handler
+                    handlers[defaultHandler] = function (d) {
+                        handler_1(d);
+                        _this.config.handlers[defaultHandler](d);
+                    };
                 }
-                d3.event.stopPropagation();
+            };
+            for (var defaultHandler in handlers) {
+                _loop_1(defaultHandler);
             }
-            else if (_this.focus !== d) {
-                _this.zoom(d);
-                d3.event.stopPropagation();
-            } })
-                .on("mouseover", function (d) { if (!d.children) {
-                _this.showText(d, true);
-                _this.showText(d.parent, false);
-            } })
-                .on("mouseout", function (d) { if (d.parent !== _this.focus && !d.children) {
-                _this.showText(d, false);
-                _this.showText(d.parent, true);
-            } });
+            // apply all handlers
+            for (var handler in handlers) {
+                console.info("installing handler " + handler);
+                _this.circle.on(handler, handlers[handler]);
+            }
             var text = _this.g.selectAll("text")
                 .data(nodes)
                 .enter().append("text")
@@ -95,7 +132,7 @@ var BubbleTree = (function () {
                 .style("pointer-events", "none")
                 .text(function (d) { return d.data.name; });
             _this.svg.on("click", function () { return _this.zoom(root); });
-            _this.zoomTo([root.x, root.y, root.r * 2 + _this.margin]);
+            _this.zoomTo([root.x, root.y, root.r * 2 + _this.config.margin]);
         });
     };
     BubbleTree.prototype.leafColor = function (saturation) {
@@ -157,7 +194,7 @@ var BubbleTree = (function () {
         var transition = d3.transition()
             .duration(d3.event && d3.event.altKey ? 7500 : 750)
             .tween("zoom", function (d) {
-            var i = d3.interpolateZoom(_this.view, [_this.focus.x, _this.focus.y, _this.focus.r * 2 + _this.margin]);
+            var i = d3.interpolateZoom(_this.view, [_this.focus.x, _this.focus.y, _this.focus.r * 2 + _this.config.margin]);
             return function (t) { return _this.zoomTo(i(t)); };
         });
         transition.selectAll("text")
@@ -190,3 +227,4 @@ var BubbleTree = (function () {
     BubbleTree.ID = 1;
     return BubbleTree;
 }());
+//# sourceMappingURL=arnd_bubbletree.js.map

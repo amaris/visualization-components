@@ -66,7 +66,19 @@ interface BubbleTreeConfiguration {
     /**
      * Hanler called when the user clicks on a node.
      */
-    onClick: (handler: d3.pack.Node<Data>) => any;
+    onClick?: (handler: d3.pack.Node<Data>) => any;
+    /**
+     * Hanler called when the user clicks on a node.
+     */
+    handlers?: { [eventType: string]: ((node: d3.pack.Node<Data>) => any) };
+    /**
+     * True to select the clicked leaf node.
+     */
+    selectOnClick?: boolean;
+    /**
+     * The margin size around the bubble tree.
+     */
+    margin?: number;
 }
 
 /**
@@ -75,7 +87,6 @@ interface BubbleTreeConfiguration {
 class BubbleTree {
 
     private svg: d3.Selection<any>;
-    private margin: number;
     private diameter: number;
     private g: d3.Selection<any>;
 
@@ -91,6 +102,10 @@ class BubbleTree {
     private selections: {} = {};
     private rootData: Data;
 
+    private update() {
+        this.diameter = Math.min(this.config.container.parentElement.clientWidth, this.config.container.parentElement.clientHeight) - (this.config.margin * 2);
+    }
+    
     /**
      * Builds the buble tree diagram as specified by the given configuration.
      * 
@@ -98,11 +113,15 @@ class BubbleTree {
      */
     build(config: BubbleTreeConfiguration) {
         this.config = config;
+        if (!this.config.handlers) {
+            this.config.handlers = {};
+        }
         this.config.showRoot = this.config.showRoot ? this.config.showRoot : false;
         this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 70;
         this.svg = d3.select(config.container);
-        this.margin = 20;
-        this.diameter = 1000; //+this.svg.attr("width");
+        if(!this.config.margin) this.config.margin = 20;
+        this.update();
+        console.info("diameter: "+this.diameter);
         this.g = this.svg.append("g").attr("transform", "translate(" + this.diameter / 2 + "," + this.diameter / 2 + ")");
 
         this.defaultColor = d3.scaleLinear()
@@ -111,14 +130,14 @@ class BubbleTree {
             .interpolate(d3.interpolateHcl);
 
         this.pack = d3.pack()
-            .size([this.diameter - this.margin, this.diameter - this.margin])
+            .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
             .padding(2);
 
         d3.json(config.url, (error, rootData: Data) => {
             console.log(rootData);
             if (error) throw error;
 
-            this.rootData = rootData;            
+            this.rootData = rootData;
             let root = <any>d3.hierarchy(rootData)
                 .sum(d => d["weight"])
                 .sort((a, b) => b.value - a.value);
@@ -133,10 +152,54 @@ class BubbleTree {
                 .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
                 .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
                 .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
-                .style("fill", d => this.nodeColor(d))
-                .on("click", d => { if (!d.children) { this.clearSelect().select(d.data.uid); if (this.config.onClick !== undefined) { this.config.onClick(d); } else { this.zoom(d.parent); } d3.event.stopPropagation(); } else if (this.focus !== d) { this.zoom(d); d3.event.stopPropagation(); } })
-                .on("mouseover", d => { if (!d.children) { this.showText(d, true); this.showText(d.parent, false); } })
-                .on("mouseout", d => { if (d.parent !== this.focus && !d.children) { this.showText(d, false); this.showText(d.parent, true); } });
+                .style("fill", d => this.nodeColor(d));
+
+            let handlers = {
+                "click": (d: d3.pack.Node<Data>) => {
+                    if (!d.children) {
+                        if (this.config.selectOnClick) {
+                            this.clearSelect().select(d.data.uid);
+                        }
+                        if (this.config.onClick !== undefined) {
+                            this.config.onClick(d);
+                        } else {
+                            this.zoom(d.parent);
+                        } d3.event.stopPropagation();
+                    } else if (this.focus !== d) {
+                        this.zoom(d);
+                        d3.event.stopPropagation();
+                    }
+                },
+                "mouseover": (d: d3.pack.Node<Data>) => {
+                    if (!d.children) {
+                        this.showText(d, true);
+                        this.showText(d.parent, false);
+                    }
+                },
+                "mouseout": (d: d3.pack.Node<Data>) => {
+                    if (d.parent !== this.focus && !d.children) {
+                        this.showText(d, false); this.showText(d.parent, true);
+                    }
+                }
+            };
+
+            // merge handlers
+            for (let defaultHandler in handlers) {
+                if (this.config.handlers[defaultHandler]) {
+                    let handler = handlers[defaultHandler];
+                    // merge with user-defined handler
+                    handlers[defaultHandler] = d => {
+                        handler(d);
+                        this.config.handlers[defaultHandler](d);
+                    };
+                }
+            }
+
+            // apply all handlers
+            for (let handler in handlers) {
+                console.info("installing handler " + handler);
+                this.circle.on(handler, handlers[handler]);
+            }
 
             var text = this.g.selectAll("text")
                 .data<d3.pack.Node<Data>>(nodes)
@@ -150,7 +213,7 @@ class BubbleTree {
 
             this.svg.on("click", () => this.zoom(root));
 
-            this.zoomTo([root.x, root.y, root.r * 2 + this.margin]);
+            this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
 
         });
 
@@ -161,9 +224,9 @@ class BubbleTree {
     }
 
     private nodeColor(d: d3.pack.Node<Data>): string {
-        return d.data.color? d.data.color : d.children ? this.defaultColor(d.depth) : this.leafColor(0);
+        return d.data.color ? d.data.color : d.children ? this.defaultColor(d.depth) : this.leafColor(0);
     }
-    
+
     /**
      * Zooms to a node represented by its uid.
      * 
@@ -217,7 +280,7 @@ class BubbleTree {
         var transition = d3.transition()
             .duration(d3.event && (<any>d3.event).altKey ? 7500 : 750)
             .tween("zoom", d => {
-                var i = d3.interpolateZoom(this.view, [this.focus.x, this.focus.y, this.focus.r * 2 + this.margin]);
+                var i = d3.interpolateZoom(this.view, [this.focus.x, this.focus.y, this.focus.r * 2 + this.config.margin]);
                 return t => this.zoomTo(i(t));
             });
 
@@ -233,10 +296,10 @@ class BubbleTree {
      * 
      * @see build
      */
-    getRootData() : Data {
+    getRootData(): Data {
         return this.rootData;
     }
-    
+
     private nodeToText(d): HTMLElement {
         return document.getElementById("text_" + d.data.uid);
     }

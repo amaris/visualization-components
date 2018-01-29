@@ -48,14 +48,27 @@ interface BubbleTreeConfiguration {
     /**
      * Hanler called when the user clicks on a node.
      */
-    onClick: (handler: d3.pack.Node<Data>) => any;
+    onClick?: (handler: d3.pack.Node<Data>) => any;
+    /**
+     * Hanler called when the user clicks on a node.
+     */
+    handlers?: {
+        [eventType: string]: ((node: d3.pack.Node<Data>) => any);
+    };
+    /**
+     * True to select the clicked leaf node.
+     */
+    selectOnClick?: boolean;
+    /**
+     * The margin size around the bubble tree.
+     */
+    margin?: number;
 }
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.
  */
 declare class BubbleTree {
     private svg;
-    private margin;
     private diameter;
     private g;
     private defaultColor;
@@ -67,6 +80,7 @@ declare class BubbleTree {
     private config;
     private selections;
     private rootData;
+    private update();
     /**
      * Builds the buble tree diagram as specified by the given configuration.
      *
