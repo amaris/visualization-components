@@ -82,7 +82,7 @@ interface BubbleTreeConfiguration {
     /**
      * On built callback.
      */
-    onBuilt: (bubbleTree: BubbleTree) => any;
+    onBuilt?: (bubbleTree: BubbleTree) => any;
 }
 
 /**

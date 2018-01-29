@@ -66,7 +66,7 @@ interface BubbleTreeConfiguration {
     /**
      * On built callback.
      */
-    onBuilt: (bubbleTree: BubbleTree) => any;
+    onBuilt?: (bubbleTree: BubbleTree) => any;
 }
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.
