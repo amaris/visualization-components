@@ -104,11 +104,11 @@ class BubbleTree {
 
     private update() {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight) - (this.config.margin * 2);
-        if(NaN == this.diameter || this.diameter <= 0) {
+        if (NaN == this.diameter || this.diameter <= 0) {
             this.diameter = 1000;
         }
     }
-    
+
     /**
      * Builds the buble tree diagram as specified by the given configuration.
      * 
@@ -124,9 +124,9 @@ class BubbleTree {
         this.config.showRoot = this.config.showRoot ? this.config.showRoot : false;
         this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 70;
         this.svg = d3.select(config.container);
-        if(!this.config.margin) this.config.margin = 20;
+        if (!this.config.margin) this.config.margin = 20;
         this.update();
-        console.info("diameter: "+this.diameter);
+        console.info("diameter: " + this.diameter);
         this.g = this.svg.append("g").attr("transform", "translate(" + this.diameter / 2 + "," + this.diameter / 2 + ")");
 
         this.defaultColor = d3.scaleLinear()
@@ -189,14 +189,18 @@ class BubbleTree {
             };
 
             // merge handlers
-            for (let defaultHandler in handlers) {
-                if (this.config.handlers[defaultHandler]) {
-                    let handler = handlers[defaultHandler];
+            for (let userHandler in this.config.handlers) {
+                if (handlers[userHandler]) {
+                    let handler = handlers[userHandler];
                     // merge with user-defined handler
-                    handlers[defaultHandler] = d => {
+                    handlers[userHandler] = d => {
                         handler(d);
-                        this.config.handlers[defaultHandler](d);
+                        this.config.handlers[userHandler](d);
                     };
+                } else {
+                    // install user handler
+                    handlers[userHandler] =
+                        this.config.handlers[userHandler];
                 }
             }
 
