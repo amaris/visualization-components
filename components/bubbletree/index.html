@@ -1,45 +1,53 @@
-<!-- This HTML file shows how to embed a bubbletree component in a regular HTML page -->
+﻿<!-- This HTML file shows how to embed a bubbletree component in a regular HTML page -->
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="arnd_bubbletree.css" />
-<style>
-</style>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="/components/bubbletree/arnd_bubbletree.css"/>
+    <style>
+        
+    </style>
 </head>
 <body>
 <button onclick="c.select('1s3').select('1s2', 0.5).select('1s1', 0.1)">CLICK</button>
 
 <div>
-<svg id="bubbletree" style="min-height:500px"></svg>
+    <svg id="bubbletree" style="min-height: 500px"></svg>
 </div>
 
 <script src="/lib/d3.v4.min.js"></script>
-<script src="/dist/arnd_bubbletree.js"></script>
+<script src="/components/bubbletree/arnd_bubbletree.js"></script>
 
 <script>
-c = new BubbleTree();
-c.build({container: document.getElementById("bubbletree"), url:"data.json",
-	handlers: {
-		"click": function(d) {
-			console.info(">> "+d.data);
-		},
-		"mouseover": function(d) { console.info("mouseover"); },
-		"dblclick": function(d) { console.info("dblclick"); }
-	}, showRoot: true
-});
+    c = new BubbleTree();
+    c.build({
+        container: document.getElementById("bubbletree"),
+        url: "data.json",
+        handlers: {
+            "click": function(d) {
+                console.info(">> " + d.data);
+            },
+            "mouseover": function(d) { console.info("mouseover"); },
+            "dblclick": function(d) { console.info("dblclick"); }
+        },
+        showRoot: true
+    });
 
 
-c = new BubbleTree();
-c.build({container: document.getElementById("bubbletree"), url:"data.json",
-	handlers: {
-		"click": function(d) {
-			console.info(">> "+d.data);
-		},
-		"mouseover": function(d) { console.info("mouseover"); },
-		"dblclick": function(d) { console.info("dblclick"); }
-	}, showRoot: true
-});
+    c = new BubbleTree();
+    c.build({
+        container: document.getElementById("bubbletree"),
+        url: "data.json",
+        handlers: {
+            "click": function(d) {
+                console.info(">> " + d.data);
+            },
+            "mouseover": function(d) { console.info("mouseover"); },
+            "dblclick": function(d) { console.info("dblclick"); }
+        },
+        showRoot: true
+    });
 
 </script>
 </body>
+</html>
