@@ -27,7 +27,7 @@ var BubbleTree = (function () {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
         this.width = this.config.container.clientWidth;
         this.height = this.config.container.clientHeight;
-        if (NaN == this.diameter || this.diameter <= 0) {
+        if (NaN === this.diameter || this.diameter <= 0) {
             this.diameter = 1000;
             this.width = 1000;
             this.height = 1000;
@@ -136,7 +136,7 @@ var BubbleTree = (function () {
                 console.info("installing handler " + handler);
                 _this.circle.on(handler, handlers[handler]);
             }
-            var text = _this.g.selectAll("text")
+            _this.g.selectAll("text")
                 .data(nodes)
                 .enter().append("text")
                 .attr("class", "label")
@@ -210,7 +210,7 @@ var BubbleTree = (function () {
         this.focus = d;
         var transition = d3.transition()
             .duration(d3.event && d3.event.altKey ? 7500 : 750)
-            .tween("zoom", function (d) {
+            .tween("zoom", function () {
             var i = d3.interpolateZoom(_this.view, [_this.focus.x, _this.focus.y, _this.focus.r * 2 + _this.config.margin]);
             return function (t) { return _this.zoomTo(i(t)); };
         });

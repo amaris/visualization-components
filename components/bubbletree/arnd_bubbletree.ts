@@ -83,6 +83,18 @@ interface BubbleTreeConfiguration {
      * On built callback.
      */
     onBuilt?: (bubbleTree: BubbleTree) => any;
+    /**
+     * True to autosize component at 100% of this parent
+     */
+    autosize?: boolean;
+    /**
+     * Width if not autosize
+     */
+    width?: number;
+    /**
+     * Height if not autosize
+    */
+    height?: number;
 }
 
 /**
@@ -112,7 +124,7 @@ class BubbleTree {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
         this.width = this.config.container.clientWidth;
         this.height = this.config.container.clientHeight;
-        if (NaN == this.diameter || this.diameter <= 0) {
+        if (NaN === this.diameter || this.diameter <= 0) {
             this.diameter = 1000;
             this.width = 1000;
             this.height = 1000;
@@ -220,7 +232,7 @@ class BubbleTree {
                 this.circle.on(handler, handlers[handler]);
             }
 
-            var text = this.g.selectAll("text")
+            this.g.selectAll("text")
                 .data<d3.pack.Node<Data>>(nodes)
                 .enter().append("text")
                 .attr("class", "label")
@@ -301,7 +313,7 @@ class BubbleTree {
 
         var transition = d3.transition()
             .duration(d3.event && (<any>d3.event).altKey ? 7500 : 750)
-            .tween("zoom", d => {
+            .tween("zoom", () => {
                 var i = d3.interpolateZoom(this.view, [this.focus.x, this.focus.y, this.focus.r * 2 + this.config.margin]);
                 return t => this.zoomTo(i(t));
             });
