@@ -83,18 +83,6 @@ interface BubbleTreeConfiguration {
      * On built callback.
      */
     onBuilt?: (bubbleTree: BubbleTree) => any;
-    /**
-     * True to autosize component at 100% of this parent
-     */
-    autosize?: boolean;
-    /**
-     * Width if not autosize
-     */
-    width?: number;
-    /**
-     * Height if not autosize
-    */
-    height?: number;
 }
 
 /**

@@ -11,8 +11,17 @@
 <body>
 <button onclick="c.select('1s3').select('1s2', 0.5).select('1s1', 0.1)">CLICK</button>
 
-<div>
-    <svg id="bubbletree" style="min-height: 500px"></svg>
+<div style="width: 50%; height: 75%; border: red; border-style: dashed;">
+    <svg id="bubbletree1"></svg>
+</div>
+ 
+<div style="display: flex; flex-direction: row;height: 999px">
+    <div style="display: flex; flex-direction: column; width: 30%; border: red; border-style: dashed;">
+        <svg id="bubbletree2"></svg>
+    </div>
+    <div style="display: flex; flex-direction: column; width: 70%; border: red; border-style: dashed;">
+        <svg id="bubbletree3"></svg>
+    </div>
 </div>
 
 <script src="/lib/d3.v4.min.js"></script>
@@ -21,7 +30,23 @@
 <script>
     c = new BubbleTree();
     c.build({
-        container: document.getElementById("bubbletree"),
+        container: document.getElementById("bubbletree1"),
+        url: "data.json",
+        handlers: {
+            "click": function(d) {
+                console.info(">> " + d.data);
+            },
+            "mouseover": function(d) { console.info("mouseover"); },
+            "dblclick": function(d) { console.info("dblclick"); }
+        },
+        autosize:true,
+        showRoot: true
+    });
+
+
+    c = new BubbleTree();
+    c.build({
+        container: document.getElementById("bubbletree2"),
         url: "data.json",
         handlers: {
             "click": function(d) {
@@ -33,10 +58,9 @@
         showRoot: true
     });
 
-
     c = new BubbleTree();
     c.build({
-        container: document.getElementById("bubbletree"),
+        container: document.getElementById("bubbletree3"),
         url: "data.json",
         handlers: {
             "click": function(d) {
