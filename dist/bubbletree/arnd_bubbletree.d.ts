@@ -76,6 +76,8 @@ declare class BubbleTree {
     private diameter;
     private width;
     private height;
+    private offsetX;
+    private offsetY;
     private g;
     private defaultColor;
     private pack;
@@ -86,6 +88,7 @@ declare class BubbleTree {
     private config;
     private selections;
     private rootData;
+    private innerPaneFactor;
     private update();
     /**
      * Builds the buble tree diagram as specified by the given configuration.

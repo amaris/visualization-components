@@ -22,15 +22,17 @@
 var BubbleTree = (function () {
     function BubbleTree() {
         this.selections = {};
+        this.innerPaneFactor = 4;
     }
     BubbleTree.prototype.update = function () {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
         this.width = this.config.container.clientWidth;
         this.height = this.config.container.clientHeight;
         if (NaN === this.diameter || this.diameter <= 0) {
+            console.error("container has not been layouted - using default size");
             this.diameter = 1000;
-            this.width = 1000;
-            this.height = 1000;
+            this.width = this.diameter;
+            this.height = this.diameter;
         }
     };
     /**
@@ -42,8 +44,6 @@ var BubbleTree = (function () {
         var _this = this;
         this.config = config;
         this.config.container.innerHTML = "";
-        this.config.container.setAttribute("width", "100%");
-        this.config.container.setAttribute("height", "100%");
         if (!this.config.handlers) {
             this.config.handlers = {};
         }
@@ -54,6 +54,9 @@ var BubbleTree = (function () {
             this.config.margin = 20;
         this.update();
         console.info("diameter: " + this.diameter);
+        new MotionController(config.container);
+        this.svg.attr("width", (this.width * this.innerPaneFactor) + "px");
+        this.svg.attr("height", (this.height * this.innerPaneFactor) + "px");
         this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
         this.defaultColor = d3.scaleLinear()
             .domain([-1, 5])
@@ -80,8 +83,25 @@ var BubbleTree = (function () {
                 .attr("id", function (d) { return d.data.uid ? "circle_" + d.data.uid : null; })
                 .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
                 .style("fill", function (d) { return _this.nodeColor(d); });
+            var mouseDown = false;
+            var dragging = false;
             var handlers = {
+                "mousedown": function () {
+                    mouseDown = true;
+                    dragging = false;
+                },
+                "mousemove": function () {
+                    if (mouseDown) {
+                        dragging = true;
+                    }
+                },
+                "mouseup": function () {
+                    mouseDown = false;
+                },
                 "click": function (d) {
+                    if (dragging) {
+                        return;
+                    }
                     if (!d.children) {
                         if (_this.config.selectOnClick) {
                             _this.clearSelect().select(d.data.uid);
@@ -96,7 +116,6 @@ var BubbleTree = (function () {
                     }
                     else if (_this.focus !== d) {
                         _this.zoom(d);
-                        d3.event.stopPropagation();
                     }
                 },
                 "mouseover": function (d) {
