@@ -94,6 +94,8 @@ class BubbleTree {
     private diameter: number;
     private width: number;
     private height: number;
+    private offsetX: number;
+    private offsetY: number;
     private g: d3.Selection<any>;
 
     private defaultColor: d3.scale.Linear<any, any>;
@@ -107,15 +109,17 @@ class BubbleTree {
     private config: BubbleTreeConfiguration;
     private selections: {} = {};
     private rootData: Data;
+    private innerPaneFactor = 4;
 
     private update() {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
         this.width = this.config.container.clientWidth;
         this.height = this.config.container.clientHeight;
         if (NaN === this.diameter || this.diameter <= 0) {
+            console.error("container has not been layouted - using default size")
             this.diameter = 1000;
-            this.width = 1000;
-            this.height = 1000;
+            this.width = this.diameter;
+            this.height = this.diameter;
         }
     }
 
@@ -127,8 +131,6 @@ class BubbleTree {
     build(config: BubbleTreeConfiguration) {
         this.config = config;
         this.config.container.innerHTML = "";
-        this.config.container.setAttribute("width", "100%");
-        this.config.container.setAttribute("height", "100%");
         if (!this.config.handlers) {
             this.config.handlers = {};
         }
@@ -138,7 +140,12 @@ class BubbleTree {
         if (!this.config.margin) this.config.margin = 20;
         this.update();
         console.info("diameter: " + this.diameter);
+        new MotionController(config.container);
+        this.svg.attr("width", (this.width * this.innerPaneFactor)+"px");
+        this.svg.attr("height", (this.height * this.innerPaneFactor) + "px");
+
         this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
+
 
         this.defaultColor = d3.scaleLinear()
             .domain([-1, 5])
@@ -169,8 +176,26 @@ class BubbleTree {
                 .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
                 .style("fill", d => this.nodeColor(d));
 
+            let mouseDown = false;
+            let dragging = false;
+
             let handlers = {
+                "mousedown": () => {
+                    mouseDown = true;
+                    dragging = false;
+                },
+                "mousemove": () => {
+                    if (mouseDown) {
+                        dragging = true;
+                    }
+                },
+                "mouseup": () => {
+                    mouseDown = false;
+                },
                 "click": (d: d3.pack.Node<Data>) => {
+                    if (dragging) {
+                        return;
+                    }
                     if (!d.children) {
                         if (this.config.selectOnClick) {
                             this.clearSelect().select(d.data.uid);
@@ -182,7 +207,6 @@ class BubbleTree {
                         } d3.event.stopPropagation();
                     } else if (this.focus !== d) {
                         this.zoom(d);
-                        d3.event.stopPropagation();
                     }
                 },
                 "mouseover": (d: d3.pack.Node<Data>) => {

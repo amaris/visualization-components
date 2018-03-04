@@ -34,17 +34,17 @@
     <WarningLevel>4</WarningLevel>
     <TypeScriptTarget>ES5</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
-    <TypeScriptModuleKind />
+    <TypeScriptModuleKind>None</TypeScriptModuleKind>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
     <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
     <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
-    <TypeScriptOutFile />
-    <TypeScriptOutDir />
-    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptOutFile>dist/visualization-components.js</TypeScriptOutFile>
+    <TypeScriptOutDir>dist</TypeScriptOutDir>
+    <TypeScriptGeneratesDeclarations>True</TypeScriptGeneratesDeclarations>
     <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
     <TypeScriptSourceMap>True</TypeScriptSourceMap>
     <TypeScriptMapRoot />
-    <TypeScriptSourceRoot />
+    <TypeScriptSourceRoot>components</TypeScriptSourceRoot>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -80,6 +80,7 @@
   <ItemGroup>
     <Content Include="components\bubbletree\arnd_bubbletree.css" />
     <Content Include="components\bubbletree\index.html" />
+    <Content Include="index.html" />
     <Content Include="lib\d3.v4.min.js" />
     <Content Include="Web.config" />
   </ItemGroup>
@@ -92,6 +93,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="components\bubbletree\arnd_bubbletree.ts" />
     <TypeScriptCompile Include="components\bubbletree\d3.d.ts" />
+    <TypeScriptCompile Include="components\util\arnd_motioncontroller.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
