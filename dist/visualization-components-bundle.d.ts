@@ -11,26 +11,30 @@ interface Data {
      */
     children: Data[];
     /**
-     * The data's uid, to be used in the selection API.
+     * The data's uid, to be used in the selection API (automatically added if not found).
      */
-    uid: string;
+    uid?: string;
     /**
      * The color of the data.
      */
     color?: string;
+    /**
+     * The weight.
+     */
+    weight?: number;
 }
 /**
  * Typing for the bubble tree configuration object (to be passed to the bubble tree constructor).
  */
-interface BubbleTreeConfiguration {
+interface BubbleTreeConfiguration<D extends Data> {
     /**
      * The DOM SVG element that will contain the bubble tree.
      */
     container: HTMLElement;
     /**
-     * The URL to fetch the data from.
+     * The data holding the tree.
      */
-    url: string;
+    data: string | D;
     /**
      * The color hue for base leafs (default is 110). See http://hslpicker.com/ to check out the meaning of hue.
      */
@@ -48,12 +52,12 @@ interface BubbleTreeConfiguration {
     /**
      * Hanler called when the user clicks on a node.
      */
-    onClick?: (handler: d3.pack.Node<Data>) => any;
+    onClick?: (handler: d3.pack.Node<D>) => any;
     /**
      * Hanler called when the user clicks on a node.
      */
     handlers?: {
-        [eventType: string]: ((node: d3.pack.Node<Data>) => any);
+        [eventType: string]: ((node: d3.pack.Node<D>) => any);
     };
     /**
      * True to select the clicked leaf node.
@@ -66,12 +70,12 @@ interface BubbleTreeConfiguration {
     /**
      * On built callback.
      */
-    onBuilt?: (bubbleTree: BubbleTree) => any;
+    onBuilt?: (bubbleTree: BubbleTree<D>) => any;
 }
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.
  */
-declare class BubbleTree {
+declare class BubbleTree<D extends Data> {
     private svg;
     private diameter;
     private width;
@@ -86,13 +90,15 @@ declare class BubbleTree {
     private config;
     private selections;
     private rootData;
+    constructor();
     private update();
+    private buildFromData(rootData);
     /**
      * Builds the buble tree diagram as specified by the given configuration.
      *
      * @param {BubbleTreeConfiguration} config - the configuration
      */
-    build(config: BubbleTreeConfiguration): void;
+    build(config: BubbleTreeConfiguration<D>): void;
     private leafColor(saturation);
     private nodeColor(d);
     /**
@@ -100,21 +106,21 @@ declare class BubbleTree {
      *
      * @param {string} uid - the uid of the node to be zoomed to
      */
-    zoomToId(uid: string): BubbleTree;
+    zoomToId(uid: string): BubbleTree<D>;
     /**
      * Selects a node represented by its uid. The weight will determine the intensity of the selection color (0 to 1).
      *
      * @param {string} uid - the uid of the node to be zoomed to
      * @param {number} weight - the selection's weight (color intensity)
      */
-    select(uid: string, weight?: number): BubbleTree;
+    select(uid: string, weight?: number): BubbleTree<D>;
     /**
      * Clears all the selections.
      *
      * @param {string} uid - the uid of the node to be zoomed to
      * @see #select
      */
-    clearSelect(): BubbleTree;
+    clearSelect(): BubbleTree<D>;
     private zoomTo(v);
     private zoom(d);
     /**
@@ -126,4 +132,32 @@ declare class BubbleTree {
     private nodeToText(d);
     private nodeToCircle(d);
     private showText(d, show?);
+}
+/**
+ * Typing for the table configuration object (to be passed to the table constructor).
+ */
+interface TableConfiguration<D> {
+    /**
+     * The DOM SVG element that will contain the table.
+     */
+    container: HTMLElement;
+    /**
+     * The data to be shown in the table.
+     */
+    data: string | D[];
+}
+/**
+ * An interactive D3.js component to render objects in a table.
+ */
+declare class Table<D> {
+    private config;
+    private data;
+    private selection;
+    constructor();
+    /**
+     * Builds the table as specified by the given configuration.
+     *
+     * @param {TableConfiguration} config - the configuration
+     */
+    build(config: TableConfiguration<D>): void;
 }

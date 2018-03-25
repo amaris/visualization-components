@@ -52,9 +52,9 @@ interface BubbleTreeConfiguration<D extends Data> {
      */
     container: HTMLElement;
     /**
-     * The URL to fetch the data from.
+     * The data holding the tree.
      */
-    url: string;
+    data: string | D;
     /**
      * The color hue for base leafs (default is 110). See http://hslpicker.com/ to check out the meaning of hue.
      */
@@ -112,8 +112,8 @@ class BubbleTree<D extends Data> {
     private selections: {} = {};
     private rootData: Data;
 
-    public constructor() {}
-    
+    public constructor() { }
+
     private update() {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
         this.width = this.config.container.clientWidth;
@@ -123,6 +123,94 @@ class BubbleTree<D extends Data> {
             this.width = 1000;
             this.height = 1000;
         }
+    }
+
+    private buildFromData(rootData: Data) {
+        this.rootData = rootData;
+        let root = <any>d3.hierarchy(rootData)
+            .sum(d => d["weight"])
+            .sort((a, b) => b.value - a.value);
+
+        this.focus = root;
+        let nodes = this.pack(root).descendants();
+
+        this.circle = this.g.selectAll("circle")
+            .data<d3.pack.Node<D>>(nodes)
+            .enter().append("circle").each(d => { if (d.data.uid === undefined) d.data.uid = "__generated_" + (BubbleTree.ID++); })
+            .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
+            .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
+            .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
+            .style("fill", d => this.nodeColor(d));
+
+        let handlers = {
+            "click": (d: d3.pack.Node<D>) => {
+                if (!d.children) {
+                    if (this.config.selectOnClick) {
+                        this.clearSelect().select(d.data.uid);
+                    }
+                    if (this.config.onClick !== undefined) {
+                        this.config.onClick(d);
+                    } else {
+                        this.zoom(d.parent);
+                    } d3.event.stopPropagation();
+                } else if (this.focus !== d) {
+                    this.zoom(d);
+                    d3.event.stopPropagation();
+                }
+            },
+            "mouseover": (d: d3.pack.Node<Data>) => {
+                if (!d.children) {
+                    this.showText(d, true);
+                    this.showText(d.parent, false);
+                }
+            },
+            "mouseout": (d: d3.pack.Node<Data>) => {
+                if (d.parent !== this.focus && !d.children) {
+                    this.showText(d, false); this.showText(d.parent, true);
+                }
+            }
+        };
+
+        // merge handlers
+        for (let userHandler in this.config.handlers) {
+            if (handlers[userHandler]) {
+                let handler = handlers[userHandler];
+                // merge with user-defined handler
+                handlers[userHandler] = d => {
+                    handler(d);
+                    this.config.handlers[userHandler](d);
+                };
+            } else {
+                // install user handler
+                handlers[userHandler] =
+                    this.config.handlers[userHandler];
+            }
+        }
+
+        // apply all handlers
+        for (let handler in handlers) {
+            console.info("installing handler " + handler);
+            this.circle.on(handler, handlers[handler]);
+        }
+
+        this.g.selectAll("text")
+            .data<d3.pack.Node<Data>>(nodes)
+            .enter().append("text")
+            .attr("class", "label")
+            .attr("id", d => d.data.uid ? "text_" + d.data.uid : null)
+            .style("fill-opacity", d => d.parent === root ? 1 : 0)
+            .style("display", d => d.parent === root ? "inline" : "none")
+            .style("pointer-events", "none")
+            .text(d => d.data.name);
+
+        this.svg.on("click", () => this.zoom(root));
+
+        this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
+
+        if (this.config.onBuilt) {
+            this.config.onBuilt(this);
+        }
+
     }
 
     /**
@@ -155,95 +243,22 @@ class BubbleTree<D extends Data> {
             .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
             .padding(2);
 
-        d3.json(config.url, (error, rootData: Data) => {
-            console.log(rootData);
-            if (error) throw error;
+        // use possible url field for backward compatibility
+        if (config.data == null && config['url'] != null) {
+            config.data = config['url'];
+        }
 
-            this.rootData = rootData;
-            let root = <any>d3.hierarchy(rootData)
-                .sum(d => d["weight"])
-                .sort((a, b) => b.value - a.value);
-
-            this.focus = root;
-            let nodes = this.pack(root).descendants();
-
-            this.circle = this.g.selectAll("circle")
-                .data<d3.pack.Node<D>>(nodes)
-                .enter().append("circle").each(d => { if (d.data.uid === undefined) d.data.uid = "__generated_" + (BubbleTree.ID++); })
-                .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
-                .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
-                .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
-                .style("fill", d => this.nodeColor(d));
-
-            let handlers = {
-                "click": (d: d3.pack.Node<D>) => {
-                    if (!d.children) {
-                        if (this.config.selectOnClick) {
-                            this.clearSelect().select(d.data.uid);
-                        }
-                        if (this.config.onClick !== undefined) {
-                            this.config.onClick(d);
-                        } else {
-                            this.zoom(d.parent);
-                        } d3.event.stopPropagation();
-                    } else if (this.focus !== d) {
-                        this.zoom(d);
-                        d3.event.stopPropagation();
-                    }
-                },
-                "mouseover": (d: d3.pack.Node<Data>) => {
-                    if (!d.children) {
-                        this.showText(d, true);
-                        this.showText(d.parent, false);
-                    }
-                },
-                "mouseout": (d: d3.pack.Node<Data>) => {
-                    if (d.parent !== this.focus && !d.children) {
-                        this.showText(d, false); this.showText(d.parent, true);
-                    }
-                }
-            };
-
-            // merge handlers
-            for (let userHandler in this.config.handlers) {
-                if (handlers[userHandler]) {
-                    let handler = handlers[userHandler];
-                    // merge with user-defined handler
-                    handlers[userHandler] = d => {
-                        handler(d);
-                        this.config.handlers[userHandler](d);
-                    };
-                } else {
-                    // install user handler
-                    handlers[userHandler] =
-                        this.config.handlers[userHandler];
-                }
-            }
-
-            // apply all handlers
-            for (let handler in handlers) {
-                console.info("installing handler " + handler);
-                this.circle.on(handler, handlers[handler]);
-            }
-
-            this.g.selectAll("text")
-                .data<d3.pack.Node<Data>>(nodes)
-                .enter().append("text")
-                .attr("class", "label")
-                .attr("id", d => d.data.uid ? "text_" + d.data.uid : null)
-                .style("fill-opacity", d => d.parent === root ? 1 : 0)
-                .style("display", d => d.parent === root ? "inline" : "none")
-                .style("pointer-events", "none")
-                .text(d => d.data.name);
-
-            this.svg.on("click", () => this.zoom(root));
-
-            this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
-
-            if (this.config.onBuilt) {
-                this.config.onBuilt(this);
-            }
-        });
+        if (typeof config.data === 'string') {
+            // URL case
+            d3.json(<string>config.data, (error, rootData: Data) => {
+                console.log(rootData);
+                if (error) throw error;
+                this.buildFromData(rootData);
+            });
+        } else {
+            // data as JavaScript object
+            this.buildFromData(<D>config.data);
+        }
 
     }
 
