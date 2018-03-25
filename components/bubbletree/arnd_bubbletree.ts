@@ -30,19 +30,23 @@ interface Data {
      */
     children: Data[];
     /**
-     * The data's uid, to be used in the selection API.
+     * The data's uid, to be used in the selection API (automatically added if not found).
      */
-    uid: string;
+    uid?: string;
     /**
      * The color of the data.
      */
     color?: string;
+    /**
+     * The weight.
+     */
+    weight?: number;
 }
 
 /**
  * Typing for the bubble tree configuration object (to be passed to the bubble tree constructor).
  */
-interface BubbleTreeConfiguration {
+interface BubbleTreeConfiguration<D extends Data> {
     /**
      * The DOM SVG element that will contain the bubble tree.
      */
@@ -66,11 +70,11 @@ interface BubbleTreeConfiguration {
     /**
      * Hanler called when the user clicks on a node.
      */
-    onClick?: (handler: d3.pack.Node<Data>) => any;
+    onClick?: (handler: d3.pack.Node<D>) => any;
     /**
      * Hanler called when the user clicks on a node.
      */
-    handlers?: { [eventType: string]: ((node: d3.pack.Node<Data>) => any) };
+    handlers?: { [eventType: string]: ((node: d3.pack.Node<D>) => any) };
     /**
      * True to select the clicked leaf node.
      */
@@ -82,13 +86,13 @@ interface BubbleTreeConfiguration {
     /**
      * On built callback.
      */
-    onBuilt?: (bubbleTree: BubbleTree) => any;
+    onBuilt?: (bubbleTree: BubbleTree<D>) => any;
 }
 
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.
  */
-class BubbleTree {
+class BubbleTree<D extends Data> {
 
     private svg: d3.Selection<any>;
     private diameter: number;
@@ -100,14 +104,16 @@ class BubbleTree {
 
     private pack: d3.Pack<any>;
 
-    private circle: d3.Selection<d3.pack.Node<Data>>;
+    private circle: d3.Selection<d3.pack.Node<D>>;
     private view;
-    private focus: d3.pack.Node<Data>;
+    private focus: d3.pack.Node<D>;
     private static ID: number = 1;
-    private config: BubbleTreeConfiguration;
+    private config: BubbleTreeConfiguration<D>;
     private selections: {} = {};
     private rootData: Data;
 
+    public constructor() {}
+    
     private update() {
         this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
         this.width = this.config.container.clientWidth;
@@ -124,7 +130,7 @@ class BubbleTree {
      * 
      * @param {BubbleTreeConfiguration} config - the configuration
      */
-    build(config: BubbleTreeConfiguration) {
+    build(config: BubbleTreeConfiguration<D>) {
         this.config = config;
         this.config.container.innerHTML = "";
         this.config.container.setAttribute("width", "100%");
@@ -162,7 +168,7 @@ class BubbleTree {
             let nodes = this.pack(root).descendants();
 
             this.circle = this.g.selectAll("circle")
-                .data<d3.pack.Node<Data>>(nodes)
+                .data<d3.pack.Node<D>>(nodes)
                 .enter().append("circle").each(d => { if (d.data.uid === undefined) d.data.uid = "__generated_" + (BubbleTree.ID++); })
                 .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
                 .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
@@ -170,7 +176,7 @@ class BubbleTree {
                 .style("fill", d => this.nodeColor(d));
 
             let handlers = {
-                "click": (d: d3.pack.Node<Data>) => {
+                "click": (d: d3.pack.Node<D>) => {
                     if (!d.children) {
                         if (this.config.selectOnClick) {
                             this.clearSelect().select(d.data.uid);
@@ -254,7 +260,7 @@ class BubbleTree {
      * 
      * @param {string} uid - the uid of the node to be zoomed to
      */
-    zoomToId(uid: string): BubbleTree {
+    zoomToId(uid: string): BubbleTree<D> {
         this.zoom(d3.select("#circle_" + uid).datum());
         return this;
     }
@@ -265,7 +271,7 @@ class BubbleTree {
      * @param {string} uid - the uid of the node to be zoomed to
      * @param {number} weight - the selection's weight (color intensity)
      */
-    select(uid: string, weight: number = 1): BubbleTree {
+    select(uid: string, weight: number = 1): BubbleTree<D> {
         this.selections[uid] = weight;
         this.g.selectAll("circle")
             .filter(d => d.data.uid in this.selections)
@@ -280,7 +286,7 @@ class BubbleTree {
      * @param {string} uid - the uid of the node to be zoomed to
      * @see #select
      */
-    clearSelect(): BubbleTree {
+    clearSelect(): BubbleTree<D> {
         this.g.selectAll("circle")
             .filter(d => d.data.uid in this.selections)
             .classed("selected", false)
