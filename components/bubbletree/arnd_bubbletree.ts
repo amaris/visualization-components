@@ -136,10 +136,11 @@ class BubbleTree<D extends Data> {
 
         this.circle = this.g.selectAll("circle")
             .data<d3.pack.Node<D>>(nodes)
-            .enter().append("circle").each(d => { if (d.data.uid === undefined) d.data.uid = "__generated_" + (BubbleTree.ID++); })
+            .enter().append("circle").each(d => { if (d.data.uid == null) d.data.uid = "__generated_" + (BubbleTree.ID++); })
             .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
             .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
             .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
+            .style("stroke", "#B0B0B0")
             .style("fill", d => this.nodeColor(d));
 
         let handlers = {
@@ -152,21 +153,25 @@ class BubbleTree<D extends Data> {
                         this.config.onClick(d);
                     } else {
                         this.zoom(d.parent);
-                    } d3.event.stopPropagation();
+                    }
+                    d3.event.stopPropagation();
                 } else if (this.focus !== d) {
                     this.zoom(d);
                     d3.event.stopPropagation();
                 }
             },
             "mouseover": (d: d3.pack.Node<Data>) => {
-                if (!d.children) {
+                if (d != this.focus) {
                     this.showText(d, true);
-                    this.showText(d.parent, false);
+                    while (d.parent != null /*&& d.parent!=this.focus*/) {
+                        this.showText(d.parent, false);
+                        d = d.parent;
+                    }
                 }
             },
             "mouseout": (d: d3.pack.Node<Data>) => {
-                if (d.parent !== this.focus && !d.children) {
-                    this.showText(d, false); this.showText(d.parent, true);
+                if (d.parent !== this.focus) {
+                    this.showText(d, false);
                 }
             }
         };
@@ -196,11 +201,13 @@ class BubbleTree<D extends Data> {
         this.g.selectAll("text")
             .data<d3.pack.Node<Data>>(nodes)
             .enter().append("text")
-            .attr("class", "label")
             .attr("id", d => d.data.uid ? "text_" + d.data.uid : null)
             .style("fill-opacity", d => d.parent === root ? 1 : 0)
             .style("display", d => d.parent === root ? "inline" : "none")
             .style("pointer-events", "none")
+            .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
+            .style("text-anchor", "middle")
+            .style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
             .text(d => d.data.name);
 
         this.svg.on("click", () => this.zoom(root));
@@ -358,4 +365,5 @@ class BubbleTree<D extends Data> {
             text.style.display = show ? "inline" : "none";
         }
     }
+
 }

@@ -43,11 +43,12 @@ var BubbleTree = (function () {
         var nodes = this.pack(root).descendants();
         this.circle = this.g.selectAll("circle")
             .data(nodes)
-            .enter().append("circle").each(function (d) { if (d.data.uid === undefined)
+            .enter().append("circle").each(function (d) { if (d.data.uid == null)
             d.data.uid = "__generated_" + (BubbleTree.ID++); })
             .attr("class", function (d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
             .attr("id", function (d) { return d.data.uid ? "circle_" + d.data.uid : null; })
             .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
+            .style("stroke", "#B0B0B0")
             .style("fill", function (d) { return _this.nodeColor(d); });
         var handlers = {
             "click": function (d) {
@@ -69,15 +70,17 @@ var BubbleTree = (function () {
                 }
             },
             "mouseover": function (d) {
-                if (!d.children) {
+                if (d != _this.focus) {
                     _this.showText(d, true);
-                    _this.showText(d.parent, false);
+                    while (d.parent != null /*&& d.parent!=this.focus*/) {
+                        _this.showText(d.parent, false);
+                        d = d.parent;
+                    }
                 }
             },
             "mouseout": function (d) {
-                if (d.parent !== _this.focus && !d.children) {
+                if (d.parent !== _this.focus) {
                     _this.showText(d, false);
-                    _this.showText(d.parent, true);
                 }
             }
         };
@@ -109,11 +112,13 @@ var BubbleTree = (function () {
         this.g.selectAll("text")
             .data(nodes)
             .enter().append("text")
-            .attr("class", "label")
             .attr("id", function (d) { return d.data.uid ? "text_" + d.data.uid : null; })
             .style("fill-opacity", function (d) { return d.parent === root ? 1 : 0; })
             .style("display", function (d) { return d.parent === root ? "inline" : "none"; })
             .style("pointer-events", "none")
+            .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
+            .style("text-anchor", "middle")
+            .style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
             .text(function (d) { return d.data.name; });
         this.svg.on("click", function () { return _this.zoom(root); });
         this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
