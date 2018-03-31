@@ -161,6 +161,7 @@ class BubbleTree<D extends Data> {
                 }
             },
             "mouseover": (d: d3.pack.Node<Data>) => {
+                this.setCircleColor(d, "#404040");
                 if (d != this.focus) {
                     this.showText(d, true);
                     while (d.parent != null /*&& d.parent!=this.focus*/) {
@@ -170,9 +171,8 @@ class BubbleTree<D extends Data> {
                 }
             },
             "mouseout": (d: d3.pack.Node<Data>) => {
-                if (d.parent !== this.focus) {
-                    this.showText(d, false);
-                }
+                this.setCircleColor(d, "#B0B0B0");
+                this.showText(d, d.parent === this.focus);
             }
         };
 
@@ -325,6 +325,7 @@ class BubbleTree<D extends Data> {
     }
 
     private zoom(d) {
+        let bbc = this;
         this.focus = d;
 
         var transition = d3.transition()
@@ -335,10 +336,10 @@ class BubbleTree<D extends Data> {
             });
 
         transition.select("#" + this.config.container.id).selectAll("text")
-            .filter(d => d.parent && d.parent === this.focus || this.nodeToText(d).style.display === "inline")
+            .filter(function(d) { return d.parent && d.parent === bbc.focus || this.style.display === "inline"; })
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
-            .on("start", d => { if (d.parent === this.focus) this.nodeToText(d).style.display = "inline"; })
-            .on("end", d => { if (d.parent !== this.focus) this.nodeToText(d).style.display = "none"; });
+            .on("start", function(d) { if (d.parent === bbc.focus) this.style.display = "inline"; })
+            .on("end", function(d) { if (d.parent !== bbc.focus) this.style.display = "none"; });
     }
 
     /**
@@ -350,20 +351,12 @@ class BubbleTree<D extends Data> {
         return this.rootData;
     }
 
-    private nodeToText(d): HTMLElement {
-        return document.getElementById("text_" + d.data.uid);
-    }
-
-    private nodeToCircle(d): HTMLElement {
-        return document.getElementById("circle_" + d.data.uid);
-    }
-
     private showText(d, show: boolean = true) {
-        let text: HTMLElement = this.nodeToText(d);
-        if (text) {
-            text.style.fillOpacity = show ? "1" : "0";
-            text.style.display = show ? "inline" : "none";
-        }
+        this.g.selectAll("text").filter(data => data == d).style("fill-opacity", show ? "1" : "0").style("display", show ? "inline" : "none");
     }
 
+    private setCircleColor(d, color : string) {
+        this.g.selectAll("circle").filter(data => data == d).style("stroke", color);
+    }
+    
 }

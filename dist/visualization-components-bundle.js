@@ -70,6 +70,7 @@ var BubbleTree = (function () {
                 }
             },
             "mouseover": function (d) {
+                _this.setCircleColor(d, "#404040");
                 if (d != _this.focus) {
                     _this.showText(d, true);
                     while (d.parent != null /*&& d.parent!=this.focus*/) {
@@ -79,9 +80,8 @@ var BubbleTree = (function () {
                 }
             },
             "mouseout": function (d) {
-                if (d.parent !== _this.focus) {
-                    _this.showText(d, false);
-                }
+                _this.setCircleColor(d, "#B0B0B0");
+                _this.showText(d, d.parent === _this.focus);
             }
         };
         // merge handlers
@@ -228,6 +228,7 @@ var BubbleTree = (function () {
     };
     BubbleTree.prototype.zoom = function (d) {
         var _this = this;
+        var bbc = this;
         this.focus = d;
         var transition = d3.transition()
             .duration(d3.event && d3.event.altKey ? 7500 : 750)
@@ -236,12 +237,12 @@ var BubbleTree = (function () {
             return function (t) { return _this.zoomTo(i(t)); };
         });
         transition.select("#" + this.config.container.id).selectAll("text")
-            .filter(function (d) { return d.parent && d.parent === _this.focus || _this.nodeToText(d).style.display === "inline"; })
+            .filter(function (d) { return d.parent && d.parent === bbc.focus || this.style.display === "inline"; })
             .style("fill-opacity", function (d) { return d.parent === _this.focus ? 1 : 0; })
-            .on("start", function (d) { if (d.parent === _this.focus)
-            _this.nodeToText(d).style.display = "inline"; })
-            .on("end", function (d) { if (d.parent !== _this.focus)
-            _this.nodeToText(d).style.display = "none"; });
+            .on("start", function (d) { if (d.parent === bbc.focus)
+            this.style.display = "inline"; })
+            .on("end", function (d) { if (d.parent !== bbc.focus)
+            this.style.display = "none"; });
     };
     /**
      * Returns the root data as read from the JSON.
@@ -251,19 +252,12 @@ var BubbleTree = (function () {
     BubbleTree.prototype.getRootData = function () {
         return this.rootData;
     };
-    BubbleTree.prototype.nodeToText = function (d) {
-        return document.getElementById("text_" + d.data.uid);
-    };
-    BubbleTree.prototype.nodeToCircle = function (d) {
-        return document.getElementById("circle_" + d.data.uid);
-    };
     BubbleTree.prototype.showText = function (d, show) {
         if (show === void 0) { show = true; }
-        var text = this.nodeToText(d);
-        if (text) {
-            text.style.fillOpacity = show ? "1" : "0";
-            text.style.display = show ? "inline" : "none";
-        }
+        this.g.selectAll("text").filter(function (data) { return data == d; }).style("fill-opacity", show ? "1" : "0").style("display", show ? "inline" : "none");
+    };
+    BubbleTree.prototype.setCircleColor = function (d, color) {
+        this.g.selectAll("circle").filter(function (data) { return data == d; }).style("stroke", color);
     };
     BubbleTree.ID = 1;
     return BubbleTree;
@@ -293,16 +287,22 @@ var Table = (function () {
     function Table() {
     }
     /**
-     * Builds the table as specified by the given configuration.
+     * Builds the table as specified by the given configuration (loads the data if any is given).
      *
      * @param {TableConfiguration} config - the configuration
      */
     Table.prototype.build = function (config) {
-        var _this = this;
-        this.data = config.data;
         this.config = config;
+        this.loadData(config.data);
+    };
+    /**
+     * Loads or reloads the data, keeping all the other configuration unchanged.
+     */
+    Table.prototype.loadData = function (data) {
+        var _this = this;
+        this.data = data;
         this.config.container.innerHTML = "";
-        this.selection = d3.select(config.container);
+        this.selection = d3.select(this.config.container);
         var table = this.selection.append('table').classed('table', true);
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
@@ -311,6 +311,11 @@ var Table = (function () {
             .selectAll('th')
             .data(Object.keys(this.data[0])).enter()
             .append('th')
+            .on('click', function (d) {
+            if (_this.config.headerClickHandler != null) {
+                _this.config.headerClickHandler(Object.keys(_this.data[0]).indexOf(d));
+            }
+        })
             .text(function (column) { return column; });
         // create a row for each object in the data
         var rows = tbody.selectAll('tr')
@@ -330,6 +335,12 @@ var Table = (function () {
             .text(function (d) {
             return d.value;
         });
+    };
+    /**
+     * Gets the data in the table.
+     */
+    Table.prototype.getData = function () {
+        return this.data;
     };
     return Table;
 }());

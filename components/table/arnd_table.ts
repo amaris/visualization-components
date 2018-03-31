@@ -29,6 +29,8 @@ interface TableConfiguration<D> {
      * The data to be shown in the table.
      */
     data: string | D[];
+
+    headerClickHandler: (column: number) => void;
 }
 
 /**
@@ -43,15 +45,22 @@ class Table<D> {
     public constructor() { }
 
     /**
-     * Builds the table as specified by the given configuration.
+     * Builds the table as specified by the given configuration (loads the data if any is given).
      * 
      * @param {TableConfiguration} config - the configuration
      */
-    build(config: TableConfiguration<D>) {
-        this.data = <D[]>config.data;
+    public build(config: TableConfiguration<D>) {
         this.config = config;
+        this.loadData(<D[]>config.data);
+    }
+
+    /**
+     * Loads or reloads the data, keeping all the other configuration unchanged.
+     */
+    public loadData(data: D[]) {
+        this.data = data;
         this.config.container.innerHTML = "";
-        this.selection = d3.select(config.container);
+        this.selection = d3.select(this.config.container);
 
         let table = this.selection.append('table').classed('table', true);
         var thead = table.append('thead').classed('thead-light', true);
@@ -62,6 +71,11 @@ class Table<D> {
             .selectAll('th')
             .data(Object.keys(this.data[0])).enter()
             .append('th')
+            .on('click', (d) => {
+                if (this.config.headerClickHandler != null) {
+                    this.config.headerClickHandler(Object.keys(this.data[0]).indexOf(d));
+                }
+            })
             .text(column => column);
 
         // create a row for each object in the data
@@ -85,4 +99,11 @@ class Table<D> {
             });
     }
 
+    /**
+     * Gets the data in the table.
+     */
+    public getData() : D[] {
+        return this.data;
+    }
+    
 }
