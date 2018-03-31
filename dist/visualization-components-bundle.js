@@ -335,6 +335,9 @@ var Table = (function () {
             .text(function (d) {
             return d.value;
         });
+        if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
+            $(this.config.container.children[0]).DataTable();
+        }
     };
     /**
      * Gets the data in the table.

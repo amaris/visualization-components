@@ -144,7 +144,14 @@ interface TableConfiguration<D> {
      * The data to be shown in the table.
      */
     data: string | D[];
+    /**
+     * Callback when the header is clicked.
+     */
     headerClickHandler: (column: number) => void;
+    /**
+     * Tells if this table uses bootstrap 4 data tables for pagination and filtering (default is true).
+     */
+    useBoostrapDataTable?: boolean;
 }
 /**
  * An interactive D3.js component to render objects in a table.

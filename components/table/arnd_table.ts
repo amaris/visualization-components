@@ -29,8 +29,14 @@ interface TableConfiguration<D> {
      * The data to be shown in the table.
      */
     data: string | D[];
-
+    /**
+     * Callback when the header is clicked.
+     */
     headerClickHandler: (column: number) => void;
+    /**
+     * Tells if this table uses bootstrap 4 data tables for pagination and filtering (default is true).
+     */
+    useBoostrapDataTable?: boolean;
 }
 
 /**
@@ -97,6 +103,11 @@ class Table<D> {
             .text(d => {
                 return d.value;
             });
+        
+        if(!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
+            (<any>$(this.config.container.children[0])).DataTable();
+        }
+        
     }
 
     /**
