@@ -152,6 +152,8 @@ interface TableConfiguration<D> {
      * Tells if this table uses bootstrap 4 data tables for pagination and filtering (default is true).
      */
     useBoostrapDataTable?: boolean;
+    striped?: boolean;
+    bordered?: boolean;
 }
 /**
  * An interactive D3.js component to render objects in a table.

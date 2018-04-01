@@ -303,7 +303,7 @@ var Table = (function () {
         this.data = data;
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
-        var table = this.selection.append('table').classed('table', true);
+        var table = this.selection.append('table').classed('table', true).classed("table-striped", this.config.striped).classed("table-bordered", this.config.bordered);
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
         // append the header row

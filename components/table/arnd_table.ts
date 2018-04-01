@@ -37,6 +37,8 @@ interface TableConfiguration<D> {
      * Tells if this table uses bootstrap 4 data tables for pagination and filtering (default is true).
      */
     useBoostrapDataTable?: boolean;
+    striped?: boolean;
+    bordered?: boolean;
 }
 
 /**
@@ -68,7 +70,7 @@ class Table<D> {
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
 
-        let table = this.selection.append('table').classed('table', true);
+        let table = this.selection.append('table').classed('table', true).classed("table-striped", this.config.striped).classed("table-bordered", this.config.bordered);
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
 
