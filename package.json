@@ -1,0 +1,32 @@
+{
+  "name": "visualization-components",
+  "version": "1.0.0",
+  "description": "A set of data-visualization components written in TypeScript",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "none",
+    "tsc": "tsc",
+    "tsc:w": "tsc -w",
+    "lite": "lite-server",
+    "start": "concurrently \"npm run tsc:w\" \"npm run lite\" "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amaris/visualization-components.git"
+  },
+  "author": "Renaud Pawlak",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/amaris/visualization-components/issues"
+  },
+  "homepage": "https://github.com/amaris/visualization-components#readme",
+  "devDependencies": {
+    "concurrently": "^3.5.1",
+    "lite-server": "^2.3.0",
+    "typescript": "^2.8.1"
+  }
+}

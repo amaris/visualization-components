@@ -5,3 +5,4 @@
 /.vs
 /obj/Debug
 /bin
+/node_modules/

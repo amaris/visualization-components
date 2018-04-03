@@ -1,7 +1,7 @@
 build.path.exportedFolder=
 build.path.sourceFolder=components
 compiler.codeGenTarget=ECMASCRIPT5
-compiler.compileOnSave=true
+compiler.compileOnSave=false
 compiler.generateDeclarationFiles=true
 compiler.inlineSourceMap=false
 compiler.inlineSources=false

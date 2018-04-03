@@ -1,3 +1,4 @@
+"use strict";
 /*
  * Visualisation Components - https://github.com/amaris/visualization-components
  * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
@@ -19,7 +20,7 @@
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.
  */
-var BubbleTree = (function () {
+var BubbleTree = /** @class */ (function () {
     function BubbleTree() {
         this.selections = {};
     }
@@ -84,8 +85,7 @@ var BubbleTree = (function () {
                 _this.showText(d, d.parent === _this.focus);
             }
         };
-        // merge handlers
-        var _loop_1 = function(userHandler) {
+        var _loop_1 = function (userHandler) {
             if (handlers[userHandler]) {
                 var handler_1 = handlers[userHandler];
                 // merge with user-defined handler
@@ -101,6 +101,7 @@ var BubbleTree = (function () {
             }
         };
         var this_1 = this;
+        // merge handlers
         for (var userHandler in this.config.handlers) {
             _loop_1(userHandler);
         }
@@ -283,7 +284,7 @@ var BubbleTree = (function () {
 /**
  * An interactive D3.js component to render objects in a table.
  */
-var Table = (function () {
+var Table = /** @class */ (function () {
     function Table() {
     }
     /**
@@ -301,6 +302,8 @@ var Table = (function () {
     Table.prototype.loadData = function (data) {
         var _this = this;
         this.data = data;
+        this.data;
+        this.data;
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
         var table = this.selection.append('table').classed('table', true).classed("table-striped", this.config.striped).classed("table-bordered", this.config.bordered);

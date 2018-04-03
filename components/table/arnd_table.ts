@@ -67,6 +67,8 @@ class Table<D> {
      */
     public loadData(data: D[]) {
         this.data = data;
+        this.data;
+	this.data;
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
 
