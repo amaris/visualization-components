@@ -302,8 +302,6 @@ var Table = /** @class */ (function () {
     Table.prototype.loadData = function (data) {
         var _this = this;
         this.data = data;
-        this.data;
-        this.data;
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
         var table = this.selection.append('table').classed('table', true).classed("table-striped", this.config.striped).classed("table-bordered", this.config.bordered);
