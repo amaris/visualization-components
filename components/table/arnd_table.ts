@@ -32,7 +32,7 @@ interface TableConfiguration<D> {
     /**
      * Callback when the header is clicked.
      */
-    headerClickHandler: (column: number) => void;
+    headerClickHandler?: (column: number) => void;
     /**
      * Tells if this table uses bootstrap 4 data tables for pagination and filtering (default is true).
      */
