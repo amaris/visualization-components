@@ -311,7 +311,11 @@ var Table = /** @class */ (function () {
         this.data = data;
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
-        var table = this.selection.append('table').classed('table', true).classed("table-striped", this.config.striped).classed("table-bordered", this.config.bordered);
+        var table = this.selection.append('table') //
+            .classed('table', true) //
+            .classed('table-sm', this.config.small) //
+            .classed("table-striped", this.config.striped) //
+            .classed("table-bordered", this.config.bordered);
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
         // append the header row
@@ -329,7 +333,16 @@ var Table = /** @class */ (function () {
         var rows = tbody.selectAll('tr')
             .data(this.data)
             .enter()
-            .append('tr');
+            .append('tr')
+            .on('click', function (d) {
+            if (_this.config.selectableRows) {
+                rows.classed('table-primary', false);
+                rows.filter(function (data) { return data === d; }).classed('table-primary', true);
+            }
+            if (_this.config.rowClickHandler != null) {
+                _this.config.rowClickHandler(_this.data.indexOf(d));
+            }
+        });
         rows.selectAll('td')
             .data(function (d) {
             return Object.keys(_this.data[0]).map(function (k) {

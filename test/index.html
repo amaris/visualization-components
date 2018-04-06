@@ -142,6 +142,8 @@
         container: document.getElementById("table"),
         striped: true,
         bordered: true,
+        selectableRows: true,
+        rowClickHandler: function(r) { console.info(r); },
         data: [{ "a":"1", "b":"2" }, { "a":"3", "b":"4" }]
     });
 

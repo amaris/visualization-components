@@ -34,11 +34,29 @@ interface TableConfiguration<D> {
      */
     headerClickHandler?: (column: number) => void;
     /**
+     * Callback when a cell is clicked.
+     */
+    rowClickHandler?: (row: number) => void;
+    /**
      * Tells if this table uses bootstrap 4 data tables for pagination and filtering (default is true).
      */
     useBoostrapDataTable?: boolean;
+    /**
+     * Tells if this table is using striped rows for rendering.
+     */
     striped?: boolean;
+    /**
+     * Tells if showing a table border.
+     */
     bordered?: boolean;
+    /**
+     * Tells if this table allows row selection. 
+     */
+    selectableRows?: boolean;
+    /**
+     * Tells if this table uses small rendering. 
+     */
+    small?: boolean;
 }
 
 /**
@@ -70,7 +88,11 @@ class Table<D> {
         this.config.container.innerHTML = "";
         this.selection = d3.select(this.config.container);
 
-        let table = this.selection.append('table').classed('table', true).classed("table-striped", this.config.striped).classed("table-bordered", this.config.bordered);
+        let table = this.selection.append('table') //
+            .classed('table', true) //
+            .classed('table-sm', this.config.small) //
+            .classed("table-striped", this.config.striped) //
+            .classed("table-bordered", this.config.bordered);
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
 
@@ -90,7 +112,16 @@ class Table<D> {
         var rows = tbody.selectAll('tr')
             .data(this.data)
             .enter()
-            .append('tr');
+            .append('tr')
+            .on('click', (d) => {
+                if (this.config.selectableRows) {
+                    rows.classed('table-primary', false);
+                    rows.filter(data => data === d).classed('table-primary', true);
+                }
+                if (this.config.rowClickHandler != null) {
+                    this.config.rowClickHandler(this.data.indexOf(d));
+                }
+            });
 
         rows.selectAll('td')
             .data(d => {
@@ -105,18 +136,18 @@ class Table<D> {
             .text(d => {
                 return d.value;
             });
-        
-        if(!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
+
+        if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
             (<any>$(this.config.container.children[0])).DataTable();
         }
-        
+
     }
 
     /**
      * Gets the data in the table.
      */
-    public getData() : D[] {
+    public getData(): D[] {
         return this.data;
     }
-    
+
 }
