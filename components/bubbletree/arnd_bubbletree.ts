@@ -351,12 +351,21 @@ class BubbleTree<D extends Data> {
         return this.rootData;
     }
 
+    /**
+     * Returns the currently selected nodes uid with associated percentils).
+     */
+    getSelections(): Data[] {
+        return this.g.selectAll("circle")
+            .filter(d => d.data.uid in this.selections).data().map(d => d.data);
+
+    }
+
     private showText(d, show: boolean = true) {
         this.g.selectAll("text").filter(data => data == d).style("fill-opacity", show ? "1" : "0").style("display", show ? "inline" : "none");
     }
 
-    private setCircleColor(d, color : string) {
+    private setCircleColor(d, color: string) {
         this.g.selectAll("circle").filter(data => data == d).style("stroke", color);
     }
-    
+
 }

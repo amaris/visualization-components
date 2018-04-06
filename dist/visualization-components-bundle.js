@@ -252,6 +252,14 @@ var BubbleTree = /** @class */ (function () {
     BubbleTree.prototype.getRootData = function () {
         return this.rootData;
     };
+    /**
+     * Returns the currently selected nodes uid with associated percentils).
+     */
+    BubbleTree.prototype.getSelections = function () {
+        var _this = this;
+        return this.g.selectAll("circle")
+            .filter(function (d) { return d.data.uid in _this.selections; }).data().map(function (d) { return d.data; });
+    };
     BubbleTree.prototype.showText = function (d, show) {
         if (show === void 0) { show = true; }
         this.g.selectAll("text").filter(function (data) { return data == d; }).style("fill-opacity", show ? "1" : "0").style("display", show ? "inline" : "none");

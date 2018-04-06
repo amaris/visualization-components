@@ -129,6 +129,10 @@ declare class BubbleTree<D extends Data> {
      * @see build
      */
     getRootData(): Data;
+    /**
+     * Returns the currently selected nodes uid with associated percentils).
+     */
+    getSelections(): Data[];
     private showText(d, show?);
     private setCircleColor(d, color);
 }
