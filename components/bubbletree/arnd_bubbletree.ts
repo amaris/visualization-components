@@ -80,6 +80,10 @@ interface BubbleTreeConfiguration<D extends Data> {
      */
     selectOnClick?: boolean;
     /**
+     * True to allow non-leaf nodes to be selected.
+     */
+    allowParentSelection?: boolean;
+    /**
      * The margin size around the bubble tree.
      */
     margin?: number;
@@ -156,6 +160,9 @@ class BubbleTree<D extends Data> {
                     }
                     d3.event.stopPropagation();
                 } else if (this.focus !== d) {
+                    if (this.config.selectOnClick && this.config.allowParentSelection) {
+                        this.clearSelect().select(d.data.uid);
+                    }
                     this.zoom(d);
                     d3.event.stopPropagation();
                 }
@@ -297,6 +304,18 @@ class BubbleTree<D extends Data> {
         this.selections[uid] = weight;
         this.g.selectAll("circle")
             .filter(d => d.data.uid in this.selections)
+            .classed("selected", true)
+            .style("fill", d => this.leafColor(this.selections[d.data.uid]));
+        return this;
+    }
+
+    /**
+     * Selects node(s) accordingly to a selection function. The selection function should return a selection weight between 0 and 1. 
+     * Returning 0 or undefined means that the node is not selected.
+     */
+    selectData(selector: (data: D) => number): BubbleTree<D> {
+        this.g.selectAll("circle")
+            .filter(d => { let weight = selector(d.data); if (weight && weight > 0) { this.selections[d.data.uid] = weight; return true } else return false; })
             .classed("selected", true)
             .style("fill", d => this.leafColor(this.selections[d.data.uid]));
         return this;

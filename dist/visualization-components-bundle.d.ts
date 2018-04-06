@@ -64,6 +64,10 @@ interface BubbleTreeConfiguration<D extends Data> {
      */
     selectOnClick?: boolean;
     /**
+     * True to allow non-leaf nodes to be selected.
+     */
+    allowParentSelection?: boolean;
+    /**
      * The margin size around the bubble tree.
      */
     margin?: number;
@@ -114,6 +118,11 @@ declare class BubbleTree<D extends Data> {
      * @param {number} weight - the selection's weight (color intensity)
      */
     select(uid: string, weight?: number): BubbleTree<D>;
+    /**
+     * Selects node(s) accordingly to a selection function. The selection function should return a selection weight between 0 and 1.
+     * Returning 0 or undefined means that the node is not selected.
+     */
+    selectData(selector: (data: D) => number): BubbleTree<D>;
     /**
      * Clears all the selections.
      *
@@ -176,6 +185,10 @@ interface TableConfiguration<D> {
      * Tells if this table uses small rendering.
      */
     small?: boolean;
+    /**
+     * Sets the optional title.
+     */
+    title?: string;
 }
 /**
  * An interactive D3.js component to render objects in a table.
@@ -194,7 +207,7 @@ declare class Table<D> {
     /**
      * Loads or reloads the data, keeping all the other configuration unchanged.
      */
-    loadData(data: D[]): void;
+    loadData(data: D[], emptyMessage?: string): void;
     /**
      * Gets the data in the table.
      */

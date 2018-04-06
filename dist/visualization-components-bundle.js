@@ -65,6 +65,9 @@ var BubbleTree = /** @class */ (function () {
                     d3.event.stopPropagation();
                 }
                 else if (_this.focus !== d) {
+                    if (_this.config.selectOnClick && _this.config.allowParentSelection) {
+                        _this.clearSelect().select(d.data.uid);
+                    }
                     _this.zoom(d);
                     d3.event.stopPropagation();
                 }
@@ -205,6 +208,23 @@ var BubbleTree = /** @class */ (function () {
         return this;
     };
     /**
+     * Selects node(s) accordingly to a selection function. The selection function should return a selection weight between 0 and 1.
+     * Returning 0 or undefined means that the node is not selected.
+     */
+    BubbleTree.prototype.selectData = function (selector) {
+        var _this = this;
+        this.g.selectAll("circle")
+            .filter(function (d) { var weight = selector(d.data); if (weight && weight > 0) {
+            _this.selections[d.data.uid] = weight;
+            return true;
+        }
+        else
+            return false; })
+            .classed("selected", true)
+            .style("fill", function (d) { return _this.leafColor(_this.selections[d.data.uid]); });
+        return this;
+    };
+    /**
      * Clears all the selections.
      *
      * @param {string} uid - the uid of the node to be zoomed to
@@ -306,11 +326,16 @@ var Table = /** @class */ (function () {
     /**
      * Loads or reloads the data, keeping all the other configuration unchanged.
      */
-    Table.prototype.loadData = function (data) {
+    Table.prototype.loadData = function (data, emptyMessage) {
         var _this = this;
         this.data = data;
         this.config.container.innerHTML = "";
+        if (!data || data.length == 0) {
+            this.config.container.innerHTML = emptyMessage ? emptyMessage : "Empty data";
+            return;
+        }
         this.selection = d3.select(this.config.container);
+        var strings = typeof data[0] == 'string';
         var table = this.selection.append('table') //
             .classed('table', true) //
             .classed('table-sm', this.config.small) //
@@ -319,16 +344,25 @@ var Table = /** @class */ (function () {
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
         // append the header row
-        thead.append('tr')
-            .selectAll('th')
-            .data(Object.keys(this.data[0])).enter()
-            .append('th')
-            .on('click', function (d) {
-            if (_this.config.headerClickHandler != null) {
-                _this.config.headerClickHandler(Object.keys(_this.data[0]).indexOf(d));
-            }
-        })
-            .text(function (column) { return column; });
+        if (strings) {
+            thead.append('tr')
+                .selectAll('th')
+                .data([this.config.title == null ? "List" : this.config.title]).enter()
+                .append('th')
+                .text(function (column) { return column; });
+        }
+        else {
+            thead.append('tr')
+                .selectAll('th')
+                .data(Object.keys(this.data[0])).enter()
+                .append('th')
+                .on('click', function (d) {
+                if (_this.config.headerClickHandler != null) {
+                    _this.config.headerClickHandler(Object.keys(_this.data[0]).indexOf(d));
+                }
+            })
+                .text(function (column) { return column; });
+        }
         // create a row for each object in the data
         var rows = tbody.selectAll('tr')
             .data(this.data)
@@ -343,19 +377,27 @@ var Table = /** @class */ (function () {
                 _this.config.rowClickHandler(_this.data.indexOf(d));
             }
         });
-        rows.selectAll('td')
-            .data(function (d) {
-            return Object.keys(_this.data[0]).map(function (k) {
-                return { 'value': d[k], 'name': k };
+        if (strings) {
+            rows.append('td')
+                .text(function (d) {
+                return "" + d;
             });
-        }).enter()
-            .append('td')
-            .attr('data-th', function (d) {
-            return d.name;
-        })
-            .text(function (d) {
-            return d.value;
-        });
+        }
+        else {
+            rows.selectAll('td')
+                .data(function (d) {
+                return Object.keys(_this.data[0]).map(function (k) {
+                    return { 'value': d[k], 'name': k };
+                });
+            }).enter()
+                .append('td')
+                .attr('data-th', function (d) {
+                return d.name;
+            })
+                .text(function (d) {
+                return d.value;
+            });
+        }
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
             $(this.config.container.children[0]).DataTable();
         }

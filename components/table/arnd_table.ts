@@ -57,6 +57,10 @@ interface TableConfiguration<D> {
      * Tells if this table uses small rendering. 
      */
     small?: boolean;
+    /**
+     * Sets the optional title.
+     */
+    title?: string;
 }
 
 /**
@@ -83,10 +87,16 @@ class Table<D> {
     /**
      * Loads or reloads the data, keeping all the other configuration unchanged.
      */
-    public loadData(data: D[]) {
+    public loadData(data: D[], emptyMessage?: string) {
         this.data = data;
         this.config.container.innerHTML = "";
+        if (!data || data.length == 0) {
+            this.config.container.innerHTML = emptyMessage ? emptyMessage : "Empty data";
+            return;
+        }
         this.selection = d3.select(this.config.container);
+
+        let strings: boolean = typeof data[0] == 'string';
 
         let table = this.selection.append('table') //
             .classed('table', true) //
@@ -97,16 +107,24 @@ class Table<D> {
         var tbody = table.append('tbody');
 
         // append the header row
-        thead.append('tr')
-            .selectAll('th')
-            .data(Object.keys(this.data[0])).enter()
-            .append('th')
-            .on('click', (d) => {
-                if (this.config.headerClickHandler != null) {
-                    this.config.headerClickHandler(Object.keys(this.data[0]).indexOf(d));
-                }
-            })
-            .text(column => column);
+        if (strings) {
+            thead.append('tr')
+                .selectAll('th')
+                .data([this.config.title == null ? "List" : this.config.title]).enter()
+                .append('th')
+                .text(column => column);
+        } else {
+            thead.append('tr')
+                .selectAll('th')
+                .data(Object.keys(this.data[0])).enter()
+                .append('th')
+                .on('click', (d) => {
+                    if (this.config.headerClickHandler != null) {
+                        this.config.headerClickHandler(Object.keys(this.data[0]).indexOf(d));
+                    }
+                })
+                .text(column => column);
+        }
 
         // create a row for each object in the data
         var rows = tbody.selectAll('tr')
@@ -123,19 +141,26 @@ class Table<D> {
                 }
             });
 
-        rows.selectAll('td')
-            .data(d => {
-                return Object.keys(this.data[0]).map(function(k) {
-                    return { 'value': d[k], 'name': k };
+        if (strings) {
+            rows.append('td')
+                .text(d => {
+                    return "" + d;
                 });
-            }).enter()
-            .append('td')
-            .attr('data-th', d => {
-                return d.name;
-            })
-            .text(d => {
-                return d.value;
-            });
+        } else {
+            rows.selectAll('td')
+                .data(d => {
+                    return Object.keys(this.data[0]).map(function(k) {
+                        return { 'value': d[k], 'name': k };
+                    });
+                }).enter()
+                .append('td')
+                .attr('data-th', d => {
+                    return d.name;
+                })
+                .text(d => {
+                    return d.value;
+                });
+        }
 
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
             (<any>$(this.config.container.children[0])).DataTable();
