@@ -51,10 +51,21 @@ var BubbleTree = /** @class */ (function () {
             .style("stroke", "#B0B0B0")
             .style("fill", function (d) { return _this.nodeColor(d); });
         if (this.config.nodePopover != null) {
+            var self_1 = this;
             this.circle
                 .classed("popover-node", true)
-                .attr("data-content", function (d) { return _this.config.nodePopover(d).content; })
-                .attr("data-original-title", function (d) { return _this.config.nodePopover(d).title; })
+                .filter(function (d) {
+                var _this = this;
+                self_1.config.nodePopover(d, function (popover) {
+                    if (popover && popover.content) {
+                        _this.setAttribute("data-content", popover.content);
+                    }
+                    if (popover && popover.title) {
+                        _this.setAttribute("data-original-title", popover.title);
+                    }
+                });
+                return true;
+            })
                 .attr("rel", "popover")
                 .attr("data-trigger", "hover");
             $('.popover-node').popover();

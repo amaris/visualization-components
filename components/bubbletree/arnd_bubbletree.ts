@@ -94,7 +94,7 @@ interface BubbleTreeConfiguration<D extends Data> {
     /**
      * A function to create a popover on a node. It can return undefined when no popover needs to be shown.
      */
-    nodePopover?: (node: d3.pack.Node<D>) => { title?: string, content: string };
+    nodePopover?: (node: d3.pack.Node<D>, callback: (popover: { title?: string, content: string }) => void) => void;
 }
 
 /**
@@ -152,12 +152,23 @@ class BubbleTree<D extends Data> {
             .style("fill", d => this.nodeColor(d));
 
         if (this.config.nodePopover != null) {
+            let self = this;
             this.circle
                 .classed("popover-node", true)
-                .attr("data-content", d => this.config.nodePopover(d).content)
-                .attr("data-original-title", d => this.config.nodePopover(d).title)
+                .filter(function(d) {
+                    self.config.nodePopover(d, popover => {
+                        if (popover && popover.content) {
+                            this.setAttribute("data-content", popover.content);
+                        }
+                        if (popover && popover.title) {
+                            this.setAttribute("data-original-title", popover.title);
+                        }
+                    });
+                    return true;
+                })
                 .attr("rel", "popover")
                 .attr("data-trigger", "hover");
+
             (<any>$('.popover-node')).popover();
         }
 

@@ -151,8 +151,9 @@
         },
         selectOnClick: true,
         showRoot: true,
-        nodePopover: function(d) {
-        	return { title: "Node", content: d.data.name };
+        nodePopover: function(d, callback) {
+        	console.info(d);
+        	callback({ title: "Node", content: d.data.name });
         }
     });
 
