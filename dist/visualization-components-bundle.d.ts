@@ -75,6 +75,13 @@ interface BubbleTreeConfiguration<D extends Data> {
      * On built callback.
      */
     onBuilt?: (bubbleTree: BubbleTree<D>) => any;
+    /**
+     * A function to create a popover on a node. It can return undefined when no popover needs to be shown.
+     */
+    nodePopover?: (node: d3.pack.Node<D>) => {
+        title?: string;
+        content: string;
+    };
 }
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.

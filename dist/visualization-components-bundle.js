@@ -50,6 +50,15 @@ var BubbleTree = /** @class */ (function () {
             .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
             .style("stroke", "#B0B0B0")
             .style("fill", function (d) { return _this.nodeColor(d); });
+        if (this.config.nodePopover != null) {
+            this.circle
+                .classed("popover-node", true)
+                .attr("data-content", function (d) { return _this.config.nodePopover(d).content; })
+                .attr("data-original-title", function (d) { return _this.config.nodePopover(d).title; })
+                .attr("rel", "popover")
+                .attr("data-trigger", "hover");
+            $('.popover-node').popover();
+        }
         var handlers = {
             "click": function (d) {
                 if (!d.children) {

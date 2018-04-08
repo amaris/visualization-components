@@ -91,6 +91,10 @@ interface BubbleTreeConfiguration<D extends Data> {
      * On built callback.
      */
     onBuilt?: (bubbleTree: BubbleTree<D>) => any;
+    /**
+     * A function to create a popover on a node. It can return undefined when no popover needs to be shown.
+     */
+    nodePopover?: (node: d3.pack.Node<D>) => { title?: string, content: string };
 }
 
 /**
@@ -146,6 +150,16 @@ class BubbleTree<D extends Data> {
             .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
             .style("stroke", "#B0B0B0")
             .style("fill", d => this.nodeColor(d));
+
+        if (this.config.nodePopover != null) {
+            this.circle
+                .classed("popover-node", true)
+                .attr("data-content", d => this.config.nodePopover(d).content)
+                .attr("data-original-title", d => this.config.nodePopover(d).title)
+                .attr("rel", "popover")
+                .attr("data-trigger", "hover");
+            (<any>$('.popover-node')).popover();
+        }
 
         let handlers = {
             "click": (d: d3.pack.Node<D>) => {
