@@ -28,7 +28,7 @@
 <div id="table">
 </div>
 
-<div id="list">
+<div id="list" style="max-height:300px;overflow-y:scroll">
 </div>
 
 <script src="../lib/d3.v4.min.js"></script>
@@ -150,14 +150,12 @@
         data: [{ "a":"1", "b":"2" }, { "a":"3", "b":"4" }]
     });
 
-    l = new Table();
+    l = new List();
     l.build({
         container: document.getElementById("list"),
-        striped: true,
-        bordered: true,
         selectableRows: true,
         rowClickHandler: function(r) { console.info(r); },
-        data: ["element 1", "element 2", "element 3"]
+        data: ["element 1", "element 2", "element 3", "element 4", "element 5", "element 6", "element 7", "element 8", "element 9", "element 10"]
     });
 
 </script>

@@ -309,6 +309,79 @@ var BubbleTree = /** @class */ (function () {
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 /**
+ * An interactive D3.js component to render items in a list.
+ */
+var List = /** @class */ (function () {
+    function List() {
+    }
+    /**
+     * Builds the list as specified by the given configuration (loads the data if any is given).
+     *
+     * @param {ListConfiguration} config - the configuration
+     */
+    List.prototype.build = function (config) {
+        this.config = config;
+        this.loadData(config.data);
+    };
+    /**
+     * Loads or reloads the data, keeping all the other configuration unchanged.
+     */
+    List.prototype.loadData = function (data, emptyMessage) {
+        var _this = this;
+        this.data = data;
+        this.config.container.innerHTML = "";
+        if (!data || data.length == 0) {
+            this.config.container.innerHTML = emptyMessage ? emptyMessage : "Empty data";
+            return;
+        }
+        this.selection = d3.select(this.config.container);
+        var list = this.selection.append('ul').classed("list-group", true);
+        // create a row for each object in the data
+        var rows = list.selectAll('li')
+            .data(this.data)
+            .enter()
+            .append('li')
+            .classed('list-group-item', true)
+            .text(function (d) { return "" + d; })
+            .on('click', function (d) {
+            if (_this.config.selectableRows) {
+                rows.classed('active', false);
+                rows.filter(function (data) { return data === d; }).classed('active', true);
+            }
+            if (_this.config.rowClickHandler != null) {
+                _this.config.rowClickHandler(_this.data.indexOf(d));
+            }
+        });
+        //list.style('overflow-y', 'scroll');
+        //padding:0px;max-height:200px;overflow-y:scroll
+    };
+    /**
+     * Gets the data in the list.
+     */
+    List.prototype.getData = function () {
+        return this.data;
+    };
+    return List;
+}());
+/*
+ * Visualisation Components - https://github.com/amaris/visualization-components
+ * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+/**
  * An interactive D3.js component to render objects in a table.
  */
 var Table = /** @class */ (function () {
@@ -328,6 +401,9 @@ var Table = /** @class */ (function () {
      */
     Table.prototype.loadData = function (data, emptyMessage) {
         var _this = this;
+        if (typeof data[0] == 'string') {
+            throw new Error("invalid type of data: must be an object array");
+        }
         this.data = data;
         this.config.container.innerHTML = "";
         if (!data || data.length == 0) {
@@ -335,7 +411,6 @@ var Table = /** @class */ (function () {
             return;
         }
         this.selection = d3.select(this.config.container);
-        var strings = typeof data[0] == 'string';
         var table = this.selection.append('table') //
             .classed('table', true) //
             .classed('table-sm', this.config.small) //
@@ -344,25 +419,16 @@ var Table = /** @class */ (function () {
         var thead = table.append('thead').classed('thead-light', true);
         var tbody = table.append('tbody');
         // append the header row
-        if (strings) {
-            thead.append('tr')
-                .selectAll('th')
-                .data([this.config.title == null ? "List" : this.config.title]).enter()
-                .append('th')
-                .text(function (column) { return column; });
-        }
-        else {
-            thead.append('tr')
-                .selectAll('th')
-                .data(Object.keys(this.data[0])).enter()
-                .append('th')
-                .on('click', function (d) {
-                if (_this.config.headerClickHandler != null) {
-                    _this.config.headerClickHandler(Object.keys(_this.data[0]).indexOf(d));
-                }
-            })
-                .text(function (column) { return column; });
-        }
+        thead.append('tr')
+            .selectAll('th')
+            .data(Object.keys(this.data[0])).enter()
+            .append('th')
+            .on('click', function (d) {
+            if (_this.config.headerClickHandler != null) {
+                _this.config.headerClickHandler(Object.keys(_this.data[0]).indexOf(d));
+            }
+        })
+            .text(function (column) { return column; });
         // create a row for each object in the data
         var rows = tbody.selectAll('tr')
             .data(this.data)
@@ -377,27 +443,19 @@ var Table = /** @class */ (function () {
                 _this.config.rowClickHandler(_this.data.indexOf(d));
             }
         });
-        if (strings) {
-            rows.append('td')
-                .text(function (d) {
-                return "" + d;
+        rows.selectAll('td')
+            .data(function (d) {
+            return Object.keys(_this.data[0]).map(function (k) {
+                return { 'value': d[k], 'name': k };
             });
-        }
-        else {
-            rows.selectAll('td')
-                .data(function (d) {
-                return Object.keys(_this.data[0]).map(function (k) {
-                    return { 'value': d[k], 'name': k };
-                });
-            }).enter()
-                .append('td')
-                .attr('data-th', function (d) {
-                return d.name;
-            })
-                .text(function (d) {
-                return d.value;
-            });
-        }
+        }).enter()
+            .append('td')
+            .attr('data-th', function (d) {
+            return d.name;
+        })
+            .text(function (d) {
+            return d.value;
+        });
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
             $(this.config.container.children[0]).DataTable();
         }
