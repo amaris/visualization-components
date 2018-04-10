@@ -17,10 +17,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import * as d3 from 'd3';
+
 /**
  * Typing for the table configuration object (to be passed to the table constructor).
  */
-interface TableConfiguration<D> {
+export interface TableConfiguration<D> {
     /**
      * The DOM SVG element that will contain the table.
      */
@@ -66,11 +68,11 @@ interface TableConfiguration<D> {
 /**
  * An interactive D3.js component to render objects in a table.
  */
-class Table<D> {
+export class Table<D> {
 
     private config: TableConfiguration<D>;
     private data: D[];
-    private selection: d3.Selection<any>;
+    private selection: d3.Selection<any, D, any, any>;
 
     public constructor() { }
 

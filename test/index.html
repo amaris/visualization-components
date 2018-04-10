@@ -10,171 +10,175 @@
     </style>
 </head>
 <body>
-<button onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='test1'?1:d.name=='test2'?0.5:0; })">Click me to select nodes</button>
-
-<div style="width: 50%; height: 75%; border: red; border-style: dashed;">
-    <svg id="bubbletree1"></svg>
-</div>
- 
-<div style="display: flex; flex-direction: row;height: 999px">
-    <div style="display: flex; flex-direction: column; width: 30%; border: red; border-style: dashed;">
-        <svg id="bubbletree2"></svg>
+    <button onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='test1'?1:d.name=='test2'?0.5:0; })">Click me to select nodes</button>
+    <div style="width: 50%; height: 75%; border: red; border-style: dashed;">
+        <svg id="bubbletree1"></svg>
     </div>
-    <div style="display: flex; flex-direction: column; width: 70%; border: red; border-style: dashed;">
-        <svg id="bubbletree3"></svg>
+
+    <div style="display: flex; flex-direction: row;height: 999px">
+        <div style="display: flex; flex-direction: column; width: 30%; border: red; border-style: dashed;">
+            <svg id="bubbletree2"></svg>
+        </div>
+        <div style="display: flex; flex-direction: column; width: 70%; border: red; border-style: dashed;">
+            <svg id="bubbletree3"></svg>
+        </div>
     </div>
-</div>
+    <div id="table">
+    </div>
+    <div id="list" style="max-height:300px;overflow-y:scroll">
+    </div>
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Home</a>
+            <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</a>
+            <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">ABC</div>
+        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">DEF</div>
+        <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">GFHI</div>
+    </div>
 
-<div id="table">
-</div>
+    <div id="ts"></div>
 
-<div id="list" style="max-height:300px;overflow-y:scroll">
-</div>
+    <!--<script src="../lib/d3.v4.min.js"></script>
+    <script src="../lib/jquery-1.12.4.js"></script>-->
+    <script src="../dist/bundle.js"></script>
+    <script src="../lib/bootstrap.bundle.min.js"></script>
+    <script src="../lib/jquery.dataTables.min.js"></script>
+    <script src="../lib/dataTables.bootstrap4.min.js"></script>
+    <!--<script src="../dist/visualization-components-bundle.js"></script>-->
+    <script>
 
-<nav>
-  <div class="nav nav-tabs" id="nav-tab" role="tablist">
-    <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Home</a>
-    <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Profile</a>
-    <a class="nav-item nav-link" id="nav-contact-tab" data-toggle="tab" href="#nav-contact" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</a>
-  </div>
-</nav>
-<div class="tab-content" id="nav-tabContent">
-  <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">ABC</div>
-  <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">DEF</div>
-  <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">GFHI</div>
-</div>
+        var data = {
+            "name": "clustering",
+            "children": [
+                {
+                    "name": "cluster 1",
+                    "children": [
+                        {
+                            "name": "sub cluster 1",
+                            "children": [
+                                {
+                                    "name": "test1",
+                                    "weight": 3938
+                                },
+                                {
+                                    "name": "test2",
+                                    "weight": 3812
+                                },
+                                {
+                                    "name": "test3",
+                                    "weight": 6714
+                                }
+                            ]
+                        },
+                        {
+                            "name": "sub cluster 2",
+                            "children": [
+                                {
+                                    "name": "test 4",
+                                    "weight": 3534
+                                },
+                                {
+                                    "name": "Test 5",
+                                    "weight": 5731
+                                },
+                                {
+                                    "name": "Test 6",
+                                    "weight": 7840
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "name": "cluster 2",
+                    "weight": 3812
+                },
+                {
+                    "name": "cluster 3",
+                    "weight": 6000
+                }
+            ]
+        };
 
-<script src="../lib/d3.v4.min.js"></script>
-<script src="../lib/jquery-1.12.4.js"></script>
-<script src="../lib/bootstrap.bundle.min.js"></script>
-<script src="../lib/jquery.dataTables.min.js"></script>
-<script src="../lib/dataTables.bootstrap4.min.js"></script>
-<script src="../dist/visualization-components-bundle.js"></script>
-
-<script>
-
-	var data = {
-		"name": "clustering", 
-		"children": [
-			{
-				"name": "cluster 1",
- 				"children": [
-					{
-						"name": "sub cluster 1",
-						"children": [
-							{
-								"name": "test1",
-								"weight": 3938
-							},
-							{
-            					"name": "test2",
-            					"weight": 3812
-          					},
-          					{
-            					"name": "test3",
-            					"weight": 6714
-          					}
-        				]
-      				},
-      				{
-        				"name": "sub cluster 2",
-				        "children": [
-          					{
-					            "name": "test 4",
-            					"weight": 3534
-          					},
-          					{
-            					"name": "Test 5",
-            					"weight": 5731
-          					},
-          					{
-            					"name": "Test 6",
-            					"weight": 7840
-          					}
-        				]
-      				}
-      			]
-      		},
-      		{
-				"name": "cluster 2",
-            	"weight": 3812
-           	},
-      		{
-				"name": "cluster 3",
-            	"weight": 6000
-           	}
-      	]
-	};
-
-    var c = new BubbleTree();
-    c.build({
-        container: document.getElementById("bubbletree1"),
-        data: data,
-        handlers: {
-            "click": function(d) {
-                console.info(">> " + d.data);
+        var c = new arnd.BubbleTree();
+        c.build({
+            container: document.getElementById("bubbletree1"),
+            data: data,
+            handlers: {
+                "click": function (d) {
+                    console.info(">> " + d.data);
+                },
+                "mouseover": function (d) { console.info("mouseover"); },
+                "dblclick": function (d) { console.info("dblclick"); }
             },
-            "mouseover": function(d) { console.info("mouseover"); },
-            "dblclick": function(d) { console.info("dblclick"); }
-        },
-        autosize:true,
-        showRoot: true,
-        selectOnClick: true
-    });
+            autosize: true,
+            showRoot: true,
+            selectOnClick: true
+        });
 
 
-    c = new BubbleTree();
-    c.build({
-        container: document.getElementById("bubbletree2"),
-        data: data,
-        handlers: {
-            "click": function(d) {
-                console.info(">> " + d.data);
+        c = new arnd.BubbleTree();
+        c.build({
+            container: document.getElementById("bubbletree2"),
+            data: data,
+            handlers: {
+                "click": function (d) {
+                    console.info(">> " + d.data);
+                },
+                "mouseover": function (d) { console.info("mouseover"); },
+                "dblclick": function (d) { console.info("dblclick"); }
             },
-            "mouseover": function(d) { console.info("mouseover"); },
-            "dblclick": function(d) { console.info("dblclick"); }
-        },
-        selectOnClick: true,
-        showRoot: true
-    });
+            selectOnClick: true,
+            showRoot: true
+        });
 
-    c = new BubbleTree();
-    c.build({
-        container: document.getElementById("bubbletree3"),
-        data: data,
-        handlers: {
-            "click": function(d) {
-                console.info(">> " + d.data);
+        c = new arnd.BubbleTree();
+        c.build({
+            container: document.getElementById("bubbletree3"),
+            data: data,
+            handlers: {
+                "click": function (d) {
+                    console.info(">> " + d.data);
+                },
+                "mouseover": function (d) { console.info("mouseover"); },
+                "dblclick": function (d) { console.info("dblclick"); }
             },
-            "mouseover": function(d) { console.info("mouseover"); },
-            "dblclick": function(d) { console.info("dblclick"); }
-        },
-        selectOnClick: true,
-        showRoot: true,
-        nodePopover: function(d, callback) {
-        	console.info(d);
-        	callback({ title: "Node", content: d.data.name });
-        }
-    });
+            selectOnClick: true,
+            showRoot: true,
+            nodePopover: function (d, callback) {
+                console.info(d);
+                callback({ title: "Node", content: d.data.name });
+            }
+        });
 
-    var t = new Table();
-    t.build({
-        container: document.getElementById("table"),
-        striped: true,
-        bordered: true,
-        selectableRows: true,
-        rowClickHandler: function(r) { console.info(r); },
-        data: [{ "a":"1", "b":"2" }, { "a":"3", "b":"4" }]
-    });
+        var t = new arnd.Table();
+        t.build({
+            container: document.getElementById("table"),
+            striped: true,
+            bordered: true,
+            selectableRows: true,
+            rowClickHandler: function (r) { console.info(r); },
+            data: [{ "a": "1", "b": "2" }, { "a": "3", "b": "4" }]
+        });
 
-    l = new List();
-    l.build({
-        container: document.getElementById("list"),
-        selectableRows: true,
-        rowClickHandler: function(r) { console.info(r); },
-        data: ["element 1", "element 2", "element 3", "element 4", "element 5", "element 6", "element 7", "element 8", "element 9", "element 10"]
-    });
+        l = new arnd.List();
+        l.build({
+            container: document.getElementById("list"),
+            selectableRows: true,
+            rowClickHandler: function (r) { console.info(r); },
+            data: ["element 1", "element 2", "element 3", "element 4", "element 5", "element 6", "element 7", "element 8", "element 9", "element 10"]
+        });
 
-</script>
+        l = new arnd.TimeSeries({
+            data: [{ x: new Date("2018-1-1"), y: 10 }, { x: new Date("2018-2-1"), y: 10 }, { x: new Date("2018-3-1"), y: 8 }, { x: new Date("2018-4-1"), y: 11 }, { x: new Date("2018-5-1"), y: 9 }],
+            options: {}
+        });
+        l.createChart("#ts");
+
+    </script>
 </body>
 </html>

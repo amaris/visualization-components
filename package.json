@@ -8,11 +8,12 @@
     "test": "test"
   },
   "scripts": {
+    "start": "concurrently \"npm run rollup:w\" \"npm run lite\" ",
     "test": "none",
     "tsc": "tsc",
     "tsc:w": "tsc -w",
-    "lite": "lite-server",
-    "start": "concurrently \"npm run tsc:w\" \"npm run lite\" "
+    "rollup:w": "rollup -c -w",
+    "lite": "lite-server"
   },
   "repository": {
     "type": "git",
@@ -25,8 +26,18 @@
   },
   "homepage": "https://github.com/amaris/visualization-components#readme",
   "devDependencies": {
+    "@types/d3": "^4.13.0",
+    "@types/jquery": "^2.0.49",
     "concurrently": "^3.5.1",
     "lite-server": "^2.3.0",
+    "rollup": "^0.57.1",
+    "rollup-plugin-node-resolve": "^3.3.0",
+    "rollup-plugin-typescript2": "^0.12.0",
+    "rollup-watch": "^4.3.1",
     "typescript": "^2.8.1"
+  },
+  "dependencies": {
+    "d3": "^4.13.0",
+    "jquery": "^1.12.4"
   }
 }

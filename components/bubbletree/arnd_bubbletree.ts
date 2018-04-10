@@ -17,10 +17,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import * as d3 from 'd3';
+import 'jquery';
+
 /**
  * The underlying JSON data to feed the bubble tree with.
  */
-interface Data {
+export interface Data {
     /**
      * The name of the data, or label of the node.
      */
@@ -28,7 +31,7 @@ interface Data {
     /**
      * The children.
      */
-    children: Data[];
+    children?: Data[];
     /**
      * The data's uid, to be used in the selection API (automatically added if not found).
      */
@@ -46,7 +49,7 @@ interface Data {
 /**
  * Typing for the bubble tree configuration object (to be passed to the bubble tree constructor).
  */
-interface BubbleTreeConfiguration<D extends Data> {
+export interface BubbleTreeConfiguration<D extends Data> {
     /**
      * The DOM SVG element that will contain the bubble tree.
      */
@@ -70,11 +73,11 @@ interface BubbleTreeConfiguration<D extends Data> {
     /**
      * Hanler called when the user clicks on a node.
      */
-    onClick?: (handler: d3.pack.Node<D>) => any;
+    onClick?: (handler: d3.HierarchyNode<D>) => any;
     /**
      * Hanler called when the user clicks on a node.
      */
-    handlers?: { [eventType: string]: ((node: d3.pack.Node<D>) => any) };
+    handlers?: { [eventType: string]: ((node: d3.HierarchyNode<D>) => any) };
     /**
      * True to select the clicked leaf node.
      */
@@ -94,27 +97,27 @@ interface BubbleTreeConfiguration<D extends Data> {
     /**
      * A function to create a popover on a node. It can return undefined when no popover needs to be shown.
      */
-    nodePopover?: (node: d3.pack.Node<D>, callback: (popover: { title?: string, content: string }) => void) => void;
+    nodePopover?: (node: d3.HierarchyNode<D>, callback: (popover: { title?: string, content: string }) => void) => void;
 }
 
 /**
  * An interactive D3.js component to render trees as an SVG flat bubble tree.
  */
-class BubbleTree<D extends Data> {
+export class BubbleTree<D extends Data> {
 
-    private svg: d3.Selection<any>;
+    private svg: d3.Selection<any, d3.HierarchyNode<D>, any, any>;
     private diameter: number;
     private width: number;
     private height: number;
-    private g: d3.Selection<any>;
+    private g: d3.Selection<any, d3.HierarchyNode<D>, any, any>;
 
-    private defaultColor: d3.scale.Linear<any, any>;
+    private defaultColor: d3.ScaleLinear<any, any>;
 
-    private pack: d3.Pack<any>;
+    private pack: d3.PackLayout<any>;
 
-    private circle: d3.Selection<d3.pack.Node<D>>;
+    private circle: d3.Selection<any, d3.HierarchyNode<D>, any, any>;
     private view;
-    private focus: d3.pack.Node<D>;
+    private focus: any;
     private static ID: number = 1;
     private config: BubbleTreeConfiguration<D>;
     private selections: {} = {};
@@ -143,7 +146,7 @@ class BubbleTree<D extends Data> {
         let nodes = this.pack(root).descendants();
 
         this.circle = this.g.selectAll("circle")
-            .data<d3.pack.Node<D>>(nodes)
+            .data<d3.HierarchyNode<D>>(nodes)
             .enter().append("circle").each(d => { if (d.data.uid == null) d.data.uid = "__generated_" + (BubbleTree.ID++); })
             .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
             .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
@@ -173,7 +176,7 @@ class BubbleTree<D extends Data> {
         }
 
         let handlers = {
-            "click": (d: d3.pack.Node<D>) => {
+            "click": (d: d3.HierarchyNode<D>) => {
                 if (!d.children) {
                     if (this.config.selectOnClick) {
                         this.clearSelect().select(d.data.uid);
@@ -192,7 +195,7 @@ class BubbleTree<D extends Data> {
                     d3.event.stopPropagation();
                 }
             },
-            "mouseover": (d: d3.pack.Node<Data>) => {
+            "mouseover": (d: d3.HierarchyNode<Data>) => {
                 this.setCircleColor(d, "#404040");
                 if (d != this.focus) {
                     this.showText(d, true);
@@ -202,7 +205,7 @@ class BubbleTree<D extends Data> {
                     }
                 }
             },
-            "mouseout": (d: d3.pack.Node<Data>) => {
+            "mouseout": (d: d3.HierarchyNode<Data>) => {
                 this.setCircleColor(d, "#B0B0B0");
                 this.showText(d, d.parent === this.focus);
             }
@@ -231,7 +234,7 @@ class BubbleTree<D extends Data> {
         }
 
         this.g.selectAll("text")
-            .data<d3.pack.Node<Data>>(nodes)
+            .data<d3.HierarchyNode<Data>>(nodes)
             .enter().append("text")
             .attr("id", d => d.data.uid ? "text_" + d.data.uid : null)
             .style("fill-opacity", d => d.parent === root ? 1 : 0)
@@ -273,7 +276,7 @@ class BubbleTree<D extends Data> {
         console.info("diameter: " + this.diameter);
         this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
 
-        this.defaultColor = d3.scaleLinear()
+        this.defaultColor = d3.scaleLinear<string>()
             .domain([-1, 5])
             .range(["hsl(197,30%,98%)", "hsl(220,50%,88%)"])
             .interpolate(d3.interpolateHcl);
@@ -305,7 +308,7 @@ class BubbleTree<D extends Data> {
         return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%,70%)";
     }
 
-    private nodeColor(d: d3.pack.Node<Data>): string {
+    private nodeColor(d: d3.HierarchyNode<Data>): string {
         return d.data.color ? d.data.color : d.children ? this.defaultColor(d.depth) : this.leafColor(0);
     }
 
@@ -327,7 +330,7 @@ class BubbleTree<D extends Data> {
      */
     select(uid: string, weight: number = 1): BubbleTree<D> {
         this.selections[uid] = weight;
-        this.g.selectAll("circle")
+        this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => d.data.uid in this.selections)
             .classed("selected", true)
             .style("fill", d => this.leafColor(this.selections[d.data.uid]));
@@ -339,7 +342,7 @@ class BubbleTree<D extends Data> {
      * Returning 0 or undefined means that the node is not selected.
      */
     selectData(selector: (data: D) => number): BubbleTree<D> {
-        this.g.selectAll("circle")
+        this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => { let weight = selector(d.data); if (weight && weight > 0) { this.selections[d.data.uid] = weight; return true } else return false; })
             .classed("selected", true)
             .style("fill", d => this.leafColor(this.selections[d.data.uid]));
@@ -353,7 +356,7 @@ class BubbleTree<D extends Data> {
      * @see #select
      */
     clearSelect(): BubbleTree<D> {
-        this.g.selectAll("circle")
+        this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => d.data.uid in this.selections)
             .classed("selected", false)
             .style("fill", d => this.nodeColor(d));
@@ -363,9 +366,9 @@ class BubbleTree<D extends Data> {
 
     private zoomTo(v) {
         var k = this.diameter / v[2]; this.view = v;
-        var node = this.g.selectAll("circle,text");
+        var node = this.g.selectAll<any, any>("circle,text");
         node.attr("transform", d => "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")");
-        this.circle.attr("r", d => d.r * k);
+        this.circle.attr("r", d => (<any>d).r * k);
     }
 
     private zoom(d) {
@@ -379,7 +382,7 @@ class BubbleTree<D extends Data> {
                 return t => this.zoomTo(i(t));
             });
 
-        transition.select("#" + this.config.container.id).selectAll("text")
+        transition.select("#" + this.config.container.id).selectAll<any, d3.HierarchyNode<D>>("text")
             .filter(function(d) { return d.parent && d.parent === bbc.focus || this.style.display === "inline"; })
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
             .on("start", function(d) { if (d.parent === bbc.focus) this.style.display = "inline"; })
@@ -399,7 +402,7 @@ class BubbleTree<D extends Data> {
      * Returns the currently selected nodes uid with associated percentils).
      */
     getSelections(): Data[] {
-        return this.g.selectAll("circle")
+        return this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => d.data.uid in this.selections).data().map(d => d.data);
 
     }

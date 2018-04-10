@@ -17,10 +17,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+import * as d3 from 'd3';
+
 /**
  * Typing for the list configuration object (to be passed to the list constructor).
  */
-interface ListConfiguration<D> {
+export interface ListConfiguration<D> {
     /**
      * The DOM SVG element that will contain the list.
      */
@@ -42,11 +44,11 @@ interface ListConfiguration<D> {
 /**
  * An interactive D3.js component to render items in a list.
  */
-class List<D> {
+export class List<D> {
 
     private config: ListConfiguration<D>;
     private data: D[];
-    private selection: d3.Selection<any>;
+    private selection: d3.Selection<any, D, any, any>;
 
     public constructor() { }
 
