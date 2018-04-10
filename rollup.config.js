@@ -15,7 +15,6 @@ export default {
             main: true,
             module: true
         })
-    ]
-
-    ,moduleName: 'arnd'
+    ],
+    moduleName: 'arnd'
 };

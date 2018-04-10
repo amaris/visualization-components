@@ -460,7 +460,8 @@ export class TimeSeries {
     const drawLine: d3.Line<any> = d3.line()
       .x(functorkeyscale('x', this.fullXScale))
       .y(functorkeyscale('y', smallyScale))
-      .curve(serie.interpolationFunction)
+      //.curve(serie.interpolationFunction)
+       .curve(d3.curveLinear)
       .defined(keyNotNull('y'));
     const linepath = this.drawerContainer
       .insert("path", ":first-child")

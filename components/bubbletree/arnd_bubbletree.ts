@@ -19,6 +19,8 @@
 
 import * as d3 from 'd3';
 import 'jquery';
+// TODO.
+//import 'bootstrap';
 
 /**
  * The underlying JSON data to feed the bubble tree with.
@@ -172,7 +174,7 @@ export class BubbleTree<D extends Data> {
                 .attr("rel", "popover")
                 .attr("data-trigger", "hover");
 
-            (<any>$('.popover-node')).popover();
+            $('.popover-node').popover();
         }
 
         let handlers = {

@@ -18779,7 +18779,7 @@
               return d.value;
           });
           if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
-              $(this.config.container.children[0]).DataTable();
+              ($(this.config.container.children[0])).DataTable();
           }
       };
       /**
@@ -19255,7 +19255,8 @@
           var drawLine = line()
               .x(functorkeyscale('x', this.fullXScale))
               .y(functorkeyscale('y', smallyScale))
-              .curve(serie.interpolationFunction)
+              //.curve(serie.interpolationFunction)
+              .curve(curveLinear)
               .defined(keyNotNull('y'));
           var linepath = this.drawerContainer
               .insert("path", ":first-child")

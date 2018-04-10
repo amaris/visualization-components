@@ -152,7 +152,7 @@ export class Table<D> {
             });
 
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
-            (<any>$(this.config.container.children[0])).DataTable();
+            ($(this.config.container.children[0])).DataTable();
         }
 
     }
