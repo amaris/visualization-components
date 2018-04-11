@@ -93,6 +93,10 @@
     <None Include="components\list\arnd_list.ts" />
     <None Include="components\table\arnd_table.ts" />
   </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="components\time-series\time-series-utils.ts" />
+    <TypeScriptCompile Include="components\time-series\time-series.ts" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
