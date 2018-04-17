@@ -61,6 +61,17 @@ export interface ITimeSeriesOptions {
 }
 
 export class TimeSeries {
+
+    private update() {
+        this.width = this.container2.clientWidth;
+        this.height = this.container2.clientHeight;
+        if (NaN === this.width || NaN === this.height) {
+            this.width = 800;
+            this.height = 640;
+        }
+        console.info(this.width + "," + this.height);
+    }
+
   private svg: d3.Selection<any, any, any, any>;
   private container: d3.Selection<any, any, any, any>;
   private serieContainer: d3.Selection<any, any, any, any>;
@@ -93,7 +104,10 @@ export class TimeSeries {
   public yFixeDomain: Array<number>;
   public margin: IMargin = { top: 10, bottom: 20, left: 40, right: 10 };
 
+  private container2: HTMLElement;
+
   constructor(serie: ISimpleSerie) {
+
     const { options } = serie;
 
     if (options.color) {
@@ -110,6 +124,9 @@ export class TimeSeries {
   }
 
   public createChart(elem: string) {
+      this.container2 = <HTMLElement> document.querySelector(elem);
+      this.update();
+
     // Compute mins max for the serie
     const extentY = d3.extent(this.serie.data, data => data.y);
     this.min = extentY[0];

@@ -18947,8 +18947,19 @@
           }
           this.serie = serie;
       }
+      TimeSeries.prototype.update = function () {
+          this.width = this.container2.clientWidth;
+          this.height = this.container2.clientHeight;
+          if (NaN === this.width || NaN === this.height) {
+              this.width = 800;
+              this.height = 640;
+          }
+          console.info(this.width + "," + this.height);
+      };
       TimeSeries.prototype.createChart = function (elem) {
           var _this = this;
+          this.container2 = document.querySelector(elem);
+          this.update();
           // Compute mins max for the serie
           var extentY = extent(this.serie.data, function (data) { return data.y; });
           this.min = extentY[0];

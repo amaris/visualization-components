@@ -34,6 +34,7 @@ export interface ITimeSeriesOptions {
     dashed?: boolean | string;
 }
 export declare class TimeSeries {
+    private update();
     private svg;
     private container;
     private serieContainer;
@@ -60,6 +61,7 @@ export declare class TimeSeries {
     xFixeDomain: Array<number>;
     yFixeDomain: Array<number>;
     margin: IMargin;
+    private container2;
     constructor(serie: ISimpleSerie);
     createChart(elem: string): void;
     private mousevlineUpdate();
