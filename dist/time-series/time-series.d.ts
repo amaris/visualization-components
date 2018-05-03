@@ -1,39 +1,28 @@
-import * as d3 from 'd3';
-export interface IData {
+export interface TimeSerieData {
     x: Date;
+    id?: string;
     y: number;
+    a: number;
 }
-export interface IMargin {
+export interface Margin {
     top: number;
     bottom: number;
     left: number;
     right: number;
 }
-export interface ISerieItem {
-    item: IData;
-    options: ITimeSeriesOptions;
-}
-export interface ISimpleSerie {
-    data: Array<IData>;
-    options: ITimeSeriesOptions;
+export interface ConfigurationTimeSerie<D extends TimeSerieData> {
+    container: HTMLElement;
+    data: string | Array<D>;
     threshold?: number;
-    linepath?: d3.Selection<any, any, any, any>;
-    line?: d3.Line<any>;
     'stroke-dasharray'?: string;
-    interpolationFunction?: d3.CurveFactory;
-    find?: Function;
-}
-export interface ITimeSeriesOptions {
+    update?: string;
     color?: string;
-    interpolate?: string;
     width?: number;
     height?: number;
-    strokeWidth?: number;
-    label?: string;
-    name?: string;
-    dashed?: boolean | string;
+    find?: Function;
+    frequency?: number;
 }
-export declare class TimeSeries {
+export declare class TimeSeries<D extends TimeSerieData> {
     private update();
     private svg;
     private container;
@@ -42,7 +31,10 @@ export declare class TimeSeries {
     private drawerContainer;
     private mousevline;
     private brush;
-    private serie;
+    private data;
+    private config;
+    private linepath;
+    private line?;
     private min;
     private max;
     private dateMin;
@@ -53,27 +45,37 @@ export declare class TimeSeries {
     private yScaleLabel;
     private xScaleLabel;
     private tooltipDiv;
+    private last_id?;
+    private interpolationFunction?;
+    private isZoom;
     private width;
     private height;
     private drawerHeight;
     private drawerTopMargin;
     private color;
+    private circleColor;
     xFixeDomain: Array<number>;
     yFixeDomain: Array<number>;
-    margin: IMargin;
+    margin: Margin;
     private container2;
-    constructor(serie: ISimpleSerie);
-    createChart(elem: string): void;
+    private min_zoom;
+    private max_zoom;
+    private text_size;
+    build(config: ConfigurationTimeSerie<D>): void;
+    private updateData(serie);
+    private buildFromData(rootData);
+    private createChart();
     private mousevlineUpdate();
     private yScaleFormat;
     private xScaleFormat(x);
-    private drawSerie(serie);
+    private drawSerie();
+    private draw_circles();
     private updatefocusRing(xDate?);
     private mouseMove();
     private mouseOut();
     private updateTip(xDate?);
     private tipFunction(date, serieItem);
-    private createLines(serie);
+    private createLines();
     private getInterpolationFunction(serie);
     private drawMiniDrawer();
 }

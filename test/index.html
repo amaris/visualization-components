@@ -145,11 +145,14 @@
             data: ["element 1", "element 2", "element 3", "element 4", "element 5", "element 6", "element 7", "element 8", "element 9", "element 10"]
         });
 
-        l = new arnd.TimeSeries({
-            data: [{ x: new Date("2018-1-1"), y: 10 }, { x: new Date("2018-2-1"), y: 10 }, { x: new Date("2018-3-1"), y: 8 }, { x: new Date("2018-4-1"), y: 11 }, { x: new Date("2018-5-1"), y: 9 }],
+        l = new arnd.TimeSeries();
+        l.build({
+            container: document.getElementById("ts"),
+            data: "http://10.248.188.25:5000/TS_AD/getDocuments/Twitter_Volume_mercedes",
+            update:"http://10.248.188.25:5000/TS_AD/getLastDocument/Twitter_Volume_mercedes",
+            //data: [{ x: new Date("2018-1-1"), y: 10 }, { x: new Date("2018-2-1"), y: 10 }, { x: new Date("2018-3-1"), y: 8 }, { x: new Date("2018-4-1"), y: 11 }, { x: new Date("2018-5-1"), y: 9 }],
             options: {}
         });
-        l.createChart("#ts");
 
     </script>
 </body>

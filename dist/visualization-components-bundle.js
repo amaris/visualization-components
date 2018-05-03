@@ -18684,6 +18684,7 @@
       BubbleTree.ID = 1;
       return BubbleTree;
   }());
+  //# sourceMappingURL=arnd_bubbletree.js.map
 
   /*
    * Visualisation Components - https://github.com/amaris/visualization-components
@@ -18790,6 +18791,7 @@
       };
       return Table;
   }());
+  //# sourceMappingURL=arnd_table.js.map
 
   /*
    * Visualisation Components - https://github.com/amaris/visualization-components
@@ -18864,6 +18866,7 @@
       };
       return List;
   }());
+  //# sourceMappingURL=arnd_list.js.map
 
   /*
    * Visualisation Components - https://github.com/amaris/visualization-components
@@ -18901,6 +18904,7 @@
           return d.hasOwnProperty(k) && d[k] !== null && !isNaN(d[k]);
       };
   }
+  //# sourceMappingURL=time-series-utils.js.map
 
   /*
    * Visualisation Components - https://github.com/amaris/visualization-components
@@ -18921,31 +18925,25 @@
    * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
    */
   var TimeSeries = /** @class */ (function () {
-      function TimeSeries(serie) {
+      function TimeSeries() {
           this.brush = brushX();
           this.yScale = linear$2();
           this.xScale = time();
           this.yScaleLabel = '';
           this.xScaleLabel = '';
+          this.isZoom = false;
           // default
           this.width = 600;
           this.height = 480;
           this.drawerHeight = 80;
           this.drawerTopMargin = 10;
           this.color = '#000';
+          this.circleColor = '#DDA0DD';
           this.margin = { top: 10, bottom: 20, left: 40, right: 10 };
+          this.min_zoom = 0.1;
+          this.max_zoom = 7;
+          this.text_size = 10;
           this.yScaleFormat = this.yScale.tickFormat();
-          var options = serie.options;
-          if (options.color) {
-              this.color = options.color;
-          }
-          if (options.width) {
-              this.width = options.width;
-          }
-          if (options.height) {
-              this.height = options.height;
-          }
-          this.serie = serie;
       }
       TimeSeries.prototype.update = function () {
           this.width = this.container2.clientWidth;
@@ -18956,15 +18954,57 @@
           }
           console.info(this.width + "," + this.height);
       };
-      TimeSeries.prototype.createChart = function (elem) {
+      TimeSeries.prototype.build = function (config) {
           var _this = this;
-          this.container2 = document.querySelector(elem);
+          this.config = config;
+          this.container2 = config.container;
+          if (!this.config.frequency) {
+              this.config.frequency = 1000;
+          }
+          if (typeof config.data === "string") {
+              json(this.config.data, function (error, rootData) {
+                  _this.buildFromData(rootData);
+                  _this.createChart();
+              });
+          }
+          else {
+              this.buildFromData(config.data);
+              this.createChart();
+          }
+          if (this.config.update) {
+              setInterval(this.updateData, this.config.frequency, this);
+          }
+      };
+      TimeSeries.prototype.updateData = function (serie) {
+          var _this = this;
+          json(serie.config.update, function (error, rootData) {
+              if (serie.data[serie.data.length - 1].id != rootData.id) {
+                  console.log(serie.data[serie.data.length - 1].id);
+                  console.log(rootData.id);
+                  var value = { id: rootData.id, x: new Date(rootData.x), y: rootData.x, a: rootData.a };
+                  serie.data.push(value);
+                  _this.createLines();
+                  _this.drawSerie();
+                  _this.drawMiniDrawer();
+              }
+          });
+      };
+      TimeSeries.prototype.buildFromData = function (rootData) {
+          if (typeof rootData[0].x === "string") {
+              for (var i = 0; i < rootData.length; ++i) {
+                  rootData[i].x = new Date(rootData[i].x);
+              }
+          }
+          this.data = rootData;
+      };
+      TimeSeries.prototype.createChart = function () {
+          var _this = this;
           this.update();
           // Compute mins max for the serie
-          var extentY = extent(this.serie.data, function (data) { return data.y; });
+          var extentY = extent(this.data, function (data) { return data.y; });
           this.min = extentY[0];
           this.max = extentY[1];
-          var extentX = extent(this.serie.data, function (data) { return data.x; });
+          var extentX = extent(this.data, function (data) { return data.x; });
           this.dateMin = extentX[0];
           this.dateMax = extentX[1];
           // Set scales
@@ -18991,7 +19031,7 @@
           }
           this.fullXScale = this.xScale.copy();
           // Create svg
-          this.svg = select(elem)
+          this.svg = select(this.container2)
               .append('svg')
               .attr('width', this.width)
               .attr('height', this.height);
@@ -19009,11 +19049,12 @@
               .insert('g', "rect.mouse-catch")
               .attr('transform', "translate(" + this.margin.left + "," + this.margin.top + ")")
               .attr('clip-path', 'url(#clip)');
-          this.serieContainer = this.container.append('g');
+          this.serieContainer = this.container.append('g').attr('class', 'draw-container');
           this.annotationsContainer = this.container.append('g');
           // Mini container at the bottom
           this.drawerContainer = this.svg
               .append('g')
+              .attr('class', 'mini-draw-container')
               .attr('transform', "translate(" + this.margin.left + "," + (this.height - this.drawerHeight - this.margin.bottom) + ")");
           // Vertical line moving with mouse tip
           this.mousevline = this.svg
@@ -19040,7 +19081,7 @@
               .on('brush', function () {
               var selection$$1 = event.selection;
               _this.xScale.domain(selection$$1.map(_this.fullXScale.invert, _this.fullXScale));
-              _this.drawSerie(_this.serie);
+              _this.drawSerie();
               _this.svg.select(".focus.x.axis").call(xAxis);
               _this.mousevlineUpdate();
               _this.updatefocusRing();
@@ -19049,7 +19090,7 @@
               var selection$$1 = event.selection;
               if (selection$$1 === null) {
                   _this.xScale.domain(_this.fullXScale.domain());
-                  _this.drawSerie(_this.serie);
+                  _this.drawSerie();
                   _this.svg.select(".focus.x.axis").call(xAxis);
                   _this.mousevlineUpdate();
                   _this.updatefocusRing();
@@ -19091,13 +19132,13 @@
               .style('opacity', 0)
               .on('mousemove', this.mouseMove.bind(this))
               .on('mouseout', this.mouseOut.bind(this));
-          this.tooltipDiv = select(elem)
+          this.tooltipDiv = select(this.container2)
               .style('position', 'relative')
               .append('div')
               .attr('class', 'd3_timeseries tooltip')
               .style('opacity', 0);
-          this.createLines(this.serie);
-          this.drawSerie(this.serie);
+          this.createLines();
+          this.drawSerie();
           this.drawMiniDrawer();
       };
       TimeSeries.prototype.mousevlineUpdate = function () {
@@ -19113,37 +19154,49 @@
       TimeSeries.prototype.xScaleFormat = function (x) {
           return x.toLocaleString();
       };
-      TimeSeries.prototype.drawSerie = function (serie) {
-          if (!serie.linepath) {
+      TimeSeries.prototype.drawSerie = function () {
+          if (!this.linepath) {
               var linepath = this.serieContainer
                   .append("path")
-                  .datum(serie.data)
+                  .datum(this.data)
                   .attr('class', 'd3_timeseries line')
-                  .attr('d', serie.line)
+                  .attr('d', this.line)
                   .attr('stroke', this.color)
                   .attr('stroke-linecap', 'round')
-                  .attr('stroke-width', serie.options.strokeWidth || 1.5)
+                  .attr('stroke-width', 1.5)
                   .attr('fill', 'none');
-              if (serie.options.dashed) {
-                  if (serie.options.dashed == true || serie.options.dashed == 'dashed') {
-                      serie['stroke-dasharray'] = '5,5';
-                  }
-                  else if (serie.options.dashed == 'long') {
-                      serie['stroke-dasharray'] = '10,10';
-                  }
-                  else if (serie.options.dashed == 'dot') {
-                      serie['stroke-dasharray'] = '2,4';
-                  }
-                  else {
-                      serie['stroke-dasharray'] = serie.options.dashed;
-                  }
-                  linepath.attr('stroke-dasharray', serie['stroke-dasharray']);
-              }
-              serie.linepath = linepath;
+              this.draw_circles();
+              this.linepath = linepath;
           }
           else {
-              serie.linepath.attr('d', serie.line);
+              this.linepath.attr('d', this.line);
+              this.draw_circles();
           }
+      };
+      TimeSeries.prototype.draw_circles = function () {
+          var _this = this;
+          select("#" + this.container2.id + " svg").selectAll(".draw-container").selectAll("circle").remove();
+          select("#" + this.container2.id + " svg").selectAll(".draw-container")
+              .append("circle")
+              .attr("r", (!this.data[0].a || this.data[0].a === undefined) ? 0 : 5.5)
+              .attr("fill", "none")
+              .attr('stroke-width', 3.5)
+              .attr('stroke', this.circleColor)
+              .attr('stroke-linecap', 'round')
+              .attr("cx", this.xScale(this.data[0].x))
+              .attr("cy", this.yScale(this.data[0].y));
+          //  draw others circle of anomalies
+          var anomalies = select("#" + this.container2.id + " svg").selectAll(".draw-container").selectAll("circle")
+              .data(this.data)
+              .enter().append("circle")
+              .attr("r", function (d) { return (!d.a) ? 0 : 5.5; })
+              .attr("fill", "none")
+              .attr('stroke-width', 3.5)
+              .attr('stroke', this.circleColor)
+              .attr('stroke-linecap', 'round')
+              .attr("cx", function (d) { return _this.xScale(d.x); })
+              .attr("cy", function (d) { return _this.yScale(d.y); })
+              .attr("visible", false);
       };
       TimeSeries.prototype.updatefocusRing = function (xDate) {
           var _this = this;
@@ -19154,7 +19207,7 @@
           else {
               s = s.data([{
                       x: xDate,
-                      item: this.serie.find(xDate),
+                      item: this.config.find(xDate),
                       color: this.color
                   }].filter(function (d) { return d.item && d.item.y; }));
           }
@@ -19190,8 +19243,8 @@
           }
           else {
               var s = {
-                  item: this.serie.find(xDate),
-                  options: this.serie.options
+                  item: this.config.find(xDate),
+                  options: {}
               };
               this.tooltipDiv
                   .style('opacity', 0.9)
@@ -19207,44 +19260,34 @@
           }
           return "<h4>" + this.xScaleFormat(day(date$$1)) + "</h4>" + spans;
       };
-      TimeSeries.prototype.createLines = function (serie) {
+      TimeSeries.prototype.createLines = function () {
+          var _this = this;
           // https://github.com/d3/d3-shape/blob/master/README.md#curves
-          if (!serie.options.interpolate) {
-              serie.options.interpolate = "linear";
-          }
-          else {
-              // Translate curvenames
-              serie.options.interpolate = (serie.options.interpolate === 'monotone' ? 'monotoneX'
-                  : serie.options.interpolate === 'step-after' ? 'stepAfter'
-                      : serie.options.interpolate === 'step-before' ? 'stepBefore'
-                          : serie.options.interpolate);
-          }
-          serie.interpolationFunction = this.getInterpolationFunction(serie) || curveLinear;
+          this.interpolationFunction = this.getInterpolationFunction(this.config) || curveLinear;
           var drawLine = line()
               .x(functorkeyscale('x', this.xScale))
               .y(functorkeyscale('y', this.yScale))
               .curve(curveLinear /*serie.interpolationFunction*/)
               .defined(keyNotNull('y'));
-          serie.line = drawLine;
-          serie.options.label = serie.options.label || serie.options.name;
-          serie.find = function (date$$1) {
+          this.line = drawLine;
+          this.config.find = function (date$$1) {
               var bisect = bisector(fk('x')).left;
-              var i = bisect(serie.data, date$$1) - 1;
+              var i = bisect(_this.config.data, date$$1) - 1;
               if (i === -1) {
                   return null;
               }
               // Look to far after serie is defined
-              if (i === serie.data.length - 1 &&
-                  serie.data.length > 1 &&
-                  Number(date$$1) - Number(serie.data[i].x) > Number(serie.data[i].x) - Number(serie.data[i - 1].x)) {
+              if (i === _this.data.length - 1 &&
+                  _this.data.length > 1 &&
+                  Number(date$$1) - Number(_this.data[i].x) > Number(_this.data[i].x) - Number(_this.data[i - 1].x)) {
                   return null;
               }
-              return serie.data[i];
+              return _this.data[i];
           };
       };
       TimeSeries.prototype.getInterpolationFunction = function (serie) {
           // To uppercase for d3 curve name
-          var curveName = 'curve' + serie.options.interpolate[0].toUpperCase() + serie.options.interpolate.slice(1);
+          var curveName = 'curve';
           var curveNames = [
               { curveLinear: curveLinear },
               { curveStep: step },
@@ -19259,10 +19302,11 @@
           return curve[0];
       };
       TimeSeries.prototype.drawMiniDrawer = function () {
+          var _this = this;
           var smallyScale = this.yScale
               .copy()
               .range([this.drawerHeight - this.drawerTopMargin, 0]);
-          var serie = this.serie;
+          var serie = this.config;
           var drawLine = line()
               .x(functorkeyscale('x', this.fullXScale))
               .y(functorkeyscale('y', smallyScale))
@@ -19271,13 +19315,35 @@
               .defined(keyNotNull('y'));
           var linepath = this.drawerContainer
               .insert("path", ":first-child")
-              .datum(serie.data)
+              .datum(this.data)
               .attr('class', 'd3_timeseries.line')
               .attr('transform', "translate(0," + this.drawerTopMargin + ")")
               .attr('d', drawLine)
               .attr('stroke', this.color)
-              .attr('stroke-width', serie.options.strokeWidth || 1.5)
+              .attr('stroke-width', 1.5)
               .attr('fill', 'none');
+          select("#" + this.container2.id + " svg").selectAll(".mini-draw-container").selectAll("circle").remove();
+          select("#" + this.container2.id + " svg").selectAll(".mini-draw-container")
+              .append("circle")
+              .attr("r", (!this.data[0].a || this.data[0].a === undefined) ? 0 : 1.5)
+              .attr("fill", "none")
+              .attr('stroke-width', 3.5)
+              .attr('stroke', this.circleColor)
+              .attr('stroke-linecap', 'round')
+              .attr("cx", this.xScale(this.data[0].x))
+              .attr("cy", smallyScale(this.data[0].y) + this.drawerTopMargin);
+          //  draw others circle of anomalies
+          var anomalies = select("#" + this.container2.id + " svg").selectAll(".mini-draw-container").selectAll("circle")
+              .data(this.data)
+              .enter().append("circle")
+              .attr("r", function (d) { return (!d.a) ? 0 : 1.5; })
+              .attr("fill", "none")
+              .attr('stroke-width', 3.5)
+              .attr('stroke', this.circleColor)
+              .attr('stroke-linecap', 'round')
+              .attr("cx", function (d) { return _this.fullXScale(d.x); })
+              .attr("cy", function (d) { return smallyScale(d.y) + _this.drawerTopMargin; })
+              .attr("visible", false);
           if (serie.hasOwnProperty('stroke-dasharray')) {
               linepath.attr('stroke-dasharray', serie['stroke-dasharray']);
           }
@@ -19303,6 +19369,7 @@
   * along with this program; if not, write to the Free Software Foundation,
   * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
   */
+  //# sourceMappingURL=index.js.map
 
   exports.BubbleTree = BubbleTree;
   exports.Table = Table;
