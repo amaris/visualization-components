@@ -306,6 +306,25 @@ export class BubbleTree<D extends Data> {
 
     }
 
+    lookupNames(names: string[]): string[] {
+        let result: string[] = [];
+        let root = this.rootData;
+        if (this.focus) {
+            root = this.focus.data;
+        }
+        let lookup = (d: Data) => {
+            //console.info("lookup " + d.name +" in "+names);
+            if (names.indexOf(d.name) >= 0) {
+                result.push(d.uid);
+            }
+            if (d.children) {
+                d.children.forEach(d => lookup(d));
+            }
+        }
+        lookup(root);
+        return result;
+    }
+
     private leafColor(saturation: number): string {
         return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%,70%)";
     }
@@ -320,8 +339,15 @@ export class BubbleTree<D extends Data> {
      * @param {string} uid - the uid of the node to be zoomed to
      */
     zoomToId(uid: string): BubbleTree<D> {
-        this.zoom(d3.select("#circle_" + uid).datum());
+        this.zoom(this.g.select("#circle_" + uid).datum());
         return this;
+    }
+
+    /**
+     * Zooms back to the focussing node's parent.
+     */
+    zoomBack() {
+        this.zoomToId(this.rootData.uid);
     }
 
     /**
