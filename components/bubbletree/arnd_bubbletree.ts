@@ -306,14 +306,13 @@ export class BubbleTree<D extends Data> {
 
     }
 
+    /**
+     * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
+     */
     lookupNames(names: string[]): string[] {
         let result: string[] = [];
-        let root = this.rootData;
-        if (this.focus) {
-            root = this.focus.data;
-        }
+        let root = this.getFocussedData();
         let lookup = (d: Data) => {
-            //console.info("lookup " + d.name +" in "+names);
             if (names.indexOf(d.name) >= 0) {
                 result.push(d.uid);
             }
@@ -424,6 +423,17 @@ export class BubbleTree<D extends Data> {
      */
     getRootData(): Data {
         return this.rootData;
+    }
+
+    /**
+     * Returns the currently focussed node.
+     */
+    getFocussedData(): Data {
+        let data = this.rootData;
+        if (this.focus) {
+            data = this.focus.data;
+        }
+        return data;
     }
 
     /**

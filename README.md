@@ -26,3 +26,11 @@ Once started, any modification of a TypeScript file will automatically generate 
 To test the components, just open the ``test/index.html`` file in a web browser.
 
 See in the ``test/index.html`` file how the components are integrated in the page and use the same way in your projects.
+
+Note: speech recognition will only work when opening the index from behind a web server. For example:
+
+```bash
+% python3 -m http.server
+```
+
+Then open ```http://localhost:8000/test/index.html```.

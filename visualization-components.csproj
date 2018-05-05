@@ -69,7 +69,6 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="test\test_all_docs.json" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -97,6 +96,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="components\time-series\time-series-utils.ts" />
     <TypeScriptCompile Include="components\time-series\time-series.ts" />
+    <TypeScriptCompile Include="components\util\speech-recognition.ts" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

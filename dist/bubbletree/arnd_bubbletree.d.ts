@@ -112,6 +112,10 @@ export declare class BubbleTree<D extends Data> {
      * @param {BubbleTreeConfiguration} config - the configuration
      */
     build(config: BubbleTreeConfiguration<D>): void;
+    /**
+     * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
+     */
+    lookupNames(names: string[]): string[];
     private leafColor(saturation);
     private nodeColor(d);
     /**
@@ -120,6 +124,10 @@ export declare class BubbleTree<D extends Data> {
      * @param {string} uid - the uid of the node to be zoomed to
      */
     zoomToId(uid: string): BubbleTree<D>;
+    /**
+     * Zooms back to the focussing node's parent.
+     */
+    zoomBack(): void;
     /**
      * Selects a node represented by its uid. The weight will determine the intensity of the selection color (0 to 1).
      *
@@ -147,6 +155,10 @@ export declare class BubbleTree<D extends Data> {
      * @see build
      */
     getRootData(): Data;
+    /**
+     * Returns the currently focussed node.
+     */
+    getFocussedData(): Data;
     /**
      * Returns the currently selected nodes uid with associated percentils).
      */

@@ -3,16 +3,20 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="../lib/bootstrap.min.css"/>
-    <link rel="stylesheet" href="../lib/dataTables.bootstrap4.min.css"/>
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="../lib/dataTables.bootstrap4.min.css" />
     <style>
-        h2 { padding-top: 1em; }
+        h2 {
+            padding-top: 1em;
+        }
     </style>
 </head>
 <body>
     <h1>D3.js-based Visualization components</h1>
     <h2>Bubble Tree component</h2>
     <button onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='test1'?1:d.name=='test2'?0.5:0; })">Click me to select nodes</button>
+    <span id="sr"></span>
+
     <div style="display: flex; flex-direction: row;height: 300px">
         <div style="display: flex; flex-direction: column; width: 30%; border: black dotted 1px;">
             <svg id="bubbletree1"></svg>
@@ -35,7 +39,7 @@
     <!--<script src="../lib/d3.v4.min.js"></script>
     <script src="../lib/jquery-1.12.4.js"></script>-->
     <script src="../dist/visualization-components-bundle.js"></script>
-    <script src="../lib/bootstrap.bundle.min.js"></script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../lib/jquery.dataTables.min.js"></script>
     <script src="../lib/dataTables.bootstrap4.min.js"></script>
     <script>
@@ -150,6 +154,29 @@
             container: document.getElementById("ts"),
             data: [{ x: new Date("2018-1-1"), y: 10 }, { x: new Date("2018-2-1"), y: 10 }, { x: new Date("2018-3-1"), y: 8 }, { x: new Date("2018-4-1"), y: 11 }, { x: new Date("2018-5-1"), y: 9 }],
             options: {}
+        });
+
+        var unzoomAction_FR = [
+            'dézoomer',
+            'retour',
+            'annuler',
+            'saucisse'
+        ];
+        var sr = new arnd.SimpleSpeechRecognition();
+        sr.build({
+            container: document.getElementById("sr"),
+            language: "fr-FR",
+            onSpeechRecognized: function (results) {
+                let uids = c.lookupNames(results);
+                //console.info(uids);
+                if (uids.length > 0) {
+                    c.zoomToId(uids[0]);
+                } else {
+                    if (unzoomAction_FR.indexOf(results[0]) >= 0) {
+                        c.zoomBack();
+                    }
+                }
+            }
         });
 
     </script>
