@@ -104,10 +104,11 @@ export class Table<D> {
 
         let table = this.selection.append('table') //
             .classed('table', true) //
+            .style('border-collapse', "collapse", "important") //
             .classed('table-sm', this.config.small) //
             .classed("table-striped", this.config.striped) //
             .classed("table-bordered", this.config.bordered);
-        var thead = table.append('thead').classed('thead-light', true);
+        var thead = table.append('thead');
         var tbody = table.append('tbody');
 
         // append the header row
@@ -129,8 +130,8 @@ export class Table<D> {
             .append('tr')
             .on('click', (d) => {
                 if (this.config.selectableRows) {
-                    rows.classed('table-primary', false);
-                    rows.filter(data => data === d).classed('table-primary', true);
+                    rows.classed('table-active', false);
+                    rows.filter(data => data === d).classed('table-active', true);
                 }
                 if (this.config.rowClickHandler != null) {
                     this.config.rowClickHandler(this.data.indexOf(d));
