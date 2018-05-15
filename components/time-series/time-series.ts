@@ -22,10 +22,25 @@ import * as d3 from 'd3';
 import { fk, functorkeyscale, keyNotNull } from './time-series-utils';
 import { ZoomBehavior } from 'd3';
 
+/**
+ * Specifies the data that can be found in a time serie.
+ */
 export interface TimeSerieData {
+    /**
+     * A timestamp for the data.
+     */
     x: Date;
+    /**
+     * An optional ID.
+     */
     id?: string;
+    /**
+     * The value of the data.
+     */
     y: number;
+    /**
+     * An anomaly value. // TODO: have a better name?
+     */
     a: number;
 }
 
@@ -37,19 +52,37 @@ export interface Margin {
 }
 
 
+/**
+  * The configuration for the time serie component.
+  */
 export interface ConfigurationTimeSerie<D extends TimeSerieData> {
+    /**
+     * The container of the component.
+     */
     container: HTMLElement
+    /**
+     * The initial data, shown by the time serie, as a URL or an array of data.
+     */
     data: string | Array<D>,
     threshold?: number,
     'stroke-dasharray'?: string,
+    /**
+     * An update URL to be called at the given frequency to update the data.
+     */
     update?: string,
     color?: string
     width?: number,
     height?: number,
     find?: Function,
+    /**
+     * The update frequency of the data. Default value is 1 second. Ignored if no update value is provided.
+     */
     frequency?: number
 }
 
+/**
+ * A component to show time series.
+ */
 export class TimeSeries<D extends TimeSerieData>{
 
     private update() {
@@ -109,7 +142,10 @@ export class TimeSeries<D extends TimeSerieData>{
     private max_zoom: number = 7;
     private text_size: number = 10;
 
-
+    /**
+     * Builds the time serie with the given configuration.
+     * @param config the initial configuration
+     */
 
     public build(config: ConfigurationTimeSerie<D>) {
         this.config = config
