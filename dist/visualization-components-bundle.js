@@ -19066,6 +19066,9 @@
      * along with this program; if not, write to the Free Software Foundation,
      * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
      */
+    /**
+     * A component to show time series.
+     */
     var TimeSeries = /** @class */ (function () {
         function TimeSeries() {
             this.brush = brushX();
@@ -19079,8 +19082,6 @@
             this.height = 480;
             this.drawerHeight = 80;
             this.drawerTopMargin = 10;
-            this.color = '#000';
-            this.circleColor = '#DDA0DD';
             this.margin = { top: 10, bottom: 20, left: 40, right: 10 };
             this.min_zoom = 0.1;
             this.max_zoom = 7;
@@ -19096,13 +19097,28 @@
             }
             console.info(this.width + "," + this.height);
         };
+        /**
+         * Builds the time serie with the given configuration.
+         * @param config the initial configuration
+         */
         TimeSeries.prototype.build = function (config) {
             var _this = this;
             this.config = config;
             this.container2 = config.container;
+            this.container2.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
             if (!this.config.frequency) {
                 this.config.frequency = 1000;
             }
+            if (!this.config.color) {
+                this.config.color = window.getComputedStyle(this.container2.firstChild).color;
+            }
+            if (!this.config.axisColor) {
+                this.config.axisColor = window.getComputedStyle(this.container2.children[1]).color;
+            }
+            if (!this.config.circleColor) {
+                this.config.circleColor = window.getComputedStyle(this.container2.firstChild).backgroundColor;
+            }
+            console.info("=>" + this.config.circleColor + "/" + this.config.axisColor);
             if (typeof config.data === "string") {
                 json(this.config.data, function (error, rootData) {
                     _this.buildFromData(rootData);
@@ -19269,6 +19285,9 @@
                 .attr('y', -this.margin.left + 5)
                 .style("text-anchor", "middle")
                 .text(this.yScaleLabel);
+            this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
+            this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
+            this.svg.selectAll(".axis").selectAll("text").attr("stroke", this.config.axisColor);
             // Catch event for mouse tip
             this.svg
                 .append('rect')
@@ -19307,7 +19326,7 @@
                     .datum(this.data)
                     .attr('class', 'd3_timeseries line')
                     .attr('d', this.line)
-                    .attr('stroke', this.color)
+                    .attr('stroke', this.config.color)
                     .attr('stroke-linecap', 'round')
                     .attr('stroke-width', 1.5)
                     .attr('fill', 'none');
@@ -19327,7 +19346,7 @@
                 .attr("r", (!this.data[0].a || this.data[0].a === undefined) ? 0 : 5.5)
                 .attr("fill", "none")
                 .attr('stroke-width', 3.5)
-                .attr('stroke', this.circleColor)
+                .attr('stroke', this.config.circleColor)
                 .attr('stroke-linecap', 'round')
                 .attr("cx", this.xScale(this.data[0].x))
                 .attr("cy", this.yScale(this.data[0].y));
@@ -19338,7 +19357,7 @@
                 .attr("r", function (d) { return (!d.a) ? 0 : 5.5; })
                 .attr("fill", "none")
                 .attr('stroke-width', 3.5)
-                .attr('stroke', this.circleColor)
+                .attr('stroke', this.config.circleColor)
                 .attr('stroke-linecap', 'round')
                 .attr("cx", function (d) { return _this.xScale(d.x); })
                 .attr("cy", function (d) { return _this.yScale(d.y); })
@@ -19354,7 +19373,7 @@
                 s = s.data([{
                         x: xDate,
                         item: this.config.find(xDate),
-                        color: this.color
+                        color: this.config.color
                     }].filter(function (d) { return d.item && d.item.y; }));
             }
             s.transition()
@@ -19402,7 +19421,7 @@
         TimeSeries.prototype.tipFunction = function (date$$1, serieItem) {
             var spans = '';
             if (serieItem.item && serieItem.item.y) {
-                spans = "<table style=\"border:none\">\n                <tr>\n                  <td style=\"color: #000\">" + serieItem.options.label + "</td>\n                  <td style=\"color:#333333; text-align:right\">" + this.yScaleFormat(serieItem.item.y) + "</td>\n                </tr>\n              </table>";
+                spans = "<table style=\"border:none\">\n                <tr>\n                  <td style=\"color: " + this.config.axisColor + "\">" + serieItem.options.label + "</td>\n                  <td style=\"color: " + this.config.axisColor + "; text-align:right\">" + this.yScaleFormat(serieItem.item.y) + "</td>\n                </tr>\n              </table>";
             }
             return "<h4>" + this.xScaleFormat(day(date$$1)) + "</h4>" + spans;
         };
@@ -19465,7 +19484,7 @@
                 .attr('class', 'd3_timeseries.line')
                 .attr('transform', "translate(0," + this.drawerTopMargin + ")")
                 .attr('d', drawLine)
-                .attr('stroke', this.color)
+                .attr('stroke', this.config.color)
                 .attr('stroke-width', 1.5)
                 .attr('fill', 'none');
             select("#" + this.container2.id + " svg").selectAll(".mini-draw-container").selectAll("circle").remove();
@@ -19474,7 +19493,7 @@
                 .attr("r", (!this.data[0].a || this.data[0].a === undefined) ? 0 : 1.5)
                 .attr("fill", "none")
                 .attr('stroke-width', 3.5)
-                .attr('stroke', this.circleColor)
+                .attr('stroke', this.config.circleColor)
                 .attr('stroke-linecap', 'round')
                 .attr("cx", this.xScale(this.data[0].x))
                 .attr("cy", smallyScale(this.data[0].y) + this.drawerTopMargin);
@@ -19485,7 +19504,7 @@
                 .attr("r", function (d) { return (!d.a) ? 0 : 1.5; })
                 .attr("fill", "none")
                 .attr('stroke-width', 3.5)
-                .attr('stroke', this.circleColor)
+                .attr('stroke', this.config.circleColor)
                 .attr('stroke-linecap', 'round')
                 .attr("cx", function (d) { return _this.fullXScale(d.x); })
                 .attr("cy", function (d) { return smallyScale(d.y) + _this.drawerTopMargin; })

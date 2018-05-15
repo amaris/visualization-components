@@ -70,7 +70,9 @@ export interface ConfigurationTimeSerie<D extends TimeSerieData> {
      * An update URL to be called at the given frequency to update the data.
      */
     update?: string,
-    color?: string
+    color?: string,
+    circleColor?: string,
+    axisColor?: string,
     width?: number,
     height?: number,
     find?: Function,
@@ -130,8 +132,6 @@ export class TimeSeries<D extends TimeSerieData>{
     private height: number = 480;
     private drawerHeight: number = 80;
     private drawerTopMargin: number = 10;
-    private color: string = '#000';
-    private circleColor: string = '#DDA0DD';
     public xFixeDomain: Array<number>;
     public yFixeDomain: Array<number>;
     public margin: Margin = { top: 10, bottom: 20, left: 40, right: 10 };
@@ -150,9 +150,20 @@ export class TimeSeries<D extends TimeSerieData>{
     public build(config: ConfigurationTimeSerie<D>) {
         this.config = config
         this.container2 = config.container;
+        this.container2.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
         if (!this.config.frequency) {
             this.config.frequency = 1000;
         }
+        if (!this.config.color) {
+            this.config.color = window.getComputedStyle(<HTMLElement>this.container2.firstChild).color;
+        }
+        if (!this.config.axisColor) {
+            this.config.axisColor = window.getComputedStyle(<HTMLElement>this.container2.children[1]).color;
+        }
+        if (!this.config.circleColor) {
+            this.config.circleColor = window.getComputedStyle(<HTMLElement>this.container2.firstChild).backgroundColor;
+        }
+        console.info("=>" + this.config.circleColor + "/" + this.config.axisColor)
         if (typeof config.data === "string") {
             d3.json(<string>this.config.data, (error, rootData: any) => {
                 this.buildFromData(rootData);
@@ -347,6 +358,10 @@ export class TimeSeries<D extends TimeSerieData>{
             .style("text-anchor", "middle")
             .text(this.yScaleLabel);
 
+        this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
+        this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
+        this.svg.selectAll(".axis").selectAll("text").attr("stroke", this.config.axisColor);
+
         // Catch event for mouse tip
         this.svg
             .append('rect')
@@ -390,7 +405,7 @@ export class TimeSeries<D extends TimeSerieData>{
                 .datum(this.data)
                 .attr('class', 'd3_timeseries line')
                 .attr('d', this.line)
-                .attr('stroke', this.color)
+                .attr('stroke', this.config.color)
                 .attr('stroke-linecap', 'round')
                 .attr('stroke-width', 1.5)
                 .attr('fill', 'none');
@@ -412,7 +427,7 @@ export class TimeSeries<D extends TimeSerieData>{
             .attr("r", (!this.data[0].a || this.data[0].a === undefined) ? 0 : 5.5)
             .attr("fill", "none")
             .attr('stroke-width', 3.5)
-            .attr('stroke', this.circleColor)
+            .attr('stroke', this.config.circleColor)
             .attr('stroke-linecap', 'round')
             .attr("cx", this.xScale(this.data[0].x))
             .attr("cy", this.yScale(this.data[0].y));
@@ -424,7 +439,7 @@ export class TimeSeries<D extends TimeSerieData>{
             .attr("r", (d: any) => (!d.a) ? 0 : 5.5)
             .attr("fill", "none")
             .attr('stroke-width', 3.5)
-            .attr('stroke', this.circleColor)
+            .attr('stroke', this.config.circleColor)
             .attr('stroke-linecap', 'round')
             .attr("cx", (d: any) => this.xScale(d.x))
             .attr("cy", (d: any) => this.yScale(d.y))
@@ -439,7 +454,7 @@ export class TimeSeries<D extends TimeSerieData>{
             s = s.data([{
                 x: xDate,
                 item: this.config.find(xDate),
-                color: this.color
+                color: this.config.color
             }].filter((d: any) => d.item && d.item.y));
         }
 
@@ -496,8 +511,8 @@ export class TimeSeries<D extends TimeSerieData>{
         if (serieItem.item && serieItem.item.y) {
             spans = `<table style="border:none">
                 <tr>
-                  <td style="color: #000">${serieItem.options.label}</td>
-                  <td style="color:#333333; text-align:right">${this.yScaleFormat(serieItem.item.y)}</td>
+                  <td style="color: ${this.config.axisColor}">${serieItem.options.label}</td>
+                  <td style="color: ${this.config.axisColor}; text-align:right">${this.yScaleFormat(serieItem.item.y)}</td>
                 </tr>
               </table>`
         }
@@ -569,7 +584,7 @@ export class TimeSeries<D extends TimeSerieData>{
             .attr('class', 'd3_timeseries.line')
             .attr('transform', `translate(0,${this.drawerTopMargin})`)
             .attr('d', drawLine)
-            .attr('stroke', this.color)
+            .attr('stroke', this.config.color)
             .attr('stroke-width', 1.5)
             .attr('fill', 'none');
 
@@ -579,7 +594,7 @@ export class TimeSeries<D extends TimeSerieData>{
             .attr("r", (!this.data[0].a || this.data[0].a === undefined) ? 0 : 1.5)
             .attr("fill", "none")
             .attr('stroke-width', 3.5)
-            .attr('stroke', this.circleColor)
+            .attr('stroke', this.config.circleColor)
             .attr('stroke-linecap', 'round')
             .attr("cx", this.xScale(this.data[0].x))
             .attr("cy", smallyScale(this.data[0].y) + this.drawerTopMargin);
@@ -591,7 +606,7 @@ export class TimeSeries<D extends TimeSerieData>{
             .attr("r", (d: any) => (!d.a) ? 0 : 1.5)
             .attr("fill", "none")
             .attr('stroke-width', 3.5)
-            .attr('stroke', this.circleColor)
+            .attr('stroke', this.config.circleColor)
             .attr('stroke-linecap', 'round')
             .attr("cx", (d: any) => this.fullXScale(d.x))
             .attr("cy", (d: any) => smallyScale(d.y) + this.drawerTopMargin)
