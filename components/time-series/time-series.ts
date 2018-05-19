@@ -163,7 +163,6 @@ export class TimeSeries<D extends TimeSerieData>{
         if (!this.config.circleColor) {
             this.config.circleColor = window.getComputedStyle(<HTMLElement>this.container2.firstChild).backgroundColor;
         }
-        console.info("=>" + this.config.circleColor + "/" + this.config.axisColor)
         if (typeof config.data === "string") {
             d3.json(<string>this.config.data, (error, rootData: any) => {
                 this.buildFromData(rootData);
