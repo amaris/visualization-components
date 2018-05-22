@@ -18633,6 +18633,31 @@
          */
         BubbleTree.prototype.build = function (config) {
             var _this = this;
+            window.addEventListener("resize", function (e) {
+                _this.update();
+                _this.svg.select("g").remove();
+                _this.g = _this.svg.append("g").attr("transform", "translate(" + _this.width / 2 + "," + _this.height / 2 + ")");
+                _this.pack = index$2()
+                    .size([_this.diameter - _this.config.margin, _this.diameter - _this.config.margin])
+                    .padding(2);
+                // use possible url field for backward compatibility
+                if (config.data == null && config['url'] != null) {
+                    config.data = config['url'];
+                }
+                if (typeof config.data === 'string') {
+                    // URL case
+                    json(config.data, function (error, rootData) {
+                        console.log(rootData);
+                        if (error)
+                            throw error;
+                        _this.buildFromData(rootData);
+                    });
+                }
+                else {
+                    // data as JavaScript object
+                    _this.buildFromData(config.data);
+                }
+            });
             this.config = config;
             this.config.container.innerHTML = "";
             this.config.container.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";

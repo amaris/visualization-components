@@ -277,6 +277,32 @@ export class BubbleTree<D extends Data> {
      * @param {BubbleTreeConfiguration} config - the configuration
      */
     build(config: BubbleTreeConfiguration<D>) {
+        window.addEventListener("resize", e => {
+            this.update();
+            this.svg.select("g").remove();
+            this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
+
+            this.pack = d3.pack()
+                .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
+                .padding(2);
+
+            // use possible url field for backward compatibility
+            if (config.data == null && config['url'] != null) {
+                config.data = config['url'];
+            }
+
+            if (typeof config.data === 'string') {
+                // URL case
+                d3.json(<string>config.data, (error, rootData: Data) => {
+                    console.log(rootData);
+                    if (error) throw error;
+                    this.buildFromData(rootData);
+                });
+            } else {
+                // data as JavaScript object
+                this.buildFromData(<D>config.data);
+            }
+        })
         this.config = config;
         this.config.container.innerHTML = "";
         this.config.container.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
