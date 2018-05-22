@@ -41,6 +41,7 @@ export interface BubbleTreeConfiguration<D extends Data> {
      * The color hue for base leafs (default is 110). See http://hslpicker.com/ to check out the meaning of hue.
      */
     baseLeafColorHue?: number;
+    baseLeafColorLight?: number;
     /**
      * Show the root node circle (default is false).
      */
@@ -95,6 +96,10 @@ export declare class BubbleTree<D extends Data> {
     private height;
     private g;
     private defaultColor;
+    private textColor;
+    private defaultLeafColor;
+    private circleColor;
+    private selectedCircleColor;
     private pack;
     private circle;
     private view;
@@ -116,7 +121,7 @@ export declare class BubbleTree<D extends Data> {
      * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
      */
     lookupNames(names: string[]): string[];
-    private leafColor(saturation);
+    private selectedLeafColor(saturation);
     private nodeColor(d);
     /**
      * Zooms to a node represented by its uid.
@@ -165,4 +170,5 @@ export declare class BubbleTree<D extends Data> {
     getSelections(): Data[];
     private showText(d, show?);
     private setCircleColor(d, color);
+    private setCircleFillColor(d, color, opacity?);
 }

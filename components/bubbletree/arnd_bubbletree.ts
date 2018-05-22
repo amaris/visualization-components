@@ -161,27 +161,6 @@ export class BubbleTree<D extends Data> {
             .style("stroke", this.circleColor)
             .style("fill", d => this.nodeColor(d));
 
-        if (this.config.nodePopover != null) {
-            let self = this;
-            this.circle
-                .classed("popover-node", true)
-                .filter(function(d) {
-                    self.config.nodePopover(d, popover => {
-                        if (popover && popover.content) {
-                            this.setAttribute("data-content", popover.content);
-                        }
-                        if (popover && popover.title) {
-                            this.setAttribute("data-original-title", popover.title);
-                        }
-                    });
-                    return true;
-                })
-                .attr("rel", "popover")
-                .attr("data-trigger", "hover");
-
-            $('.popover-node').popover();
-        }
-
         let handlers = {
             "click": (d: d3.HierarchyNode<D>) => {
                 if (!d.children) {
@@ -191,7 +170,9 @@ export class BubbleTree<D extends Data> {
                     if (this.config.onClick !== undefined) {
                         this.config.onClick(d);
                     } else {
-                        this.zoom(d.parent);
+                        if (this.focus != d.parent) {
+                            this.zoom(d.parent);
+                        }
                     }
                     d3.event.stopPropagation();
                 } else if (this.focus !== d) {
@@ -217,6 +198,10 @@ export class BubbleTree<D extends Data> {
             "mouseout": (d: d3.HierarchyNode<Data>) => {
                 this.setCircleFillColor(d, this.nodeColor(d));
                 this.showText(d, d.parent === this.focus);
+                if (this.config.nodePopover != null) {
+                    $('.popover-node').popover("hide");
+                }
+
             }
         };
 
@@ -252,12 +237,33 @@ export class BubbleTree<D extends Data> {
             .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
             .style("text-anchor", "middle")
             .style("fill", this.textColor)
-            //.style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
             .text(d => d.data.name);
 
         this.svg.on("click", () => this.zoom(root));
 
         this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
+
+        if (this.config.nodePopover != null) {
+            let self = this;
+            this.circle
+                .classed("popover-node", true)
+                .filter(function (d) {
+                    self.config.nodePopover(d, popover => {
+                        if (popover && popover.content) {
+                            this.setAttribute("data-content", popover.content);
+                        }
+                        if (popover && popover.title) {
+                            this.setAttribute("data-original-title", popover.title);
+                        }
+                    });
+                    return true;
+                })
+                .attr("rel", "popover")
+                .attr("data-trigger", "click hover");
+
+            $('.popover-node').popover();
+        }
+
 
         if (this.config.onBuilt) {
             this.config.onBuilt(this);
@@ -409,6 +415,9 @@ export class BubbleTree<D extends Data> {
     }
 
     private zoomTo(v) {
+        if (this.config.nodePopover != null) {
+            $('.popover-node').popover("hide");
+        }
         var k = this.diameter / v[2]; this.view = v;
         var node = this.g.selectAll<any, any>("circle,text");
         node.attr("transform", d => "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")");
@@ -416,7 +425,8 @@ export class BubbleTree<D extends Data> {
     }
 
     private zoom(d) {
-        let bbc = this;
+
+        let btc = this;
         this.focus = d;
 
         var transition = d3.transition()
@@ -427,10 +437,10 @@ export class BubbleTree<D extends Data> {
             });
 
         transition.select("#" + this.config.container.id).selectAll<any, d3.HierarchyNode<D>>("text")
-            .filter(function(d) { return d.parent && d.parent === bbc.focus || this.style.display === "inline"; })
+            .filter(function(d) { return d.parent && d.parent === btc.focus || this.style.display === "inline"; })
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
-            .on("start", function(d) { if (d.parent === bbc.focus) this.style.display = "inline"; })
-            .on("end", function(d) { if (d.parent !== bbc.focus) this.style.display = "none"; });
+            .on("start", function(d) { if (d.parent === btc.focus) this.style.display = "inline"; })
+            .on("end", function(d) { if (d.parent !== btc.focus) this.style.display = "none"; });
     }
 
     /**
