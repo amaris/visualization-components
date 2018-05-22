@@ -18563,9 +18563,9 @@
                     }
                 },
                 "mouseover": function (d) {
-                    _this.setCircleFillColor(d, _this.selectedLeafColor(100), 0.3);
-                    console.info(_this.focus.ancestors());
-                    console.info(_this.focus.ancestors().indexOf(d));
+                    if (_this.getSelections().indexOf(d.data) < 0) {
+                        _this.setCircleFillColor(d, _this.selectedLeafColor(100), 0.3);
+                    }
                     if (d != _this.focus && _this.focus.ancestors().indexOf(d) < 0) {
                         _this.showText(d, true);
                         while (d.parent != null /*&& d.parent!=this.focus*/) {
@@ -18726,6 +18726,7 @@
             this.g.selectAll("circle")
                 .filter(function (d) { return d.data.uid in _this.selections; })
                 .classed("selected", true)
+                .style("opacity", 1)
                 .style("fill", function (d) { return _this.selectedLeafColor(_this.selections[d.data.uid]); });
             return this;
         };
@@ -18754,11 +18755,12 @@
          */
         BubbleTree.prototype.clearSelect = function () {
             var _this = this;
+            var selections = this.selections;
+            this.selections = {};
             this.g.selectAll("circle")
-                .filter(function (d) { return d.data.uid in _this.selections; })
+                .filter(function (d) { return d.data.uid in selections; })
                 .classed("selected", false)
                 .style("fill", function (d) { return _this.nodeColor(d); });
-            this.selections = {};
             return this;
         };
         BubbleTree.prototype.zoomTo = function (v) {
@@ -19281,9 +19283,6 @@
                 .attr('y', -this.margin.left + 5)
                 .style("text-anchor", "middle")
                 .text(this.yScaleLabel);
-            this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
-            this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
-            this.svg.selectAll(".axis").selectAll("text").attr("stroke", this.config.axisColor);
             // Catch event for mouse tip
             this.svg
                 .append('rect')
@@ -19333,6 +19332,10 @@
                 this.linepath.attr('d', this.line);
                 this.draw_circles();
             }
+            // hack to force the axis color when zooming or moving the curve
+            this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
+            this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
+            this.svg.selectAll(".axis").selectAll("text").attr("fill", this.config.axisColor);
         };
         TimeSeries.prototype.draw_circles = function () {
             var _this = this;

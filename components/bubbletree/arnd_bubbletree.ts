@@ -203,9 +203,9 @@ export class BubbleTree<D extends Data> {
                 }
             },
             "mouseover": (d: d3.HierarchyNode<Data>) => {
-                this.setCircleFillColor(d, this.selectedLeafColor(100), 0.3);
-                console.info(this.focus.ancestors());
-                console.info(this.focus.ancestors().indexOf(d));
+                if (this.getSelections().indexOf(d.data) < 0) {
+                    this.setCircleFillColor(d, this.selectedLeafColor(100), 0.3);
+                }
                 if (d != this.focus && this.focus.ancestors().indexOf(d) < 0) {
                     this.showText(d, true);
                     while (d.parent != null /*&& d.parent!=this.focus*/) {
@@ -375,6 +375,7 @@ export class BubbleTree<D extends Data> {
         this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => d.data.uid in this.selections)
             .classed("selected", true)
+            .style("opacity", 1)
             .style("fill", d => this.selectedLeafColor(this.selections[d.data.uid]));
         return this;
     }
@@ -398,11 +399,12 @@ export class BubbleTree<D extends Data> {
      * @see #select
      */
     clearSelect(): BubbleTree<D> {
+        let selections = this.selections;
+        this.selections = {};
         this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
-            .filter(d => d.data.uid in this.selections)
+            .filter(d => d.data.uid in selections)
             .classed("selected", false)
             .style("fill", d => this.nodeColor(d));
-        this.selections = {};
         return this;
     }
 

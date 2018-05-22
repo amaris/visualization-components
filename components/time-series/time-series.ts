@@ -357,10 +357,6 @@ export class TimeSeries<D extends TimeSerieData>{
             .style("text-anchor", "middle")
             .text(this.yScaleLabel);
 
-        this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
-        this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
-        this.svg.selectAll(".axis").selectAll("text").attr("stroke", this.config.axisColor);
-
         // Catch event for mouse tip
         this.svg
             .append('rect')
@@ -380,6 +376,7 @@ export class TimeSeries<D extends TimeSerieData>{
         this.createLines();
         this.drawSerie();
         this.drawMiniDrawer();
+
     }
 
     private mousevlineUpdate() {
@@ -417,6 +414,11 @@ export class TimeSeries<D extends TimeSerieData>{
             this.draw_circles();
 
         }
+        // hack to force the axis color when zooming or moving the curve
+        this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
+        this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
+        this.svg.selectAll(".axis").selectAll("text").attr("fill", this.config.axisColor);
+
     }
 
     private draw_circles() {
