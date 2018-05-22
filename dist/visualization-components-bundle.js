@@ -4,7 +4,9 @@
     (factory((global.arnd = {})));
 }(this, (function (exports) { 'use strict';
 
-    var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+    //declare var webkitSpeechRecognition;
+    //declare var webkitSpeechRecognitionEvent;
+    var SpeechRecognition = SpeechRecognition;
     /**
      * A simple speech recognition component, which is a wrapper of the Web Speech Regognition API.
      */
@@ -2333,24 +2335,6 @@
 
       return i;
     }
-
-    function hcl$1(hue$$1) {
-      return function(start, end) {
-        var h = hue$$1((start = hcl(start)).h, (end = hcl(end)).h),
-            c = nogamma(start.c, end.c),
-            l = nogamma(start.l, end.l),
-            opacity = nogamma(start.opacity, end.opacity);
-        return function(t) {
-          start.h = h(t);
-          start.c = c(t);
-          start.l = l(t);
-          start.opacity = opacity(t);
-          return start + "";
-        };
-      }
-    }
-
-    var hcl$2 = hcl$1(hue);
 
     function cubehelix$1(hue$$1) {
       return (function cubehelixGamma(y) {
@@ -18534,7 +18518,7 @@
                 .attr("class", function (d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
                 .attr("id", function (d) { return d.data.uid ? "circle_" + d.data.uid : null; })
                 .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
-                .style("stroke", "#B0B0B0")
+                .style("stroke", this.circleColor)
                 .style("fill", function (d) { return _this.nodeColor(d); });
             if (this.config.nodePopover != null) {
                 var self_1 = this;
@@ -18579,8 +18563,10 @@
                     }
                 },
                 "mouseover": function (d) {
-                    _this.setCircleColor(d, "#404040");
-                    if (d != _this.focus) {
+                    _this.setCircleFillColor(d, _this.selectedLeafColor(100), 0.3);
+                    console.info(_this.focus.ancestors());
+                    console.info(_this.focus.ancestors().indexOf(d));
+                    if (d != _this.focus && _this.focus.ancestors().indexOf(d) < 0) {
                         _this.showText(d, true);
                         while (d.parent != null /*&& d.parent!=this.focus*/) {
                             _this.showText(d.parent, false);
@@ -18589,7 +18575,7 @@
                     }
                 },
                 "mouseout": function (d) {
-                    _this.setCircleColor(d, "#B0B0B0");
+                    _this.setCircleFillColor(d, _this.nodeColor(d));
                     _this.showText(d, d.parent === _this.focus);
                 }
             };
@@ -18627,7 +18613,8 @@
                 .style("pointer-events", "none")
                 .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
                 .style("text-anchor", "middle")
-                .style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
+                .style("fill", this.textColor)
+                //.style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
                 .text(function (d) { return d.data.name; });
             this.svg.on("click", function () { return _this.zoom(root); });
             this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
@@ -18644,23 +18631,29 @@
             var _this = this;
             this.config = config;
             this.config.container.innerHTML = "";
+            this.config.container.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
+            this.defaultColor = "hsla(220, 50%, 88%, 0.09)";
+            this.textColor = window.getComputedStyle(this.config.container.children[1]).color;
+            this.circleColor = this.defaultColor;
+            //this.defaultLeafColor = window.getComputedStyle(document.body).backgroundColor;
+            this.defaultLeafColor = this.selectedLeafColor(0);
+            //this.circleColor = this.defaultLeafColor;
+            this.selectedCircleColor = window.getComputedStyle(this.config.container.firstChild).color;
+            console.info(this.selectedCircleColor);
             this.config.container.setAttribute("width", "100%");
             this.config.container.setAttribute("height", "100%");
             if (!this.config.handlers) {
                 this.config.handlers = {};
             }
             this.config.showRoot = this.config.showRoot ? this.config.showRoot : false;
-            this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 70;
+            this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 30;
+            this.config.baseLeafColorLight = this.config.baseLeafColorLight ? this.config.baseLeafColorLight : 50;
             this.svg = select(config.container);
             if (!this.config.margin)
                 this.config.margin = 20;
             this.update();
             console.info("diameter: " + this.diameter);
             this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
-            this.defaultColor = linear$2()
-                .domain([-1, 5])
-                .range(["hsl(197,30%,98%)", "hsl(220,50%,88%)"])
-                .interpolate(hcl$2);
             this.pack = index$2()
                 .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
                 .padding(2);
@@ -18699,11 +18692,11 @@
             lookup(root);
             return result;
         };
-        BubbleTree.prototype.leafColor = function (saturation) {
-            return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%,70%)";
+        BubbleTree.prototype.selectedLeafColor = function (saturation) {
+            return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%," + this.config.baseLeafColorLight + "%)";
         };
         BubbleTree.prototype.nodeColor = function (d) {
-            return d.data.color ? d.data.color : d.children ? this.defaultColor(d.depth) : this.leafColor(0);
+            return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(this.selections[d.data.uid] ? this.selections[d.data.uid] : 0);
         };
         /**
          * Zooms to a node represented by its uid.
@@ -18733,7 +18726,7 @@
             this.g.selectAll("circle")
                 .filter(function (d) { return d.data.uid in _this.selections; })
                 .classed("selected", true)
-                .style("fill", function (d) { return _this.leafColor(_this.selections[d.data.uid]); });
+                .style("fill", function (d) { return _this.selectedLeafColor(_this.selections[d.data.uid]); });
             return this;
         };
         /**
@@ -18750,7 +18743,7 @@
             else
                 return false; })
                 .classed("selected", true)
-                .style("fill", function (d) { return _this.leafColor(_this.selections[d.data.uid]); });
+                .style("fill", function (d) { return _this.selectedLeafColor(_this.selections[d.data.uid]); });
             return this;
         };
         /**
@@ -18825,6 +18818,10 @@
         };
         BubbleTree.prototype.setCircleColor = function (d, color$$1) {
             this.g.selectAll("circle").filter(function (data) { return data == d; }).style("stroke", color$$1);
+        };
+        BubbleTree.prototype.setCircleFillColor = function (d, color$$1, opacity) {
+            if (opacity === void 0) { opacity = 1; }
+            this.g.selectAll("circle").filter(function (data) { return data == d; }).style("fill", color$$1).style("opacity", opacity);
         };
         BubbleTree.ID = 1;
         return BubbleTree;
@@ -19118,7 +19115,6 @@
             if (!this.config.circleColor) {
                 this.config.circleColor = window.getComputedStyle(this.container2.firstChild).backgroundColor;
             }
-            console.info("=>" + this.config.circleColor + "/" + this.config.axisColor);
             if (typeof config.data === "string") {
                 json(this.config.data, function (error, rootData) {
                     _this.buildFromData(rootData);

@@ -115,6 +115,7 @@ export class BubbleTree<D extends Data> {
     private g: d3.Selection<any, d3.HierarchyNode<D>, any, any>;
 
     private defaultColor: string;
+    private textColor: string;
     private defaultLeafColor: string;
     private circleColor: string;
     private selectedCircleColor: string;
@@ -202,8 +203,10 @@ export class BubbleTree<D extends Data> {
                 }
             },
             "mouseover": (d: d3.HierarchyNode<Data>) => {
-                this.setCircleColor(d, this.selectedLeafColor(100));
-                if (d != this.focus) {
+                this.setCircleFillColor(d, this.selectedLeafColor(100), 0.3);
+                console.info(this.focus.ancestors());
+                console.info(this.focus.ancestors().indexOf(d));
+                if (d != this.focus && this.focus.ancestors().indexOf(d) < 0) {
                     this.showText(d, true);
                     while (d.parent != null /*&& d.parent!=this.focus*/) {
                         this.showText(d.parent, false);
@@ -212,7 +215,7 @@ export class BubbleTree<D extends Data> {
                 }
             },
             "mouseout": (d: d3.HierarchyNode<Data>) => {
-                this.setCircleColor(d, this.circleColor);
+                this.setCircleFillColor(d, this.nodeColor(d));
                 this.showText(d, d.parent === this.focus);
             }
         };
@@ -248,7 +251,8 @@ export class BubbleTree<D extends Data> {
             .style("pointer-events", "none")
             .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
             .style("text-anchor", "middle")
-            .style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
+            .style("fill", this.textColor)
+            //.style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
             .text(d => d.data.name);
 
         this.svg.on("click", () => this.zoom(root));
@@ -271,7 +275,8 @@ export class BubbleTree<D extends Data> {
         this.config.container.innerHTML = "";
         this.config.container.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
         this.defaultColor = "hsla(220, 50%, 88%, 0.09)";
-        this.circleColor = window.getComputedStyle(<HTMLElement>this.config.container.children[1]).color;
+        this.textColor = window.getComputedStyle(<HTMLElement>this.config.container.children[1]).color;
+        this.circleColor = this.defaultColor;
         //this.defaultLeafColor = window.getComputedStyle(document.body).backgroundColor;
         this.defaultLeafColor = this.selectedLeafColor(0);
         //this.circleColor = this.defaultLeafColor;
@@ -339,7 +344,7 @@ export class BubbleTree<D extends Data> {
     }
 
     private nodeColor(d: d3.HierarchyNode<Data>): string {
-        return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(0);
+        return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(this.selections[d.data.uid] ? this.selections[d.data.uid]:0);
     }
 
     /**
@@ -461,6 +466,10 @@ export class BubbleTree<D extends Data> {
 
     private setCircleColor(d, color: string) {
         this.g.selectAll("circle").filter(data => data == d).style("stroke", color);
+    }
+
+    private setCircleFillColor(d, color: string, opacity: number = 1) {
+        this.g.selectAll("circle").filter(data => data == d).style("fill", color).style("opacity", opacity);
     }
 
 }
