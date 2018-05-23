@@ -1,0 +1,172 @@
+[
+    {
+        "_id": {
+            "$oid": "5ae1d40993d8010cd8bf630a"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T05:55:00Z"
+        },
+        "value": 19
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d41393d8010cd8bf630c"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:00:00Z"
+        },
+        "value": 94
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d41d93d8010cd8bf630e"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:05:00Z"
+        },
+        "value": 63
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d42793d8010cd8bf6310"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:10:00Z"
+        },
+        "value": 85
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d43193d8010cd8bf6312"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:15:00Z"
+        },
+        "value": 92
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d43b93d8010cd8bf6314"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:20:00Z"
+        },
+        "value": 94
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d44593d8010cd8bf6316"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:25:00Z"
+        },
+        "value": 89
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d44f93d8010cd8bf6318"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:30:00Z"
+        },
+        "value": 92
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d45993d8010cd8bf631a"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:35:00Z"
+        },
+        "value": 70
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d46393d8010cd8bf631c"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:40:00Z"
+        },
+        "value": 62
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d46d93d8010cd8bf631e"
+        },
+        "anomaly_score": 0,
+        "timestamp": {
+            "$date": "2018-04-25T06:45:00Z"
+        },
+        "value": 88
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d47893d8010cd8bf6320"
+        },
+        "anomaly_score": 1,
+        "timestamp": {
+            "$date": "2018-04-25T06:50:00Z"
+        },
+        "value": 96
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d48293d8010cd8bf6322"
+        },
+        "anomaly_score": 1,
+        "timestamp": {
+            "$date": "2018-04-25T06:55:00Z"
+        },
+        "value": 75
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d48c93d8010cd8bf6324"
+        },
+        "anomaly_score": 1,
+        "timestamp": {
+            "$date": "2018-04-25T07:00:00Z"
+        },
+        "value": 10
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d49693d8010cd8bf6326"
+        },
+        "anomaly_score": 1,
+        "timestamp": {
+            "$date": "2018-04-25T07:05:00Z"
+        },
+        "value": 2
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d4a093d8010cd8bf6328"
+        },
+        "anomaly_score": 1,
+        "timestamp": {
+            "$date": "2018-04-25T07:10:00Z"
+        },
+        "value": 2
+    },
+    {
+        "_id": {
+            "$oid": "5ae1d4aa93d8010cd8bf632a"
+        },
+        "anomaly_score": 1,
+        "timestamp": {
+            "$date": "2018-04-25T07:15:00Z"
+        },
+        "value": 2
+    }
+]
