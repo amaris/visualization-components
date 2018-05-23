@@ -64,6 +64,7 @@ export interface BubbleTreeConfiguration<D extends Data> {
      * The color hue for base leafs (default is 110). See http://hslpicker.com/ to check out the meaning of hue.
      */
     baseLeafColorHue?: number;
+    baseLeafColorLight?: number;
     /**
      * Show the root node circle (default is false).
      */
@@ -113,7 +114,11 @@ export class BubbleTree<D extends Data> {
     private height: number;
     private g: d3.Selection<any, d3.HierarchyNode<D>, any, any>;
 
-    private defaultColor: d3.ScaleLinear<any, any>;
+    private defaultColor: string;
+    private textColor: string;
+    private defaultLeafColor: string;
+    private circleColor: string;
+    private selectedCircleColor: string;
 
     private pack: d3.PackLayout<any>;
 
@@ -153,29 +158,8 @@ export class BubbleTree<D extends Data> {
             .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
             .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
             .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
-            .style("stroke", "#B0B0B0")
+            .style("stroke", this.circleColor)
             .style("fill", d => this.nodeColor(d));
-
-        if (this.config.nodePopover != null) {
-            let self = this;
-            this.circle
-                .classed("popover-node", true)
-                .filter(function(d) {
-                    self.config.nodePopover(d, popover => {
-                        if (popover && popover.content) {
-                            this.setAttribute("data-content", popover.content);
-                        }
-                        if (popover && popover.title) {
-                            this.setAttribute("data-original-title", popover.title);
-                        }
-                    });
-                    return true;
-                })
-                .attr("rel", "popover")
-                .attr("data-trigger", "hover");
-
-            $('.popover-node').popover();
-        }
 
         let handlers = {
             "click": (d: d3.HierarchyNode<D>) => {
@@ -186,7 +170,9 @@ export class BubbleTree<D extends Data> {
                     if (this.config.onClick !== undefined) {
                         this.config.onClick(d);
                     } else {
-                        this.zoom(d.parent);
+                        if (this.focus != d.parent) {
+                            this.zoom(d.parent);
+                        }
                     }
                     d3.event.stopPropagation();
                 } else if (this.focus !== d) {
@@ -198,8 +184,10 @@ export class BubbleTree<D extends Data> {
                 }
             },
             "mouseover": (d: d3.HierarchyNode<Data>) => {
-                this.setCircleColor(d, "#404040");
-                if (d != this.focus) {
+                if (this.getSelections().indexOf(d.data) < 0) {
+                    this.setCircleFillColor(d, this.selectedLeafColor(100), 0.3);
+                }
+                if (d != this.focus && this.focus.ancestors().indexOf(d) < 0) {
                     this.showText(d, true);
                     while (d.parent != null /*&& d.parent!=this.focus*/) {
                         this.showText(d.parent, false);
@@ -208,8 +196,12 @@ export class BubbleTree<D extends Data> {
                 }
             },
             "mouseout": (d: d3.HierarchyNode<Data>) => {
-                this.setCircleColor(d, "#B0B0B0");
+                this.setCircleFillColor(d, this.nodeColor(d));
                 this.showText(d, d.parent === this.focus);
+                if (this.config.nodePopover != null) {
+                    $('.popover-node').popover("hide");
+                }
+
             }
         };
 
@@ -244,12 +236,34 @@ export class BubbleTree<D extends Data> {
             .style("pointer-events", "none")
             .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
             .style("text-anchor", "middle")
-            .style("text-shadow", "0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff")
+            .style("fill", this.textColor)
             .text(d => d.data.name);
 
         this.svg.on("click", () => this.zoom(root));
 
         this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
+
+        if (this.config.nodePopover != null) {
+            let self = this;
+            this.circle
+                .classed("popover-node", true)
+                .filter(function (d) {
+                    self.config.nodePopover(d, popover => {
+                        if (popover && popover.content) {
+                            this.setAttribute("data-content", popover.content);
+                        }
+                        if (popover && popover.title) {
+                            this.setAttribute("data-original-title", popover.title);
+                        }
+                    });
+                    return true;
+                })
+                .attr("rel", "popover")
+                .attr("data-trigger", "click hover");
+
+            $('.popover-node').popover();
+        }
+
 
         if (this.config.onBuilt) {
             this.config.onBuilt(this);
@@ -263,25 +277,58 @@ export class BubbleTree<D extends Data> {
      * @param {BubbleTreeConfiguration} config - the configuration
      */
     build(config: BubbleTreeConfiguration<D>) {
+        window.addEventListener("resize", e => {
+            this.update();
+            this.svg.select("g").remove();
+            this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
+
+            this.pack = d3.pack()
+                .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
+                .padding(2);
+
+            // use possible url field for backward compatibility
+            if (config.data == null && config['url'] != null) {
+                config.data = config['url'];
+            }
+
+            if (typeof config.data === 'string') {
+                // URL case
+                d3.json(<string>config.data, (error, rootData: Data) => {
+                    console.log(rootData);
+                    if (error) throw error;
+                    this.buildFromData(rootData);
+                });
+            } else {
+                // data as JavaScript object
+                this.buildFromData(<D>config.data);
+            }
+        })
         this.config = config;
         this.config.container.innerHTML = "";
+        this.config.container.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
+        this.defaultColor = "hsla(220, 50%, 88%, 0.09)";
+        this.textColor = window.getComputedStyle(<HTMLElement>this.config.container.children[1]).color;
+        this.circleColor = this.defaultColor;
+        //this.defaultLeafColor = window.getComputedStyle(document.body).backgroundColor;
+        this.defaultLeafColor = this.selectedLeafColor(0);
+        //this.circleColor = this.defaultLeafColor;
+        this.selectedCircleColor = window.getComputedStyle(<HTMLElement>this.config.container.firstChild).color;
+        console.info(this.selectedCircleColor);
+
+
         this.config.container.setAttribute("width", "100%");
         this.config.container.setAttribute("height", "100%");
         if (!this.config.handlers) {
             this.config.handlers = {};
         }
         this.config.showRoot = this.config.showRoot ? this.config.showRoot : false;
-        this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 70;
+        this.config.baseLeafColorHue = this.config.baseLeafColorHue ? this.config.baseLeafColorHue : 30;
+        this.config.baseLeafColorLight = this.config.baseLeafColorLight ? this.config.baseLeafColorLight : 50;
         this.svg = d3.select(config.container);
         if (!this.config.margin) this.config.margin = 20;
         this.update();
         console.info("diameter: " + this.diameter);
         this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
-
-        this.defaultColor = d3.scaleLinear<string>()
-            .domain([-1, 5])
-            .range(["hsl(197,30%,98%)", "hsl(220,50%,88%)"])
-            .interpolate(d3.interpolateHcl);
 
         this.pack = d3.pack()
             .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
@@ -324,12 +371,12 @@ export class BubbleTree<D extends Data> {
         return result;
     }
 
-    private leafColor(saturation: number): string {
-        return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%,70%)";
+    private selectedLeafColor(saturation: number): string {
+        return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%," + this.config.baseLeafColorLight + "%)";
     }
 
     private nodeColor(d: d3.HierarchyNode<Data>): string {
-        return d.data.color ? d.data.color : d.children ? this.defaultColor(d.depth) : this.leafColor(0);
+        return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(this.selections[d.data.uid] ? this.selections[d.data.uid]:0);
     }
 
     /**
@@ -360,7 +407,8 @@ export class BubbleTree<D extends Data> {
         this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => d.data.uid in this.selections)
             .classed("selected", true)
-            .style("fill", d => this.leafColor(this.selections[d.data.uid]));
+            .style("opacity", 1)
+            .style("fill", d => this.selectedLeafColor(this.selections[d.data.uid]));
         return this;
     }
 
@@ -372,7 +420,7 @@ export class BubbleTree<D extends Data> {
         this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
             .filter(d => { let weight = selector(d.data); if (weight && weight > 0) { this.selections[d.data.uid] = weight; return true } else return false; })
             .classed("selected", true)
-            .style("fill", d => this.leafColor(this.selections[d.data.uid]));
+            .style("fill", d => this.selectedLeafColor(this.selections[d.data.uid]));
         return this;
     }
 
@@ -383,15 +431,19 @@ export class BubbleTree<D extends Data> {
      * @see #select
      */
     clearSelect(): BubbleTree<D> {
+        let selections = this.selections;
+        this.selections = {};
         this.g.selectAll<any, d3.HierarchyNode<D>>("circle")
-            .filter(d => d.data.uid in this.selections)
+            .filter(d => d.data.uid in selections)
             .classed("selected", false)
             .style("fill", d => this.nodeColor(d));
-        this.selections = {};
         return this;
     }
 
     private zoomTo(v) {
+        if (this.config.nodePopover != null) {
+            $('.popover-node').popover("hide");
+        }
         var k = this.diameter / v[2]; this.view = v;
         var node = this.g.selectAll<any, any>("circle,text");
         node.attr("transform", d => "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")");
@@ -399,7 +451,8 @@ export class BubbleTree<D extends Data> {
     }
 
     private zoom(d) {
-        let bbc = this;
+
+        let btc = this;
         this.focus = d;
 
         var transition = d3.transition()
@@ -410,10 +463,10 @@ export class BubbleTree<D extends Data> {
             });
 
         transition.select("#" + this.config.container.id).selectAll<any, d3.HierarchyNode<D>>("text")
-            .filter(function(d) { return d.parent && d.parent === bbc.focus || this.style.display === "inline"; })
+            .filter(function(d) { return d.parent && d.parent === btc.focus || this.style.display === "inline"; })
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
-            .on("start", function(d) { if (d.parent === bbc.focus) this.style.display = "inline"; })
-            .on("end", function(d) { if (d.parent !== bbc.focus) this.style.display = "none"; });
+            .on("start", function(d) { if (d.parent === btc.focus) this.style.display = "inline"; })
+            .on("end", function(d) { if (d.parent !== btc.focus) this.style.display = "none"; });
     }
 
     /**
@@ -451,6 +504,10 @@ export class BubbleTree<D extends Data> {
 
     private setCircleColor(d, color: string) {
         this.g.selectAll("circle").filter(data => data == d).style("stroke", color);
+    }
+
+    private setCircleFillColor(d, color: string, opacity: number = 1) {
+        this.g.selectAll("circle").filter(data => data == d).style("fill", color).style("opacity", opacity);
     }
 
 }
