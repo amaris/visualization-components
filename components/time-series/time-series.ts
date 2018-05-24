@@ -186,12 +186,12 @@ export class TimeSeries<D extends TimeSerieData>{
             if (serie.data[serie.data.length - 1].id != rootData.id) {
                 console.log(serie.data[serie.data.length - 1].id);
                 console.log(rootData.id);
-                let value = { id: rootData.id, x: new Date(rootData.x), y: rootData.x, a: rootData.a }
+                let value = { id: rootData.id, x: new Date(rootData.x), y: rootData.y, a: rootData.a }
                 serie.data.push(<D>value);
-                if (!this.isZoom) {
-                    this.createLines();
-                    this.drawSerie();
-                    this.drawMiniDrawer();
+                if (!serie.isZoom) {
+                    serie.createLines();
+                    serie.drawSerie();
+                    serie.drawMiniDrawer();
                 }
             }
 

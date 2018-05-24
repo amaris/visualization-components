@@ -19164,17 +19164,16 @@
             }
         };
         TimeSeries.prototype.updateData = function (serie) {
-            var _this = this;
             json(serie.config.update, function (error, rootData) {
                 if (serie.data[serie.data.length - 1].id != rootData.id) {
                     console.log(serie.data[serie.data.length - 1].id);
                     console.log(rootData.id);
-                    var value = { id: rootData.id, x: new Date(rootData.x), y: rootData.x, a: rootData.a };
+                    var value = { id: rootData.id, x: new Date(rootData.x), y: rootData.y, a: rootData.a };
                     serie.data.push(value);
-                    if (!_this.isZoom) {
-                        _this.createLines();
-                        _this.drawSerie();
-                        _this.drawMiniDrawer();
+                    if (!serie.isZoom) {
+                        serie.createLines();
+                        serie.drawSerie();
+                        serie.drawMiniDrawer();
                     }
                 }
             });
