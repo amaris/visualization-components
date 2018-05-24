@@ -3,8 +3,8 @@
 declare var webkitSpeechRecognition;
 declare var webkitSpeechRecognitionEvent;
 
-var SpeechRecognition = SpeechRecognition | webkitSpeechRecognition;
-var SpeechRecognitionEvent = SpeechRecognitionEvent | webkitSpeechRecognitionEvent;
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 
 /**
  * The configuration object for the simple speech recognition component.

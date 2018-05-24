@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var SpeechRecognition = SpeechRecognition | webkitSpeechRecognition;
-var SpeechRecognitionEvent = SpeechRecognitionEvent | webkitSpeechRecognitionEvent;
+var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
+var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
 /**
  * A simple speech recognition component, which is a wrapper of the Web Speech Regognition API.
  */
