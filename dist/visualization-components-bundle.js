@@ -4,9 +4,7 @@
     (factory((global.arnd = {})));
 }(this, (function (exports) { 'use strict';
 
-    //declare var webkitSpeechRecognition;
-    //declare var webkitSpeechRecognitionEvent;
-    var SpeechRecognition = SpeechRecognition;
+    var SpeechRecognition = SpeechRecognition | webkitSpeechRecognition;
     /**
      * A simple speech recognition component, which is a wrapper of the Web Speech Regognition API.
      */
