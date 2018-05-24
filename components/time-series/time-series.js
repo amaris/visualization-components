@@ -83,8 +83,11 @@ var TimeSeries = /** @class */ (function () {
             this.createChart();
         }
         if (this.config.update) {
-            setInterval(this.updateData, this.config.frequency, this);
+            this.update_function = setInterval(this.updateData, this.config.frequency, this);
         }
+    };
+    TimeSeries.prototype.remove_update = function () {
+        clearInterval(this.update_function);
     };
     TimeSeries.prototype.updateData = function (serie) {
         d3.json(serie.config.update, function (error, rootData) {

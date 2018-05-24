@@ -114,7 +114,7 @@ export class TimeSeries<D extends TimeSerieData>{
     private max: number;
     private dateMin: Date;
     private dateMax: Date;
-
+    private update_function: number;
     private yScale: d3.ScaleLinear<any, any> = d3.scaleLinear();
     private xScale: d3.ScaleTime<any, any> = d3.scaleTime();
     private fullXScale: d3.ScaleTime<any, any>;
@@ -175,11 +175,13 @@ export class TimeSeries<D extends TimeSerieData>{
             this.createChart();
         }
         if (this.config.update) {
-            setInterval(this.updateData, this.config.frequency, this);
+           this.update_function= setInterval(this.updateData, this.config.frequency, this);
         }
 
     }
-
+    public remove_update() {
+        clearInterval(this.update_function);
+    }
     private updateData(serie: TimeSeries<D>) {
 
         d3.json(serie.config.update, (error, rootData: any) => {
