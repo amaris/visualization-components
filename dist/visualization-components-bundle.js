@@ -18708,11 +18708,14 @@
         BubbleTree.prototype.lookupNames = function (names) {
             var result = [];
             var root = this.getFocussedData();
+            var upperCasedNames = names.map(function (n) { return n.toUpperCase(); });
             var lookup = function (d) {
-                if (names.indexOf(d.name) >= 0) {
-                    result.push(d.uid);
-                }
                 if (d.children) {
+                    d.children.forEach(function (d) {
+                        if (upperCasedNames.indexOf(d.name.toUpperCase()) >= 0) {
+                            result.push(d.uid);
+                        }
+                    });
                     d.children.forEach(function (d) { return lookup(d); });
                 }
             };

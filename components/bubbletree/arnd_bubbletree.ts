@@ -359,11 +359,14 @@ export class BubbleTree<D extends Data> {
     lookupNames(names: string[]): string[] {
         let result: string[] = [];
         let root = this.getFocussedData();
+        let upperCasedNames = names.map(n => n.toUpperCase());
         let lookup = (d: Data) => {
-            if (names.indexOf(d.name) >= 0) {
-                result.push(d.uid);
-            }
             if (d.children) {
+                d.children.forEach(d => {
+                    if (upperCasedNames.indexOf(d.name.toUpperCase()) >= 0) {
+                        result.push(d.uid);
+                    }
+                });
                 d.children.forEach(d => lookup(d));
             }
         }
