@@ -32,7 +32,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptTarget>ES2016</TypeScriptTarget>
     <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
     <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
     <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
@@ -94,6 +94,7 @@
     <None Include="components\table\arnd_table.ts" />
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="components\3DModel\earth.ts" />
     <TypeScriptCompile Include="components\time-series\time-series-utils.ts" />
     <TypeScriptCompile Include="components\time-series\time-series.ts" />
     <TypeScriptCompile Include="components\util\speech-recognition.ts" />

@@ -4,22 +4,19 @@
     (factory((global.arnd = {})));
 }(this, (function (exports) { 'use strict';
 
-    //declare var webkitSpeechRecognition;
-    //declare var webkitSpeechRecognitionEvent;
-    var SpeechRecognition = SpeechRecognition;
+    var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
     /**
      * A simple speech recognition component, which is a wrapper of the Web Speech Regognition API.
      */
-    var SimpleSpeechRecognition = /** @class */ (function () {
-        function SimpleSpeechRecognition() {
+    class SimpleSpeechRecognition {
+        constructor() {
             this.running = false;
         }
         /**
          * Initializes and build the component against the given configuration.
          * @param config the configuration object
          */
-        SimpleSpeechRecognition.prototype.build = function (config) {
-            var _this = this;
+        build(config) {
             this.config = config;
             if (!config.maxAlternatives) {
                 config.maxAlternatives = 1;
@@ -30,35 +27,35 @@
                 this.button.type = "checkbox";
                 config.container.appendChild(this.button);
                 config.container.appendChild(this.result);
-                this.button.addEventListener("click", function () { return _this.toggle(); });
-                var org_1 = config.onSpeechRecognized;
-                config.onSpeechRecognized = function (results) {
-                    _this.result.innerHTML = results[0];
-                    org_1(results);
+                this.button.addEventListener("click", () => this.toggle());
+                let org = config.onSpeechRecognized;
+                config.onSpeechRecognized = results => {
+                    this.result.innerHTML = results[0];
+                    org(results);
                 };
             }
-        };
+        }
         /**
          * Tells if the speech recognition is currently running.
          */
-        SimpleSpeechRecognition.prototype.isRunning = function () {
+        isRunning() {
             return this.running;
-        };
+        }
         /**
          * Toggles (starts or stops) the speech recognition.
          */
-        SimpleSpeechRecognition.prototype.toggle = function () {
+        toggle() {
             if (this.running) {
                 this.stop();
             }
             else {
                 this.start();
             }
-        };
+        }
         /**
          * Stops the speech recognition.
          */
-        SimpleSpeechRecognition.prototype.stop = function () {
+        stop() {
             if (this.running && this.config.onStop) {
                 this.config.onStop();
             }
@@ -67,12 +64,11 @@
                 this.recognition.stop();
                 this.recognition = undefined;
             }
-        };
+        }
         /**
          * Starts the speech recognition.
          */
-        SimpleSpeechRecognition.prototype.start = function () {
-            var _this = this;
+        start() {
             if (!this.running && this.config.onStart) {
                 this.config.onStart();
             }
@@ -87,26 +83,26 @@
             this.recognition.interimResults = false;
             this.recognition.maxAlternatives = this.config.maxAlternatives;
             this.recognition.start();
-            this.recognition.onresult = function (event) {
-                var results = [];
-                for (var i = 0; i < _this.config.maxAlternatives; i++) {
+            this.recognition.onresult = event => {
+                let results = [];
+                for (let i = 0; i < this.config.maxAlternatives; i++) {
                     if (event.results[0][i]) {
                         results.push(event.results[0][i].transcript);
                     }
                 }
-                _this.config.onSpeechRecognized(results);
+                this.config.onSpeechRecognized(results);
             };
             this.recognition.onspeechend = function () { };
-            this.recognition.onerror = function (event) {
-                if (_this.config.onError) {
-                    _this.config.onError(event.error);
+            this.recognition.onerror = event => {
+                if (this.config.onError) {
+                    this.config.onError(event.error);
                 }
             };
             this.recognition.onaudiostart = function (event) { };
             this.recognition.onaudioend = function (event) { };
-            this.recognition.onend = function (event) {
-                if (_this.running) {
-                    _this.start();
+            this.recognition.onend = event => {
+                if (this.running) {
+                    this.start();
                 }
             };
             this.recognition.onnomatch = function (event) { };
@@ -114,9 +110,9 @@
             this.recognition.onsoundend = function (event) { };
             this.recognition.onspeechstart = function (event) { };
             this.recognition.onstart = function (event) { };
-        };
-        return SimpleSpeechRecognition;
-    }());
+        }
+    }
+    //# sourceMappingURL=speech-recognition.js.map
 
     function ascending(a, b) {
       return a < b ? -1 : a > b ? 1 : a >= b ? 0 : NaN;
@@ -199,6 +195,20 @@
       return [min, max];
     }
 
+    function sequence(start, stop, step) {
+      start = +start, stop = +stop, step = (n = arguments.length) < 2 ? (stop = start, start = 0, 1) : n < 3 ? 1 : +step;
+
+      var i = -1,
+          n = Math.max(0, Math.ceil((stop - start) / step)) | 0,
+          range = new Array(n);
+
+      while (++i < n) {
+        range[i] = start + i * step;
+      }
+
+      return range;
+    }
+
     var e10 = Math.sqrt(50),
         e5 = Math.sqrt(10),
         e2 = Math.sqrt(2);
@@ -273,6 +283,28 @@
       }
 
       if (m) return sum / m;
+    }
+
+    function merge(arrays) {
+      var n = arrays.length,
+          m,
+          i = -1,
+          j = 0,
+          merged,
+          array;
+
+      while (++i < n) j += arrays[i].length;
+      merged = new Array(j);
+
+      while (--n >= 0) {
+        array = arrays[n];
+        m = array.length;
+        while (--m >= 0) {
+          merged[--j] = array[m];
+        }
+      }
+
+      return merged;
     }
 
     var slice$1 = Array.prototype.slice;
@@ -1434,6 +1466,22 @@
       return point(node, event);
     }
 
+    function touch(node, touches, identifier) {
+      if (arguments.length < 3) identifier = touches, touches = sourceEvent().changedTouches;
+
+      for (var i = 0, n = touches ? touches.length : 0, touch; i < n; ++i) {
+        if ((touch = touches[i]).identifier === identifier) {
+          return point(node, touch);
+        }
+      }
+
+      return null;
+    }
+
+    function nopropagation() {
+      event.stopImmediatePropagation();
+    }
+
     function noevent() {
       event.preventDefault();
       event.stopImmediatePropagation();
@@ -1463,6 +1511,191 @@
         root.style.MozUserSelect = root.__noselect;
         delete root.__noselect;
       }
+    }
+
+    function constant$2(x) {
+      return function() {
+        return x;
+      };
+    }
+
+    function DragEvent(target, type, subject, id, active, x, y, dx, dy, dispatch) {
+      this.target = target;
+      this.type = type;
+      this.subject = subject;
+      this.identifier = id;
+      this.active = active;
+      this.x = x;
+      this.y = y;
+      this.dx = dx;
+      this.dy = dy;
+      this._ = dispatch;
+    }
+
+    DragEvent.prototype.on = function() {
+      var value = this._.on.apply(this._, arguments);
+      return value === this._ ? this : value;
+    };
+
+    // Ignore right-click, since that should open the context menu.
+    function defaultFilter() {
+      return !event.button;
+    }
+
+    function defaultContainer() {
+      return this.parentNode;
+    }
+
+    function defaultSubject(d) {
+      return d == null ? {x: event.x, y: event.y} : d;
+    }
+
+    function defaultTouchable() {
+      return "ontouchstart" in this;
+    }
+
+    function drag() {
+      var filter = defaultFilter,
+          container = defaultContainer,
+          subject = defaultSubject,
+          touchable = defaultTouchable,
+          gestures = {},
+          listeners = dispatch("start", "drag", "end"),
+          active = 0,
+          mousedownx,
+          mousedowny,
+          mousemoving,
+          touchending,
+          clickDistance2 = 0;
+
+      function drag(selection$$1) {
+        selection$$1
+            .on("mousedown.drag", mousedowned)
+          .filter(touchable)
+            .on("touchstart.drag", touchstarted)
+            .on("touchmove.drag", touchmoved)
+            .on("touchend.drag touchcancel.drag", touchended)
+            .style("touch-action", "none")
+            .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
+      }
+
+      function mousedowned() {
+        if (touchending || !filter.apply(this, arguments)) return;
+        var gesture = beforestart("mouse", container.apply(this, arguments), mouse, this, arguments);
+        if (!gesture) return;
+        select(event.view).on("mousemove.drag", mousemoved, true).on("mouseup.drag", mouseupped, true);
+        dragDisable(event.view);
+        nopropagation();
+        mousemoving = false;
+        mousedownx = event.clientX;
+        mousedowny = event.clientY;
+        gesture("start");
+      }
+
+      function mousemoved() {
+        noevent();
+        if (!mousemoving) {
+          var dx = event.clientX - mousedownx, dy = event.clientY - mousedowny;
+          mousemoving = dx * dx + dy * dy > clickDistance2;
+        }
+        gestures.mouse("drag");
+      }
+
+      function mouseupped() {
+        select(event.view).on("mousemove.drag mouseup.drag", null);
+        yesdrag(event.view, mousemoving);
+        noevent();
+        gestures.mouse("end");
+      }
+
+      function touchstarted() {
+        if (!filter.apply(this, arguments)) return;
+        var touches$$1 = event.changedTouches,
+            c = container.apply(this, arguments),
+            n = touches$$1.length, i, gesture;
+
+        for (i = 0; i < n; ++i) {
+          if (gesture = beforestart(touches$$1[i].identifier, c, touch, this, arguments)) {
+            nopropagation();
+            gesture("start");
+          }
+        }
+      }
+
+      function touchmoved() {
+        var touches$$1 = event.changedTouches,
+            n = touches$$1.length, i, gesture;
+
+        for (i = 0; i < n; ++i) {
+          if (gesture = gestures[touches$$1[i].identifier]) {
+            noevent();
+            gesture("drag");
+          }
+        }
+      }
+
+      function touchended() {
+        var touches$$1 = event.changedTouches,
+            n = touches$$1.length, i, gesture;
+
+        if (touchending) clearTimeout(touchending);
+        touchending = setTimeout(function() { touchending = null; }, 500); // Ghost clicks are delayed!
+        for (i = 0; i < n; ++i) {
+          if (gesture = gestures[touches$$1[i].identifier]) {
+            nopropagation();
+            gesture("end");
+          }
+        }
+      }
+
+      function beforestart(id, container, point$$1, that, args) {
+        var p = point$$1(container, id), s, dx, dy,
+            sublisteners = listeners.copy();
+
+        if (!customEvent(new DragEvent(drag, "beforestart", s, id, active, p[0], p[1], 0, 0, sublisteners), function() {
+          if ((event.subject = s = subject.apply(that, args)) == null) return false;
+          dx = s.x - p[0] || 0;
+          dy = s.y - p[1] || 0;
+          return true;
+        })) return;
+
+        return function gesture(type) {
+          var p0 = p, n;
+          switch (type) {
+            case "start": gestures[id] = gesture, n = active++; break;
+            case "end": delete gestures[id], --active; // nobreak
+            case "drag": p = point$$1(container, id), n = active; break;
+          }
+          customEvent(new DragEvent(drag, type, s, id, n, p[0] + dx, p[1] + dy, p[0] - p0[0], p[1] - p0[1], sublisteners), sublisteners.apply, sublisteners, [type, that, args]);
+        };
+      }
+
+      drag.filter = function(_) {
+        return arguments.length ? (filter = typeof _ === "function" ? _ : constant$2(!!_), drag) : filter;
+      };
+
+      drag.container = function(_) {
+        return arguments.length ? (container = typeof _ === "function" ? _ : constant$2(_), drag) : container;
+      };
+
+      drag.subject = function(_) {
+        return arguments.length ? (subject = typeof _ === "function" ? _ : constant$2(_), drag) : subject;
+      };
+
+      drag.touchable = function(_) {
+        return arguments.length ? (touchable = typeof _ === "function" ? _ : constant$2(!!_), drag) : touchable;
+      };
+
+      drag.on = function() {
+        var value = listeners.on.apply(listeners, arguments);
+        return value === listeners ? drag : value;
+      };
+
+      drag.clickDistance = function(_) {
+        return arguments.length ? (clickDistance2 = (_ = +_) * _, drag) : Math.sqrt(clickDistance2);
+      };
+
+      return drag;
     }
 
     function define$1(constructor, factory, prototype) {
@@ -4931,22 +5164,1826 @@
       adder.t = (a - av) + (b - bv);
     }
 
+    var epsilon$2 = 1e-6;
     var pi$3 = Math.PI;
+    var halfPi$2 = pi$3 / 2;
+    var quarterPi = pi$3 / 4;
+    var tau$3 = pi$3 * 2;
+
+    var degrees$1 = 180 / pi$3;
+    var radians = pi$3 / 180;
+
+    var abs = Math.abs;
+    var atan = Math.atan;
+    var atan2 = Math.atan2;
+    var cos$1 = Math.cos;
+    var ceil = Math.ceil;
+    var sin$1 = Math.sin;
+    var sqrt = Math.sqrt;
+
+    function acos(x) {
+      return x > 1 ? 0 : x < -1 ? pi$3 : Math.acos(x);
+    }
+
+    function asin(x) {
+      return x > 1 ? halfPi$2 : x < -1 ? -halfPi$2 : Math.asin(x);
+    }
+
+    function noop$1() {}
+
+    function streamGeometry(geometry, stream) {
+      if (geometry && streamGeometryType.hasOwnProperty(geometry.type)) {
+        streamGeometryType[geometry.type](geometry, stream);
+      }
+    }
+
+    var streamObjectType = {
+      Feature: function(object, stream) {
+        streamGeometry(object.geometry, stream);
+      },
+      FeatureCollection: function(object, stream) {
+        var features = object.features, i = -1, n = features.length;
+        while (++i < n) streamGeometry(features[i].geometry, stream);
+      }
+    };
+
+    var streamGeometryType = {
+      Sphere: function(object, stream) {
+        stream.sphere();
+      },
+      Point: function(object, stream) {
+        object = object.coordinates;
+        stream.point(object[0], object[1], object[2]);
+      },
+      MultiPoint: function(object, stream) {
+        var coordinates = object.coordinates, i = -1, n = coordinates.length;
+        while (++i < n) object = coordinates[i], stream.point(object[0], object[1], object[2]);
+      },
+      LineString: function(object, stream) {
+        streamLine(object.coordinates, stream, 0);
+      },
+      MultiLineString: function(object, stream) {
+        var coordinates = object.coordinates, i = -1, n = coordinates.length;
+        while (++i < n) streamLine(coordinates[i], stream, 0);
+      },
+      Polygon: function(object, stream) {
+        streamPolygon(object.coordinates, stream);
+      },
+      MultiPolygon: function(object, stream) {
+        var coordinates = object.coordinates, i = -1, n = coordinates.length;
+        while (++i < n) streamPolygon(coordinates[i], stream);
+      },
+      GeometryCollection: function(object, stream) {
+        var geometries = object.geometries, i = -1, n = geometries.length;
+        while (++i < n) streamGeometry(geometries[i], stream);
+      }
+    };
+
+    function streamLine(coordinates, stream, closed) {
+      var i = -1, n = coordinates.length - closed, coordinate;
+      stream.lineStart();
+      while (++i < n) coordinate = coordinates[i], stream.point(coordinate[0], coordinate[1], coordinate[2]);
+      stream.lineEnd();
+    }
+
+    function streamPolygon(coordinates, stream) {
+      var i = -1, n = coordinates.length;
+      stream.polygonStart();
+      while (++i < n) streamLine(coordinates[i], stream, 1);
+      stream.polygonEnd();
+    }
+
+    function geoStream(object, stream) {
+      if (object && streamObjectType.hasOwnProperty(object.type)) {
+        streamObjectType[object.type](object, stream);
+      } else {
+        streamGeometry(object, stream);
+      }
+    }
 
     var areaRingSum = adder();
 
     var areaSum = adder();
 
+    function spherical(cartesian) {
+      return [atan2(cartesian[1], cartesian[0]), asin(cartesian[2])];
+    }
+
+    function cartesian(spherical) {
+      var lambda = spherical[0], phi = spherical[1], cosPhi = cos$1(phi);
+      return [cosPhi * cos$1(lambda), cosPhi * sin$1(lambda), sin$1(phi)];
+    }
+
+    function cartesianDot(a, b) {
+      return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+    }
+
+    function cartesianCross(a, b) {
+      return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+    }
+
+    // TODO return a
+    function cartesianAddInPlace(a, b) {
+      a[0] += b[0], a[1] += b[1], a[2] += b[2];
+    }
+
+    function cartesianScale(vector, k) {
+      return [vector[0] * k, vector[1] * k, vector[2] * k];
+    }
+
+    // TODO return d
+    function cartesianNormalizeInPlace(d) {
+      var l = sqrt(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+      d[0] /= l, d[1] /= l, d[2] /= l;
+    }
+
     var deltaSum = adder();
+
+    function compose(a, b) {
+
+      function compose(x, y) {
+        return x = a(x, y), b(x[0], x[1]);
+      }
+
+      if (a.invert && b.invert) compose.invert = function(x, y) {
+        return x = b.invert(x, y), x && a.invert(x[0], x[1]);
+      };
+
+      return compose;
+    }
+
+    function rotationIdentity(lambda, phi) {
+      return [lambda > pi$3 ? lambda - tau$3 : lambda < -pi$3 ? lambda + tau$3 : lambda, phi];
+    }
+
+    rotationIdentity.invert = rotationIdentity;
+
+    function rotateRadians(deltaLambda, deltaPhi, deltaGamma) {
+      return (deltaLambda %= tau$3) ? (deltaPhi || deltaGamma ? compose(rotationLambda(deltaLambda), rotationPhiGamma(deltaPhi, deltaGamma))
+        : rotationLambda(deltaLambda))
+        : (deltaPhi || deltaGamma ? rotationPhiGamma(deltaPhi, deltaGamma)
+        : rotationIdentity);
+    }
+
+    function forwardRotationLambda(deltaLambda) {
+      return function(lambda, phi) {
+        return lambda += deltaLambda, [lambda > pi$3 ? lambda - tau$3 : lambda < -pi$3 ? lambda + tau$3 : lambda, phi];
+      };
+    }
+
+    function rotationLambda(deltaLambda) {
+      var rotation = forwardRotationLambda(deltaLambda);
+      rotation.invert = forwardRotationLambda(-deltaLambda);
+      return rotation;
+    }
+
+    function rotationPhiGamma(deltaPhi, deltaGamma) {
+      var cosDeltaPhi = cos$1(deltaPhi),
+          sinDeltaPhi = sin$1(deltaPhi),
+          cosDeltaGamma = cos$1(deltaGamma),
+          sinDeltaGamma = sin$1(deltaGamma);
+
+      function rotation(lambda, phi) {
+        var cosPhi = cos$1(phi),
+            x = cos$1(lambda) * cosPhi,
+            y = sin$1(lambda) * cosPhi,
+            z = sin$1(phi),
+            k = z * cosDeltaPhi + x * sinDeltaPhi;
+        return [
+          atan2(y * cosDeltaGamma - k * sinDeltaGamma, x * cosDeltaPhi - z * sinDeltaPhi),
+          asin(k * cosDeltaGamma + y * sinDeltaGamma)
+        ];
+      }
+
+      rotation.invert = function(lambda, phi) {
+        var cosPhi = cos$1(phi),
+            x = cos$1(lambda) * cosPhi,
+            y = sin$1(lambda) * cosPhi,
+            z = sin$1(phi),
+            k = z * cosDeltaGamma - y * sinDeltaGamma;
+        return [
+          atan2(y * cosDeltaGamma + z * sinDeltaGamma, x * cosDeltaPhi + k * sinDeltaPhi),
+          asin(k * cosDeltaPhi - x * sinDeltaPhi)
+        ];
+      };
+
+      return rotation;
+    }
+
+    // Generates a circle centered at [0°, 0°], with a given radius and precision.
+    function circleStream(stream, radius, delta, direction, t0, t1) {
+      if (!delta) return;
+      var cosRadius = cos$1(radius),
+          sinRadius = sin$1(radius),
+          step = direction * delta;
+      if (t0 == null) {
+        t0 = radius + direction * tau$3;
+        t1 = radius - step / 2;
+      } else {
+        t0 = circleRadius(cosRadius, t0);
+        t1 = circleRadius(cosRadius, t1);
+        if (direction > 0 ? t0 < t1 : t0 > t1) t0 += direction * tau$3;
+      }
+      for (var point, t = t0; direction > 0 ? t > t1 : t < t1; t -= step) {
+        point = spherical([cosRadius, -sinRadius * cos$1(t), -sinRadius * sin$1(t)]);
+        stream.point(point[0], point[1]);
+      }
+    }
+
+    // Returns the signed angle of a cartesian point relative to [cosRadius, 0, 0].
+    function circleRadius(cosRadius, point) {
+      point = cartesian(point), point[0] -= cosRadius;
+      cartesianNormalizeInPlace(point);
+      var radius = acos(-point[1]);
+      return ((-point[2] < 0 ? -radius : radius) + tau$3 - epsilon$2) % tau$3;
+    }
+
+    function clipBuffer() {
+      var lines = [],
+          line;
+      return {
+        point: function(x, y) {
+          line.push([x, y]);
+        },
+        lineStart: function() {
+          lines.push(line = []);
+        },
+        lineEnd: noop$1,
+        rejoin: function() {
+          if (lines.length > 1) lines.push(lines.pop().concat(lines.shift()));
+        },
+        result: function() {
+          var result = lines;
+          lines = [];
+          line = null;
+          return result;
+        }
+      };
+    }
+
+    function pointEqual(a, b) {
+      return abs(a[0] - b[0]) < epsilon$2 && abs(a[1] - b[1]) < epsilon$2;
+    }
+
+    function Intersection(point, points, other, entry) {
+      this.x = point;
+      this.z = points;
+      this.o = other; // another intersection
+      this.e = entry; // is an entry?
+      this.v = false; // visited
+      this.n = this.p = null; // next & previous
+    }
+
+    // A generalized polygon clipping algorithm: given a polygon that has been cut
+    // into its visible line segments, and rejoins the segments by interpolating
+    // along the clip edge.
+    function clipRejoin(segments, compareIntersection, startInside, interpolate, stream) {
+      var subject = [],
+          clip = [],
+          i,
+          n;
+
+      segments.forEach(function(segment) {
+        if ((n = segment.length - 1) <= 0) return;
+        var n, p0 = segment[0], p1 = segment[n], x;
+
+        // If the first and last points of a segment are coincident, then treat as a
+        // closed ring. TODO if all rings are closed, then the winding order of the
+        // exterior ring should be checked.
+        if (pointEqual(p0, p1)) {
+          stream.lineStart();
+          for (i = 0; i < n; ++i) stream.point((p0 = segment[i])[0], p0[1]);
+          stream.lineEnd();
+          return;
+        }
+
+        subject.push(x = new Intersection(p0, segment, null, true));
+        clip.push(x.o = new Intersection(p0, null, x, false));
+        subject.push(x = new Intersection(p1, segment, null, false));
+        clip.push(x.o = new Intersection(p1, null, x, true));
+      });
+
+      if (!subject.length) return;
+
+      clip.sort(compareIntersection);
+      link$1(subject);
+      link$1(clip);
+
+      for (i = 0, n = clip.length; i < n; ++i) {
+        clip[i].e = startInside = !startInside;
+      }
+
+      var start = subject[0],
+          points,
+          point;
+
+      while (1) {
+        // Find first unvisited intersection.
+        var current = start,
+            isSubject = true;
+        while (current.v) if ((current = current.n) === start) return;
+        points = current.z;
+        stream.lineStart();
+        do {
+          current.v = current.o.v = true;
+          if (current.e) {
+            if (isSubject) {
+              for (i = 0, n = points.length; i < n; ++i) stream.point((point = points[i])[0], point[1]);
+            } else {
+              interpolate(current.x, current.n.x, 1, stream);
+            }
+            current = current.n;
+          } else {
+            if (isSubject) {
+              points = current.p.z;
+              for (i = points.length - 1; i >= 0; --i) stream.point((point = points[i])[0], point[1]);
+            } else {
+              interpolate(current.x, current.p.x, -1, stream);
+            }
+            current = current.p;
+          }
+          current = current.o;
+          points = current.z;
+          isSubject = !isSubject;
+        } while (!current.v);
+        stream.lineEnd();
+      }
+    }
+
+    function link$1(array) {
+      if (!(n = array.length)) return;
+      var n,
+          i = 0,
+          a = array[0],
+          b;
+      while (++i < n) {
+        a.n = b = array[i];
+        b.p = a;
+        a = b;
+      }
+      a.n = b = array[0];
+      b.p = a;
+    }
 
     var sum$1 = adder();
 
+    function polygonContains(polygon, point) {
+      var lambda = point[0],
+          phi = point[1],
+          normal = [sin$1(lambda), -cos$1(lambda), 0],
+          angle = 0,
+          winding = 0;
+
+      sum$1.reset();
+
+      for (var i = 0, n = polygon.length; i < n; ++i) {
+        if (!(m = (ring = polygon[i]).length)) continue;
+        var ring,
+            m,
+            point0 = ring[m - 1],
+            lambda0 = point0[0],
+            phi0 = point0[1] / 2 + quarterPi,
+            sinPhi0 = sin$1(phi0),
+            cosPhi0 = cos$1(phi0);
+
+        for (var j = 0; j < m; ++j, lambda0 = lambda1, sinPhi0 = sinPhi1, cosPhi0 = cosPhi1, point0 = point1) {
+          var point1 = ring[j],
+              lambda1 = point1[0],
+              phi1 = point1[1] / 2 + quarterPi,
+              sinPhi1 = sin$1(phi1),
+              cosPhi1 = cos$1(phi1),
+              delta = lambda1 - lambda0,
+              sign$$1 = delta >= 0 ? 1 : -1,
+              absDelta = sign$$1 * delta,
+              antimeridian = absDelta > pi$3,
+              k = sinPhi0 * sinPhi1;
+
+          sum$1.add(atan2(k * sign$$1 * sin$1(absDelta), cosPhi0 * cosPhi1 + k * cos$1(absDelta)));
+          angle += antimeridian ? delta + sign$$1 * tau$3 : delta;
+
+          // Are the longitudes either side of the point’s meridian (lambda),
+          // and are the latitudes smaller than the parallel (phi)?
+          if (antimeridian ^ lambda0 >= lambda ^ lambda1 >= lambda) {
+            var arc = cartesianCross(cartesian(point0), cartesian(point1));
+            cartesianNormalizeInPlace(arc);
+            var intersection = cartesianCross(normal, arc);
+            cartesianNormalizeInPlace(intersection);
+            var phiArc = (antimeridian ^ delta >= 0 ? -1 : 1) * asin(intersection[2]);
+            if (phi > phiArc || phi === phiArc && (arc[0] || arc[1])) {
+              winding += antimeridian ^ delta >= 0 ? 1 : -1;
+            }
+          }
+        }
+      }
+
+      // First, determine whether the South pole is inside or outside:
+      //
+      // It is inside if:
+      // * the polygon winds around it in a clockwise direction.
+      // * the polygon does not (cumulatively) wind around it, but has a negative
+      //   (counter-clockwise) area.
+      //
+      // Second, count the (signed) number of times a segment crosses a lambda
+      // from the point to the South pole.  If it is zero, then the point is the
+      // same side as the South pole.
+
+      return (angle < -epsilon$2 || angle < epsilon$2 && sum$1 < -epsilon$2) ^ (winding & 1);
+    }
+
+    function clip(pointVisible, clipLine, interpolate, start) {
+      return function(sink) {
+        var line = clipLine(sink),
+            ringBuffer = clipBuffer(),
+            ringSink = clipLine(ringBuffer),
+            polygonStarted = false,
+            polygon,
+            segments,
+            ring;
+
+        var clip = {
+          point: point,
+          lineStart: lineStart,
+          lineEnd: lineEnd,
+          polygonStart: function() {
+            clip.point = pointRing;
+            clip.lineStart = ringStart;
+            clip.lineEnd = ringEnd;
+            segments = [];
+            polygon = [];
+          },
+          polygonEnd: function() {
+            clip.point = point;
+            clip.lineStart = lineStart;
+            clip.lineEnd = lineEnd;
+            segments = merge(segments);
+            var startInside = polygonContains(polygon, start);
+            if (segments.length) {
+              if (!polygonStarted) sink.polygonStart(), polygonStarted = true;
+              clipRejoin(segments, compareIntersection, startInside, interpolate, sink);
+            } else if (startInside) {
+              if (!polygonStarted) sink.polygonStart(), polygonStarted = true;
+              sink.lineStart();
+              interpolate(null, null, 1, sink);
+              sink.lineEnd();
+            }
+            if (polygonStarted) sink.polygonEnd(), polygonStarted = false;
+            segments = polygon = null;
+          },
+          sphere: function() {
+            sink.polygonStart();
+            sink.lineStart();
+            interpolate(null, null, 1, sink);
+            sink.lineEnd();
+            sink.polygonEnd();
+          }
+        };
+
+        function point(lambda, phi) {
+          if (pointVisible(lambda, phi)) sink.point(lambda, phi);
+        }
+
+        function pointLine(lambda, phi) {
+          line.point(lambda, phi);
+        }
+
+        function lineStart() {
+          clip.point = pointLine;
+          line.lineStart();
+        }
+
+        function lineEnd() {
+          clip.point = point;
+          line.lineEnd();
+        }
+
+        function pointRing(lambda, phi) {
+          ring.push([lambda, phi]);
+          ringSink.point(lambda, phi);
+        }
+
+        function ringStart() {
+          ringSink.lineStart();
+          ring = [];
+        }
+
+        function ringEnd() {
+          pointRing(ring[0][0], ring[0][1]);
+          ringSink.lineEnd();
+
+          var clean = ringSink.clean(),
+              ringSegments = ringBuffer.result(),
+              i, n = ringSegments.length, m,
+              segment,
+              point;
+
+          ring.pop();
+          polygon.push(ring);
+          ring = null;
+
+          if (!n) return;
+
+          // No intersections.
+          if (clean & 1) {
+            segment = ringSegments[0];
+            if ((m = segment.length - 1) > 0) {
+              if (!polygonStarted) sink.polygonStart(), polygonStarted = true;
+              sink.lineStart();
+              for (i = 0; i < m; ++i) sink.point((point = segment[i])[0], point[1]);
+              sink.lineEnd();
+            }
+            return;
+          }
+
+          // Rejoin connected segments.
+          // TODO reuse ringBuffer.rejoin()?
+          if (n > 1 && clean & 2) ringSegments.push(ringSegments.pop().concat(ringSegments.shift()));
+
+          segments.push(ringSegments.filter(validSegment));
+        }
+
+        return clip;
+      };
+    }
+
+    function validSegment(segment) {
+      return segment.length > 1;
+    }
+
+    // Intersections are sorted along the clip edge. For both antimeridian cutting
+    // and circle clipping, the same comparison is used.
+    function compareIntersection(a, b) {
+      return ((a = a.x)[0] < 0 ? a[1] - halfPi$2 - epsilon$2 : halfPi$2 - a[1])
+           - ((b = b.x)[0] < 0 ? b[1] - halfPi$2 - epsilon$2 : halfPi$2 - b[1]);
+    }
+
+    var clipAntimeridian = clip(
+      function() { return true; },
+      clipAntimeridianLine,
+      clipAntimeridianInterpolate,
+      [-pi$3, -halfPi$2]
+    );
+
+    // Takes a line and cuts into visible segments. Return values: 0 - there were
+    // intersections or the line was empty; 1 - no intersections; 2 - there were
+    // intersections, and the first and last segments should be rejoined.
+    function clipAntimeridianLine(stream) {
+      var lambda0 = NaN,
+          phi0 = NaN,
+          sign0 = NaN,
+          clean; // no intersections
+
+      return {
+        lineStart: function() {
+          stream.lineStart();
+          clean = 1;
+        },
+        point: function(lambda1, phi1) {
+          var sign1 = lambda1 > 0 ? pi$3 : -pi$3,
+              delta = abs(lambda1 - lambda0);
+          if (abs(delta - pi$3) < epsilon$2) { // line crosses a pole
+            stream.point(lambda0, phi0 = (phi0 + phi1) / 2 > 0 ? halfPi$2 : -halfPi$2);
+            stream.point(sign0, phi0);
+            stream.lineEnd();
+            stream.lineStart();
+            stream.point(sign1, phi0);
+            stream.point(lambda1, phi0);
+            clean = 0;
+          } else if (sign0 !== sign1 && delta >= pi$3) { // line crosses antimeridian
+            if (abs(lambda0 - sign0) < epsilon$2) lambda0 -= sign0 * epsilon$2; // handle degeneracies
+            if (abs(lambda1 - sign1) < epsilon$2) lambda1 -= sign1 * epsilon$2;
+            phi0 = clipAntimeridianIntersect(lambda0, phi0, lambda1, phi1);
+            stream.point(sign0, phi0);
+            stream.lineEnd();
+            stream.lineStart();
+            stream.point(sign1, phi0);
+            clean = 0;
+          }
+          stream.point(lambda0 = lambda1, phi0 = phi1);
+          sign0 = sign1;
+        },
+        lineEnd: function() {
+          stream.lineEnd();
+          lambda0 = phi0 = NaN;
+        },
+        clean: function() {
+          return 2 - clean; // if intersections, rejoin first and last segments
+        }
+      };
+    }
+
+    function clipAntimeridianIntersect(lambda0, phi0, lambda1, phi1) {
+      var cosPhi0,
+          cosPhi1,
+          sinLambda0Lambda1 = sin$1(lambda0 - lambda1);
+      return abs(sinLambda0Lambda1) > epsilon$2
+          ? atan((sin$1(phi0) * (cosPhi1 = cos$1(phi1)) * sin$1(lambda1)
+              - sin$1(phi1) * (cosPhi0 = cos$1(phi0)) * sin$1(lambda0))
+              / (cosPhi0 * cosPhi1 * sinLambda0Lambda1))
+          : (phi0 + phi1) / 2;
+    }
+
+    function clipAntimeridianInterpolate(from, to, direction, stream) {
+      var phi;
+      if (from == null) {
+        phi = direction * halfPi$2;
+        stream.point(-pi$3, phi);
+        stream.point(0, phi);
+        stream.point(pi$3, phi);
+        stream.point(pi$3, 0);
+        stream.point(pi$3, -phi);
+        stream.point(0, -phi);
+        stream.point(-pi$3, -phi);
+        stream.point(-pi$3, 0);
+        stream.point(-pi$3, phi);
+      } else if (abs(from[0] - to[0]) > epsilon$2) {
+        var lambda = from[0] < to[0] ? pi$3 : -pi$3;
+        phi = direction * lambda / 2;
+        stream.point(-lambda, phi);
+        stream.point(0, phi);
+        stream.point(lambda, phi);
+      } else {
+        stream.point(to[0], to[1]);
+      }
+    }
+
+    function clipCircle(radius) {
+      var cr = cos$1(radius),
+          delta = 6 * radians,
+          smallRadius = cr > 0,
+          notHemisphere = abs(cr) > epsilon$2; // TODO optimise for this common case
+
+      function interpolate(from, to, direction, stream) {
+        circleStream(stream, radius, delta, direction, from, to);
+      }
+
+      function visible(lambda, phi) {
+        return cos$1(lambda) * cos$1(phi) > cr;
+      }
+
+      // Takes a line and cuts into visible segments. Return values used for polygon
+      // clipping: 0 - there were intersections or the line was empty; 1 - no
+      // intersections 2 - there were intersections, and the first and last segments
+      // should be rejoined.
+      function clipLine(stream) {
+        var point0, // previous point
+            c0, // code for previous point
+            v0, // visibility of previous point
+            v00, // visibility of first point
+            clean; // no intersections
+        return {
+          lineStart: function() {
+            v00 = v0 = false;
+            clean = 1;
+          },
+          point: function(lambda, phi) {
+            var point1 = [lambda, phi],
+                point2,
+                v = visible(lambda, phi),
+                c = smallRadius
+                  ? v ? 0 : code(lambda, phi)
+                  : v ? code(lambda + (lambda < 0 ? pi$3 : -pi$3), phi) : 0;
+            if (!point0 && (v00 = v0 = v)) stream.lineStart();
+            // Handle degeneracies.
+            // TODO ignore if not clipping polygons.
+            if (v !== v0) {
+              point2 = intersect(point0, point1);
+              if (!point2 || pointEqual(point0, point2) || pointEqual(point1, point2)) {
+                point1[0] += epsilon$2;
+                point1[1] += epsilon$2;
+                v = visible(point1[0], point1[1]);
+              }
+            }
+            if (v !== v0) {
+              clean = 0;
+              if (v) {
+                // outside going in
+                stream.lineStart();
+                point2 = intersect(point1, point0);
+                stream.point(point2[0], point2[1]);
+              } else {
+                // inside going out
+                point2 = intersect(point0, point1);
+                stream.point(point2[0], point2[1]);
+                stream.lineEnd();
+              }
+              point0 = point2;
+            } else if (notHemisphere && point0 && smallRadius ^ v) {
+              var t;
+              // If the codes for two points are different, or are both zero,
+              // and there this segment intersects with the small circle.
+              if (!(c & c0) && (t = intersect(point1, point0, true))) {
+                clean = 0;
+                if (smallRadius) {
+                  stream.lineStart();
+                  stream.point(t[0][0], t[0][1]);
+                  stream.point(t[1][0], t[1][1]);
+                  stream.lineEnd();
+                } else {
+                  stream.point(t[1][0], t[1][1]);
+                  stream.lineEnd();
+                  stream.lineStart();
+                  stream.point(t[0][0], t[0][1]);
+                }
+              }
+            }
+            if (v && (!point0 || !pointEqual(point0, point1))) {
+              stream.point(point1[0], point1[1]);
+            }
+            point0 = point1, v0 = v, c0 = c;
+          },
+          lineEnd: function() {
+            if (v0) stream.lineEnd();
+            point0 = null;
+          },
+          // Rejoin first and last segments if there were intersections and the first
+          // and last points were visible.
+          clean: function() {
+            return clean | ((v00 && v0) << 1);
+          }
+        };
+      }
+
+      // Intersects the great circle between a and b with the clip circle.
+      function intersect(a, b, two) {
+        var pa = cartesian(a),
+            pb = cartesian(b);
+
+        // We have two planes, n1.p = d1 and n2.p = d2.
+        // Find intersection line p(t) = c1 n1 + c2 n2 + t (n1 ⨯ n2).
+        var n1 = [1, 0, 0], // normal
+            n2 = cartesianCross(pa, pb),
+            n2n2 = cartesianDot(n2, n2),
+            n1n2 = n2[0], // cartesianDot(n1, n2),
+            determinant = n2n2 - n1n2 * n1n2;
+
+        // Two polar points.
+        if (!determinant) return !two && a;
+
+        var c1 =  cr * n2n2 / determinant,
+            c2 = -cr * n1n2 / determinant,
+            n1xn2 = cartesianCross(n1, n2),
+            A = cartesianScale(n1, c1),
+            B = cartesianScale(n2, c2);
+        cartesianAddInPlace(A, B);
+
+        // Solve |p(t)|^2 = 1.
+        var u = n1xn2,
+            w = cartesianDot(A, u),
+            uu = cartesianDot(u, u),
+            t2 = w * w - uu * (cartesianDot(A, A) - 1);
+
+        if (t2 < 0) return;
+
+        var t = sqrt(t2),
+            q = cartesianScale(u, (-w - t) / uu);
+        cartesianAddInPlace(q, A);
+        q = spherical(q);
+
+        if (!two) return q;
+
+        // Two intersection points.
+        var lambda0 = a[0],
+            lambda1 = b[0],
+            phi0 = a[1],
+            phi1 = b[1],
+            z;
+
+        if (lambda1 < lambda0) z = lambda0, lambda0 = lambda1, lambda1 = z;
+
+        var delta = lambda1 - lambda0,
+            polar = abs(delta - pi$3) < epsilon$2,
+            meridian = polar || delta < epsilon$2;
+
+        if (!polar && phi1 < phi0) z = phi0, phi0 = phi1, phi1 = z;
+
+        // Check that the first point is between a and b.
+        if (meridian
+            ? polar
+              ? phi0 + phi1 > 0 ^ q[1] < (abs(q[0] - lambda0) < epsilon$2 ? phi0 : phi1)
+              : phi0 <= q[1] && q[1] <= phi1
+            : delta > pi$3 ^ (lambda0 <= q[0] && q[0] <= lambda1)) {
+          var q1 = cartesianScale(u, (-w + t) / uu);
+          cartesianAddInPlace(q1, A);
+          return [q, spherical(q1)];
+        }
+      }
+
+      // Generates a 4-bit vector representing the location of a point relative to
+      // the small circle's bounding box.
+      function code(lambda, phi) {
+        var r = smallRadius ? radius : pi$3 - radius,
+            code = 0;
+        if (lambda < -r) code |= 1; // left
+        else if (lambda > r) code |= 2; // right
+        if (phi < -r) code |= 4; // below
+        else if (phi > r) code |= 8; // above
+        return code;
+      }
+
+      return clip(visible, clipLine, interpolate, smallRadius ? [0, -radius] : [-pi$3, radius - pi$3]);
+    }
+
+    function clipLine(a, b, x0, y0, x1, y1) {
+      var ax = a[0],
+          ay = a[1],
+          bx = b[0],
+          by = b[1],
+          t0 = 0,
+          t1 = 1,
+          dx = bx - ax,
+          dy = by - ay,
+          r;
+
+      r = x0 - ax;
+      if (!dx && r > 0) return;
+      r /= dx;
+      if (dx < 0) {
+        if (r < t0) return;
+        if (r < t1) t1 = r;
+      } else if (dx > 0) {
+        if (r > t1) return;
+        if (r > t0) t0 = r;
+      }
+
+      r = x1 - ax;
+      if (!dx && r < 0) return;
+      r /= dx;
+      if (dx < 0) {
+        if (r > t1) return;
+        if (r > t0) t0 = r;
+      } else if (dx > 0) {
+        if (r < t0) return;
+        if (r < t1) t1 = r;
+      }
+
+      r = y0 - ay;
+      if (!dy && r > 0) return;
+      r /= dy;
+      if (dy < 0) {
+        if (r < t0) return;
+        if (r < t1) t1 = r;
+      } else if (dy > 0) {
+        if (r > t1) return;
+        if (r > t0) t0 = r;
+      }
+
+      r = y1 - ay;
+      if (!dy && r < 0) return;
+      r /= dy;
+      if (dy < 0) {
+        if (r > t1) return;
+        if (r > t0) t0 = r;
+      } else if (dy > 0) {
+        if (r < t0) return;
+        if (r < t1) t1 = r;
+      }
+
+      if (t0 > 0) a[0] = ax + t0 * dx, a[1] = ay + t0 * dy;
+      if (t1 < 1) b[0] = ax + t1 * dx, b[1] = ay + t1 * dy;
+      return true;
+    }
+
+    var clipMax = 1e9, clipMin = -clipMax;
+
+    // TODO Use d3-polygon’s polygonContains here for the ring check?
+    // TODO Eliminate duplicate buffering in clipBuffer and polygon.push?
+
+    function clipRectangle(x0, y0, x1, y1) {
+
+      function visible(x, y) {
+        return x0 <= x && x <= x1 && y0 <= y && y <= y1;
+      }
+
+      function interpolate(from, to, direction, stream) {
+        var a = 0, a1 = 0;
+        if (from == null
+            || (a = corner(from, direction)) !== (a1 = corner(to, direction))
+            || comparePoint(from, to) < 0 ^ direction > 0) {
+          do stream.point(a === 0 || a === 3 ? x0 : x1, a > 1 ? y1 : y0);
+          while ((a = (a + direction + 4) % 4) !== a1);
+        } else {
+          stream.point(to[0], to[1]);
+        }
+      }
+
+      function corner(p, direction) {
+        return abs(p[0] - x0) < epsilon$2 ? direction > 0 ? 0 : 3
+            : abs(p[0] - x1) < epsilon$2 ? direction > 0 ? 2 : 1
+            : abs(p[1] - y0) < epsilon$2 ? direction > 0 ? 1 : 0
+            : direction > 0 ? 3 : 2; // abs(p[1] - y1) < epsilon
+      }
+
+      function compareIntersection(a, b) {
+        return comparePoint(a.x, b.x);
+      }
+
+      function comparePoint(a, b) {
+        var ca = corner(a, 1),
+            cb = corner(b, 1);
+        return ca !== cb ? ca - cb
+            : ca === 0 ? b[1] - a[1]
+            : ca === 1 ? a[0] - b[0]
+            : ca === 2 ? a[1] - b[1]
+            : b[0] - a[0];
+      }
+
+      return function(stream) {
+        var activeStream = stream,
+            bufferStream = clipBuffer(),
+            segments,
+            polygon,
+            ring,
+            x__, y__, v__, // first point
+            x_, y_, v_, // previous point
+            first,
+            clean;
+
+        var clipStream = {
+          point: point,
+          lineStart: lineStart,
+          lineEnd: lineEnd,
+          polygonStart: polygonStart,
+          polygonEnd: polygonEnd
+        };
+
+        function point(x, y) {
+          if (visible(x, y)) activeStream.point(x, y);
+        }
+
+        function polygonInside() {
+          var winding = 0;
+
+          for (var i = 0, n = polygon.length; i < n; ++i) {
+            for (var ring = polygon[i], j = 1, m = ring.length, point = ring[0], a0, a1, b0 = point[0], b1 = point[1]; j < m; ++j) {
+              a0 = b0, a1 = b1, point = ring[j], b0 = point[0], b1 = point[1];
+              if (a1 <= y1) { if (b1 > y1 && (b0 - a0) * (y1 - a1) > (b1 - a1) * (x0 - a0)) ++winding; }
+              else { if (b1 <= y1 && (b0 - a0) * (y1 - a1) < (b1 - a1) * (x0 - a0)) --winding; }
+            }
+          }
+
+          return winding;
+        }
+
+        // Buffer geometry within a polygon and then clip it en masse.
+        function polygonStart() {
+          activeStream = bufferStream, segments = [], polygon = [], clean = true;
+        }
+
+        function polygonEnd() {
+          var startInside = polygonInside(),
+              cleanInside = clean && startInside,
+              visible = (segments = merge(segments)).length;
+          if (cleanInside || visible) {
+            stream.polygonStart();
+            if (cleanInside) {
+              stream.lineStart();
+              interpolate(null, null, 1, stream);
+              stream.lineEnd();
+            }
+            if (visible) {
+              clipRejoin(segments, compareIntersection, startInside, interpolate, stream);
+            }
+            stream.polygonEnd();
+          }
+          activeStream = stream, segments = polygon = ring = null;
+        }
+
+        function lineStart() {
+          clipStream.point = linePoint;
+          if (polygon) polygon.push(ring = []);
+          first = true;
+          v_ = false;
+          x_ = y_ = NaN;
+        }
+
+        // TODO rather than special-case polygons, simply handle them separately.
+        // Ideally, coincident intersection points should be jittered to avoid
+        // clipping issues.
+        function lineEnd() {
+          if (segments) {
+            linePoint(x__, y__);
+            if (v__ && v_) bufferStream.rejoin();
+            segments.push(bufferStream.result());
+          }
+          clipStream.point = point;
+          if (v_) activeStream.lineEnd();
+        }
+
+        function linePoint(x, y) {
+          var v = visible(x, y);
+          if (polygon) ring.push([x, y]);
+          if (first) {
+            x__ = x, y__ = y, v__ = v;
+            first = false;
+            if (v) {
+              activeStream.lineStart();
+              activeStream.point(x, y);
+            }
+          } else {
+            if (v && v_) activeStream.point(x, y);
+            else {
+              var a = [x_ = Math.max(clipMin, Math.min(clipMax, x_)), y_ = Math.max(clipMin, Math.min(clipMax, y_))],
+                  b = [x = Math.max(clipMin, Math.min(clipMax, x)), y = Math.max(clipMin, Math.min(clipMax, y))];
+              if (clipLine(a, b, x0, y0, x1, y1)) {
+                if (!v_) {
+                  activeStream.lineStart();
+                  activeStream.point(a[0], a[1]);
+                }
+                activeStream.point(b[0], b[1]);
+                if (!v) activeStream.lineEnd();
+                clean = false;
+              } else if (v) {
+                activeStream.lineStart();
+                activeStream.point(x, y);
+                clean = false;
+              }
+            }
+          }
+          x_ = x, y_ = y, v_ = v;
+        }
+
+        return clipStream;
+      };
+    }
+
     var lengthSum = adder();
 
-    var areaSum$1 = adder(),
-        areaRingSum$1 = adder();
+    function graticuleX(y0, y1, dy) {
+      var y = sequence(y0, y1 - epsilon$2, dy).concat(y1);
+      return function(x) { return y.map(function(y) { return [x, y]; }); };
+    }
 
-    var lengthSum$1 = adder();
+    function graticuleY(x0, x1, dx) {
+      var x = sequence(x0, x1 - epsilon$2, dx).concat(x1);
+      return function(y) { return x.map(function(x) { return [x, y]; }); };
+    }
+
+    function graticule() {
+      var x1, x0, X1, X0,
+          y1, y0, Y1, Y0,
+          dx = 10, dy = dx, DX = 90, DY = 360,
+          x, y, X, Y,
+          precision = 2.5;
+
+      function graticule() {
+        return {type: "MultiLineString", coordinates: lines()};
+      }
+
+      function lines() {
+        return sequence(ceil(X0 / DX) * DX, X1, DX).map(X)
+            .concat(sequence(ceil(Y0 / DY) * DY, Y1, DY).map(Y))
+            .concat(sequence(ceil(x0 / dx) * dx, x1, dx).filter(function(x) { return abs(x % DX) > epsilon$2; }).map(x))
+            .concat(sequence(ceil(y0 / dy) * dy, y1, dy).filter(function(y) { return abs(y % DY) > epsilon$2; }).map(y));
+      }
+
+      graticule.lines = function() {
+        return lines().map(function(coordinates) { return {type: "LineString", coordinates: coordinates}; });
+      };
+
+      graticule.outline = function() {
+        return {
+          type: "Polygon",
+          coordinates: [
+            X(X0).concat(
+            Y(Y1).slice(1),
+            X(X1).reverse().slice(1),
+            Y(Y0).reverse().slice(1))
+          ]
+        };
+      };
+
+      graticule.extent = function(_) {
+        if (!arguments.length) return graticule.extentMinor();
+        return graticule.extentMajor(_).extentMinor(_);
+      };
+
+      graticule.extentMajor = function(_) {
+        if (!arguments.length) return [[X0, Y0], [X1, Y1]];
+        X0 = +_[0][0], X1 = +_[1][0];
+        Y0 = +_[0][1], Y1 = +_[1][1];
+        if (X0 > X1) _ = X0, X0 = X1, X1 = _;
+        if (Y0 > Y1) _ = Y0, Y0 = Y1, Y1 = _;
+        return graticule.precision(precision);
+      };
+
+      graticule.extentMinor = function(_) {
+        if (!arguments.length) return [[x0, y0], [x1, y1]];
+        x0 = +_[0][0], x1 = +_[1][0];
+        y0 = +_[0][1], y1 = +_[1][1];
+        if (x0 > x1) _ = x0, x0 = x1, x1 = _;
+        if (y0 > y1) _ = y0, y0 = y1, y1 = _;
+        return graticule.precision(precision);
+      };
+
+      graticule.step = function(_) {
+        if (!arguments.length) return graticule.stepMinor();
+        return graticule.stepMajor(_).stepMinor(_);
+      };
+
+      graticule.stepMajor = function(_) {
+        if (!arguments.length) return [DX, DY];
+        DX = +_[0], DY = +_[1];
+        return graticule;
+      };
+
+      graticule.stepMinor = function(_) {
+        if (!arguments.length) return [dx, dy];
+        dx = +_[0], dy = +_[1];
+        return graticule;
+      };
+
+      graticule.precision = function(_) {
+        if (!arguments.length) return precision;
+        precision = +_;
+        x = graticuleX(y0, y1, 90);
+        y = graticuleY(x0, x1, precision);
+        X = graticuleX(Y0, Y1, 90);
+        Y = graticuleY(X0, X1, precision);
+        return graticule;
+      };
+
+      return graticule
+          .extentMajor([[-180, -90 + epsilon$2], [180, 90 - epsilon$2]])
+          .extentMinor([[-180, -80 - epsilon$2], [180, 80 + epsilon$2]]);
+    }
+
+    function identity$4(x) {
+      return x;
+    }
+
+    var areaSum$1 = adder(),
+        areaRingSum$1 = adder(),
+        x00,
+        y00,
+        x0$1,
+        y0$1;
+
+    var areaStream$1 = {
+      point: noop$1,
+      lineStart: noop$1,
+      lineEnd: noop$1,
+      polygonStart: function() {
+        areaStream$1.lineStart = areaRingStart$1;
+        areaStream$1.lineEnd = areaRingEnd$1;
+      },
+      polygonEnd: function() {
+        areaStream$1.lineStart = areaStream$1.lineEnd = areaStream$1.point = noop$1;
+        areaSum$1.add(abs(areaRingSum$1));
+        areaRingSum$1.reset();
+      },
+      result: function() {
+        var area = areaSum$1 / 2;
+        areaSum$1.reset();
+        return area;
+      }
+    };
+
+    function areaRingStart$1() {
+      areaStream$1.point = areaPointFirst$1;
+    }
+
+    function areaPointFirst$1(x, y) {
+      areaStream$1.point = areaPoint$1;
+      x00 = x0$1 = x, y00 = y0$1 = y;
+    }
+
+    function areaPoint$1(x, y) {
+      areaRingSum$1.add(y0$1 * x - x0$1 * y);
+      x0$1 = x, y0$1 = y;
+    }
+
+    function areaRingEnd$1() {
+      areaPoint$1(x00, y00);
+    }
+
+    var x0$2 = Infinity,
+        y0$2 = x0$2,
+        x1 = -x0$2,
+        y1 = x1;
+
+    var boundsStream$1 = {
+      point: boundsPoint$1,
+      lineStart: noop$1,
+      lineEnd: noop$1,
+      polygonStart: noop$1,
+      polygonEnd: noop$1,
+      result: function() {
+        var bounds = [[x0$2, y0$2], [x1, y1]];
+        x1 = y1 = -(y0$2 = x0$2 = Infinity);
+        return bounds;
+      }
+    };
+
+    function boundsPoint$1(x, y) {
+      if (x < x0$2) x0$2 = x;
+      if (x > x1) x1 = x;
+      if (y < y0$2) y0$2 = y;
+      if (y > y1) y1 = y;
+    }
+
+    // TODO Enforce positive area for exterior, negative area for interior?
+
+    var X0$1 = 0,
+        Y0$1 = 0,
+        Z0$1 = 0,
+        X1$1 = 0,
+        Y1$1 = 0,
+        Z1$1 = 0,
+        X2$1 = 0,
+        Y2$1 = 0,
+        Z2$1 = 0,
+        x00$1,
+        y00$1,
+        x0$3,
+        y0$3;
+
+    var centroidStream$1 = {
+      point: centroidPoint$1,
+      lineStart: centroidLineStart$1,
+      lineEnd: centroidLineEnd$1,
+      polygonStart: function() {
+        centroidStream$1.lineStart = centroidRingStart$1;
+        centroidStream$1.lineEnd = centroidRingEnd$1;
+      },
+      polygonEnd: function() {
+        centroidStream$1.point = centroidPoint$1;
+        centroidStream$1.lineStart = centroidLineStart$1;
+        centroidStream$1.lineEnd = centroidLineEnd$1;
+      },
+      result: function() {
+        var centroid = Z2$1 ? [X2$1 / Z2$1, Y2$1 / Z2$1]
+            : Z1$1 ? [X1$1 / Z1$1, Y1$1 / Z1$1]
+            : Z0$1 ? [X0$1 / Z0$1, Y0$1 / Z0$1]
+            : [NaN, NaN];
+        X0$1 = Y0$1 = Z0$1 =
+        X1$1 = Y1$1 = Z1$1 =
+        X2$1 = Y2$1 = Z2$1 = 0;
+        return centroid;
+      }
+    };
+
+    function centroidPoint$1(x, y) {
+      X0$1 += x;
+      Y0$1 += y;
+      ++Z0$1;
+    }
+
+    function centroidLineStart$1() {
+      centroidStream$1.point = centroidPointFirstLine;
+    }
+
+    function centroidPointFirstLine(x, y) {
+      centroidStream$1.point = centroidPointLine;
+      centroidPoint$1(x0$3 = x, y0$3 = y);
+    }
+
+    function centroidPointLine(x, y) {
+      var dx = x - x0$3, dy = y - y0$3, z = sqrt(dx * dx + dy * dy);
+      X1$1 += z * (x0$3 + x) / 2;
+      Y1$1 += z * (y0$3 + y) / 2;
+      Z1$1 += z;
+      centroidPoint$1(x0$3 = x, y0$3 = y);
+    }
+
+    function centroidLineEnd$1() {
+      centroidStream$1.point = centroidPoint$1;
+    }
+
+    function centroidRingStart$1() {
+      centroidStream$1.point = centroidPointFirstRing;
+    }
+
+    function centroidRingEnd$1() {
+      centroidPointRing(x00$1, y00$1);
+    }
+
+    function centroidPointFirstRing(x, y) {
+      centroidStream$1.point = centroidPointRing;
+      centroidPoint$1(x00$1 = x0$3 = x, y00$1 = y0$3 = y);
+    }
+
+    function centroidPointRing(x, y) {
+      var dx = x - x0$3,
+          dy = y - y0$3,
+          z = sqrt(dx * dx + dy * dy);
+
+      X1$1 += z * (x0$3 + x) / 2;
+      Y1$1 += z * (y0$3 + y) / 2;
+      Z1$1 += z;
+
+      z = y0$3 * x - x0$3 * y;
+      X2$1 += z * (x0$3 + x);
+      Y2$1 += z * (y0$3 + y);
+      Z2$1 += z * 3;
+      centroidPoint$1(x0$3 = x, y0$3 = y);
+    }
+
+    function PathContext(context) {
+      this._context = context;
+    }
+
+    PathContext.prototype = {
+      _radius: 4.5,
+      pointRadius: function(_) {
+        return this._radius = _, this;
+      },
+      polygonStart: function() {
+        this._line = 0;
+      },
+      polygonEnd: function() {
+        this._line = NaN;
+      },
+      lineStart: function() {
+        this._point = 0;
+      },
+      lineEnd: function() {
+        if (this._line === 0) this._context.closePath();
+        this._point = NaN;
+      },
+      point: function(x, y) {
+        switch (this._point) {
+          case 0: {
+            this._context.moveTo(x, y);
+            this._point = 1;
+            break;
+          }
+          case 1: {
+            this._context.lineTo(x, y);
+            break;
+          }
+          default: {
+            this._context.moveTo(x + this._radius, y);
+            this._context.arc(x, y, this._radius, 0, tau$3);
+            break;
+          }
+        }
+      },
+      result: noop$1
+    };
+
+    var lengthSum$1 = adder(),
+        lengthRing,
+        x00$2,
+        y00$2,
+        x0$4,
+        y0$4;
+
+    var lengthStream$1 = {
+      point: noop$1,
+      lineStart: function() {
+        lengthStream$1.point = lengthPointFirst$1;
+      },
+      lineEnd: function() {
+        if (lengthRing) lengthPoint$1(x00$2, y00$2);
+        lengthStream$1.point = noop$1;
+      },
+      polygonStart: function() {
+        lengthRing = true;
+      },
+      polygonEnd: function() {
+        lengthRing = null;
+      },
+      result: function() {
+        var length = +lengthSum$1;
+        lengthSum$1.reset();
+        return length;
+      }
+    };
+
+    function lengthPointFirst$1(x, y) {
+      lengthStream$1.point = lengthPoint$1;
+      x00$2 = x0$4 = x, y00$2 = y0$4 = y;
+    }
+
+    function lengthPoint$1(x, y) {
+      x0$4 -= x, y0$4 -= y;
+      lengthSum$1.add(sqrt(x0$4 * x0$4 + y0$4 * y0$4));
+      x0$4 = x, y0$4 = y;
+    }
+
+    function PathString() {
+      this._string = [];
+    }
+
+    PathString.prototype = {
+      _radius: 4.5,
+      _circle: circle$1(4.5),
+      pointRadius: function(_) {
+        if ((_ = +_) !== this._radius) this._radius = _, this._circle = null;
+        return this;
+      },
+      polygonStart: function() {
+        this._line = 0;
+      },
+      polygonEnd: function() {
+        this._line = NaN;
+      },
+      lineStart: function() {
+        this._point = 0;
+      },
+      lineEnd: function() {
+        if (this._line === 0) this._string.push("Z");
+        this._point = NaN;
+      },
+      point: function(x, y) {
+        switch (this._point) {
+          case 0: {
+            this._string.push("M", x, ",", y);
+            this._point = 1;
+            break;
+          }
+          case 1: {
+            this._string.push("L", x, ",", y);
+            break;
+          }
+          default: {
+            if (this._circle == null) this._circle = circle$1(this._radius);
+            this._string.push("M", x, ",", y, this._circle);
+            break;
+          }
+        }
+      },
+      result: function() {
+        if (this._string.length) {
+          var result = this._string.join("");
+          this._string = [];
+          return result;
+        } else {
+          return null;
+        }
+      }
+    };
+
+    function circle$1(radius) {
+      return "m0," + radius
+          + "a" + radius + "," + radius + " 0 1,1 0," + -2 * radius
+          + "a" + radius + "," + radius + " 0 1,1 0," + 2 * radius
+          + "z";
+    }
+
+    function index$1(projection, context) {
+      var pointRadius = 4.5,
+          projectionStream,
+          contextStream;
+
+      function path(object) {
+        if (object) {
+          if (typeof pointRadius === "function") contextStream.pointRadius(+pointRadius.apply(this, arguments));
+          geoStream(object, projectionStream(contextStream));
+        }
+        return contextStream.result();
+      }
+
+      path.area = function(object) {
+        geoStream(object, projectionStream(areaStream$1));
+        return areaStream$1.result();
+      };
+
+      path.measure = function(object) {
+        geoStream(object, projectionStream(lengthStream$1));
+        return lengthStream$1.result();
+      };
+
+      path.bounds = function(object) {
+        geoStream(object, projectionStream(boundsStream$1));
+        return boundsStream$1.result();
+      };
+
+      path.centroid = function(object) {
+        geoStream(object, projectionStream(centroidStream$1));
+        return centroidStream$1.result();
+      };
+
+      path.projection = function(_) {
+        return arguments.length ? (projectionStream = _ == null ? (projection = null, identity$4) : (projection = _).stream, path) : projection;
+      };
+
+      path.context = function(_) {
+        if (!arguments.length) return context;
+        contextStream = _ == null ? (context = null, new PathString) : new PathContext(context = _);
+        if (typeof pointRadius !== "function") contextStream.pointRadius(pointRadius);
+        return path;
+      };
+
+      path.pointRadius = function(_) {
+        if (!arguments.length) return pointRadius;
+        pointRadius = typeof _ === "function" ? _ : (contextStream.pointRadius(+_), +_);
+        return path;
+      };
+
+      return path.projection(projection).context(context);
+    }
+
+    function transformer(methods) {
+      return function(stream) {
+        var s = new TransformStream;
+        for (var key in methods) s[key] = methods[key];
+        s.stream = stream;
+        return s;
+      };
+    }
+
+    function TransformStream() {}
+
+    TransformStream.prototype = {
+      constructor: TransformStream,
+      point: function(x, y) { this.stream.point(x, y); },
+      sphere: function() { this.stream.sphere(); },
+      lineStart: function() { this.stream.lineStart(); },
+      lineEnd: function() { this.stream.lineEnd(); },
+      polygonStart: function() { this.stream.polygonStart(); },
+      polygonEnd: function() { this.stream.polygonEnd(); }
+    };
+
+    function fit(projection, fitBounds, object) {
+      var clip = projection.clipExtent && projection.clipExtent();
+      projection.scale(150).translate([0, 0]);
+      if (clip != null) projection.clipExtent(null);
+      geoStream(object, projection.stream(boundsStream$1));
+      fitBounds(boundsStream$1.result());
+      if (clip != null) projection.clipExtent(clip);
+      return projection;
+    }
+
+    function fitExtent(projection, extent, object) {
+      return fit(projection, function(b) {
+        var w = extent[1][0] - extent[0][0],
+            h = extent[1][1] - extent[0][1],
+            k = Math.min(w / (b[1][0] - b[0][0]), h / (b[1][1] - b[0][1])),
+            x = +extent[0][0] + (w - k * (b[1][0] + b[0][0])) / 2,
+            y = +extent[0][1] + (h - k * (b[1][1] + b[0][1])) / 2;
+        projection.scale(150 * k).translate([x, y]);
+      }, object);
+    }
+
+    function fitSize(projection, size, object) {
+      return fitExtent(projection, [[0, 0], size], object);
+    }
+
+    function fitWidth(projection, width, object) {
+      return fit(projection, function(b) {
+        var w = +width,
+            k = w / (b[1][0] - b[0][0]),
+            x = (w - k * (b[1][0] + b[0][0])) / 2,
+            y = -k * b[0][1];
+        projection.scale(150 * k).translate([x, y]);
+      }, object);
+    }
+
+    function fitHeight(projection, height, object) {
+      return fit(projection, function(b) {
+        var h = +height,
+            k = h / (b[1][1] - b[0][1]),
+            x = -k * b[0][0],
+            y = (h - k * (b[1][1] + b[0][1])) / 2;
+        projection.scale(150 * k).translate([x, y]);
+      }, object);
+    }
+
+    var maxDepth = 16, // maximum depth of subdivision
+        cosMinDistance = cos$1(30 * radians); // cos(minimum angular distance)
+
+    function resample(project, delta2) {
+      return +delta2 ? resample$1(project, delta2) : resampleNone(project);
+    }
+
+    function resampleNone(project) {
+      return transformer({
+        point: function(x, y) {
+          x = project(x, y);
+          this.stream.point(x[0], x[1]);
+        }
+      });
+    }
+
+    function resample$1(project, delta2) {
+
+      function resampleLineTo(x0, y0, lambda0, a0, b0, c0, x1, y1, lambda1, a1, b1, c1, depth, stream) {
+        var dx = x1 - x0,
+            dy = y1 - y0,
+            d2 = dx * dx + dy * dy;
+        if (d2 > 4 * delta2 && depth--) {
+          var a = a0 + a1,
+              b = b0 + b1,
+              c = c0 + c1,
+              m = sqrt(a * a + b * b + c * c),
+              phi2 = asin(c /= m),
+              lambda2 = abs(abs(c) - 1) < epsilon$2 || abs(lambda0 - lambda1) < epsilon$2 ? (lambda0 + lambda1) / 2 : atan2(b, a),
+              p = project(lambda2, phi2),
+              x2 = p[0],
+              y2 = p[1],
+              dx2 = x2 - x0,
+              dy2 = y2 - y0,
+              dz = dy * dx2 - dx * dy2;
+          if (dz * dz / d2 > delta2 // perpendicular projected distance
+              || abs((dx * dx2 + dy * dy2) / d2 - 0.5) > 0.3 // midpoint close to an end
+              || a0 * a1 + b0 * b1 + c0 * c1 < cosMinDistance) { // angular distance
+            resampleLineTo(x0, y0, lambda0, a0, b0, c0, x2, y2, lambda2, a /= m, b /= m, c, depth, stream);
+            stream.point(x2, y2);
+            resampleLineTo(x2, y2, lambda2, a, b, c, x1, y1, lambda1, a1, b1, c1, depth, stream);
+          }
+        }
+      }
+      return function(stream) {
+        var lambda00, x00, y00, a00, b00, c00, // first point
+            lambda0, x0, y0, a0, b0, c0; // previous point
+
+        var resampleStream = {
+          point: point,
+          lineStart: lineStart,
+          lineEnd: lineEnd,
+          polygonStart: function() { stream.polygonStart(); resampleStream.lineStart = ringStart; },
+          polygonEnd: function() { stream.polygonEnd(); resampleStream.lineStart = lineStart; }
+        };
+
+        function point(x, y) {
+          x = project(x, y);
+          stream.point(x[0], x[1]);
+        }
+
+        function lineStart() {
+          x0 = NaN;
+          resampleStream.point = linePoint;
+          stream.lineStart();
+        }
+
+        function linePoint(lambda, phi) {
+          var c = cartesian([lambda, phi]), p = project(lambda, phi);
+          resampleLineTo(x0, y0, lambda0, a0, b0, c0, x0 = p[0], y0 = p[1], lambda0 = lambda, a0 = c[0], b0 = c[1], c0 = c[2], maxDepth, stream);
+          stream.point(x0, y0);
+        }
+
+        function lineEnd() {
+          resampleStream.point = point;
+          stream.lineEnd();
+        }
+
+        function ringStart() {
+          lineStart();
+          resampleStream.point = ringPoint;
+          resampleStream.lineEnd = ringEnd;
+        }
+
+        function ringPoint(lambda, phi) {
+          linePoint(lambda00 = lambda, phi), x00 = x0, y00 = y0, a00 = a0, b00 = b0, c00 = c0;
+          resampleStream.point = linePoint;
+        }
+
+        function ringEnd() {
+          resampleLineTo(x0, y0, lambda0, a0, b0, c0, x00, y00, lambda00, a00, b00, c00, maxDepth, stream);
+          resampleStream.lineEnd = lineEnd;
+          lineEnd();
+        }
+
+        return resampleStream;
+      };
+    }
+
+    var transformRadians = transformer({
+      point: function(x, y) {
+        this.stream.point(x * radians, y * radians);
+      }
+    });
+
+    function transformRotate(rotate) {
+      return transformer({
+        point: function(x, y) {
+          var r = rotate(x, y);
+          return this.stream.point(r[0], r[1]);
+        }
+      });
+    }
+
+    function projection(project) {
+      return projectionMutator(function() { return project; })();
+    }
+
+    function projectionMutator(projectAt) {
+      var project,
+          k = 150, // scale
+          x = 480, y = 250, // translate
+          dx, dy, lambda = 0, phi = 0, // center
+          deltaLambda = 0, deltaPhi = 0, deltaGamma = 0, rotate, projectRotate, // rotate
+          theta = null, preclip = clipAntimeridian, // clip angle
+          x0 = null, y0, x1, y1, postclip = identity$4, // clip extent
+          delta2 = 0.5, projectResample = resample(projectTransform, delta2), // precision
+          cache,
+          cacheStream;
+
+      function projection(point) {
+        point = projectRotate(point[0] * radians, point[1] * radians);
+        return [point[0] * k + dx, dy - point[1] * k];
+      }
+
+      function invert(point) {
+        point = projectRotate.invert((point[0] - dx) / k, (dy - point[1]) / k);
+        return point && [point[0] * degrees$1, point[1] * degrees$1];
+      }
+
+      function projectTransform(x, y) {
+        return x = project(x, y), [x[0] * k + dx, dy - x[1] * k];
+      }
+
+      projection.stream = function(stream) {
+        return cache && cacheStream === stream ? cache : cache = transformRadians(transformRotate(rotate)(preclip(projectResample(postclip(cacheStream = stream)))));
+      };
+
+      projection.preclip = function(_) {
+        return arguments.length ? (preclip = _, theta = undefined, reset()) : preclip;
+      };
+
+      projection.postclip = function(_) {
+        return arguments.length ? (postclip = _, x0 = y0 = x1 = y1 = null, reset()) : postclip;
+      };
+
+      projection.clipAngle = function(_) {
+        return arguments.length ? (preclip = +_ ? clipCircle(theta = _ * radians) : (theta = null, clipAntimeridian), reset()) : theta * degrees$1;
+      };
+
+      projection.clipExtent = function(_) {
+        return arguments.length ? (postclip = _ == null ? (x0 = y0 = x1 = y1 = null, identity$4) : clipRectangle(x0 = +_[0][0], y0 = +_[0][1], x1 = +_[1][0], y1 = +_[1][1]), reset()) : x0 == null ? null : [[x0, y0], [x1, y1]];
+      };
+
+      projection.scale = function(_) {
+        return arguments.length ? (k = +_, recenter()) : k;
+      };
+
+      projection.translate = function(_) {
+        return arguments.length ? (x = +_[0], y = +_[1], recenter()) : [x, y];
+      };
+
+      projection.center = function(_) {
+        return arguments.length ? (lambda = _[0] % 360 * radians, phi = _[1] % 360 * radians, recenter()) : [lambda * degrees$1, phi * degrees$1];
+      };
+
+      projection.rotate = function(_) {
+        return arguments.length ? (deltaLambda = _[0] % 360 * radians, deltaPhi = _[1] % 360 * radians, deltaGamma = _.length > 2 ? _[2] % 360 * radians : 0, recenter()) : [deltaLambda * degrees$1, deltaPhi * degrees$1, deltaGamma * degrees$1];
+      };
+
+      projection.precision = function(_) {
+        return arguments.length ? (projectResample = resample(projectTransform, delta2 = _ * _), reset()) : sqrt(delta2);
+      };
+
+      projection.fitExtent = function(extent, object) {
+        return fitExtent(projection, extent, object);
+      };
+
+      projection.fitSize = function(size, object) {
+        return fitSize(projection, size, object);
+      };
+
+      projection.fitWidth = function(width, object) {
+        return fitWidth(projection, width, object);
+      };
+
+      projection.fitHeight = function(height, object) {
+        return fitHeight(projection, height, object);
+      };
+
+      function recenter() {
+        projectRotate = compose(rotate = rotateRadians(deltaLambda, deltaPhi, deltaGamma), project);
+        var center = project(lambda, phi);
+        dx = x - center[0] * k;
+        dy = y + center[1] * k;
+        return reset();
+      }
+
+      function reset() {
+        cache = cacheStream = null;
+        return projection;
+      }
+
+      return function() {
+        project = projectAt.apply(this, arguments);
+        projection.invert = project.invert && invert;
+        return recenter();
+      };
+    }
+
+    function azimuthalInvert(angle) {
+      return function(x, y) {
+        var z = sqrt(x * x + y * y),
+            c = angle(z),
+            sc = sin$1(c),
+            cc = cos$1(c);
+        return [
+          atan2(x * sc, z * cc),
+          asin(z && y * sc / z)
+        ];
+      }
+    }
+
+    function orthographicRaw(x, y) {
+      return [cos$1(y) * sin$1(x), sin$1(y)];
+    }
+
+    orthographicRaw.invert = azimuthalInvert(asin);
+
+    function orthographic() {
+      return projection(orthographicRaw)
+          .scale(249.5)
+          .clipAngle(90 + epsilon$2);
+    }
 
     function count(node) {
       var sum = 0,
@@ -7459,6 +9496,488 @@
       return new Step(context, 1);
     }
 
+    function constant$12(x) {
+      return function() {
+        return x;
+      };
+    }
+
+    function ZoomEvent(target, type, transform) {
+      this.target = target;
+      this.type = type;
+      this.transform = transform;
+    }
+
+    function Transform(k, x, y) {
+      this.k = k;
+      this.x = x;
+      this.y = y;
+    }
+
+    Transform.prototype = {
+      constructor: Transform,
+      scale: function(k) {
+        return k === 1 ? this : new Transform(this.k * k, this.x, this.y);
+      },
+      translate: function(x, y) {
+        return x === 0 & y === 0 ? this : new Transform(this.k, this.x + this.k * x, this.y + this.k * y);
+      },
+      apply: function(point) {
+        return [point[0] * this.k + this.x, point[1] * this.k + this.y];
+      },
+      applyX: function(x) {
+        return x * this.k + this.x;
+      },
+      applyY: function(y) {
+        return y * this.k + this.y;
+      },
+      invert: function(location) {
+        return [(location[0] - this.x) / this.k, (location[1] - this.y) / this.k];
+      },
+      invertX: function(x) {
+        return (x - this.x) / this.k;
+      },
+      invertY: function(y) {
+        return (y - this.y) / this.k;
+      },
+      rescaleX: function(x) {
+        return x.copy().domain(x.range().map(this.invertX, this).map(x.invert, x));
+      },
+      rescaleY: function(y) {
+        return y.copy().domain(y.range().map(this.invertY, this).map(y.invert, y));
+      },
+      toString: function() {
+        return "translate(" + this.x + "," + this.y + ") scale(" + this.k + ")";
+      }
+    };
+
+    var identity$8 = new Transform(1, 0, 0);
+
+    function nopropagation$2() {
+      event.stopImmediatePropagation();
+    }
+
+    function noevent$2() {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+
+    // Ignore right-click, since that should open the context menu.
+    function defaultFilter$2() {
+      return !event.button;
+    }
+
+    function defaultExtent$1() {
+      var e = this, w, h;
+      if (e instanceof SVGElement) {
+        e = e.ownerSVGElement || e;
+        w = e.width.baseVal.value;
+        h = e.height.baseVal.value;
+      } else {
+        w = e.clientWidth;
+        h = e.clientHeight;
+      }
+      return [[0, 0], [w, h]];
+    }
+
+    function defaultTransform() {
+      return this.__zoom || identity$8;
+    }
+
+    function defaultWheelDelta() {
+      return -event.deltaY * (event.deltaMode ? 120 : 1) / 500;
+    }
+
+    function defaultTouchable$1() {
+      return "ontouchstart" in this;
+    }
+
+    function defaultConstrain(transform, extent, translateExtent) {
+      var dx0 = transform.invertX(extent[0][0]) - translateExtent[0][0],
+          dx1 = transform.invertX(extent[1][0]) - translateExtent[1][0],
+          dy0 = transform.invertY(extent[0][1]) - translateExtent[0][1],
+          dy1 = transform.invertY(extent[1][1]) - translateExtent[1][1];
+      return transform.translate(
+        dx1 > dx0 ? (dx0 + dx1) / 2 : Math.min(0, dx0) || Math.max(0, dx1),
+        dy1 > dy0 ? (dy0 + dy1) / 2 : Math.min(0, dy0) || Math.max(0, dy1)
+      );
+    }
+
+    function zoom() {
+      var filter = defaultFilter$2,
+          extent = defaultExtent$1,
+          constrain = defaultConstrain,
+          wheelDelta = defaultWheelDelta,
+          touchable = defaultTouchable$1,
+          scaleExtent = [0, Infinity],
+          translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]],
+          duration = 250,
+          interpolate = interpolateZoom,
+          gestures = [],
+          listeners = dispatch("start", "zoom", "end"),
+          touchstarting,
+          touchending,
+          touchDelay = 500,
+          wheelDelay = 150,
+          clickDistance2 = 0;
+
+      function zoom(selection$$1) {
+        selection$$1
+            .property("__zoom", defaultTransform)
+            .on("wheel.zoom", wheeled)
+            .on("mousedown.zoom", mousedowned)
+            .on("dblclick.zoom", dblclicked)
+          .filter(touchable)
+            .on("touchstart.zoom", touchstarted)
+            .on("touchmove.zoom", touchmoved)
+            .on("touchend.zoom touchcancel.zoom", touchended)
+            .style("touch-action", "none")
+            .style("-webkit-tap-highlight-color", "rgba(0,0,0,0)");
+      }
+
+      zoom.transform = function(collection, transform) {
+        var selection$$1 = collection.selection ? collection.selection() : collection;
+        selection$$1.property("__zoom", defaultTransform);
+        if (collection !== selection$$1) {
+          schedule(collection, transform);
+        } else {
+          selection$$1.interrupt().each(function() {
+            gesture(this, arguments)
+                .start()
+                .zoom(null, typeof transform === "function" ? transform.apply(this, arguments) : transform)
+                .end();
+          });
+        }
+      };
+
+      zoom.scaleBy = function(selection$$1, k) {
+        zoom.scaleTo(selection$$1, function() {
+          var k0 = this.__zoom.k,
+              k1 = typeof k === "function" ? k.apply(this, arguments) : k;
+          return k0 * k1;
+        });
+      };
+
+      zoom.scaleTo = function(selection$$1, k) {
+        zoom.transform(selection$$1, function() {
+          var e = extent.apply(this, arguments),
+              t0 = this.__zoom,
+              p0 = centroid(e),
+              p1 = t0.invert(p0),
+              k1 = typeof k === "function" ? k.apply(this, arguments) : k;
+          return constrain(translate(scale(t0, k1), p0, p1), e, translateExtent);
+        });
+      };
+
+      zoom.translateBy = function(selection$$1, x, y) {
+        zoom.transform(selection$$1, function() {
+          return constrain(this.__zoom.translate(
+            typeof x === "function" ? x.apply(this, arguments) : x,
+            typeof y === "function" ? y.apply(this, arguments) : y
+          ), extent.apply(this, arguments), translateExtent);
+        });
+      };
+
+      zoom.translateTo = function(selection$$1, x, y) {
+        zoom.transform(selection$$1, function() {
+          var e = extent.apply(this, arguments),
+              t = this.__zoom,
+              p = centroid(e);
+          return constrain(identity$8.translate(p[0], p[1]).scale(t.k).translate(
+            typeof x === "function" ? -x.apply(this, arguments) : -x,
+            typeof y === "function" ? -y.apply(this, arguments) : -y
+          ), e, translateExtent);
+        });
+      };
+
+      function scale(transform, k) {
+        k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], k));
+        return k === transform.k ? transform : new Transform(k, transform.x, transform.y);
+      }
+
+      function translate(transform, p0, p1) {
+        var x = p0[0] - p1[0] * transform.k, y = p0[1] - p1[1] * transform.k;
+        return x === transform.x && y === transform.y ? transform : new Transform(transform.k, x, y);
+      }
+
+      function centroid(extent) {
+        return [(+extent[0][0] + +extent[1][0]) / 2, (+extent[0][1] + +extent[1][1]) / 2];
+      }
+
+      function schedule(transition$$1, transform, center) {
+        transition$$1
+            .on("start.zoom", function() { gesture(this, arguments).start(); })
+            .on("interrupt.zoom end.zoom", function() { gesture(this, arguments).end(); })
+            .tween("zoom", function() {
+              var that = this,
+                  args = arguments,
+                  g = gesture(that, args),
+                  e = extent.apply(that, args),
+                  p = center || centroid(e),
+                  w = Math.max(e[1][0] - e[0][0], e[1][1] - e[0][1]),
+                  a = that.__zoom,
+                  b = typeof transform === "function" ? transform.apply(that, args) : transform,
+                  i = interpolate(a.invert(p).concat(w / a.k), b.invert(p).concat(w / b.k));
+              return function(t) {
+                if (t === 1) t = b; // Avoid rounding error on end.
+                else { var l = i(t), k = w / l[2]; t = new Transform(k, p[0] - l[0] * k, p[1] - l[1] * k); }
+                g.zoom(null, t);
+              };
+            });
+      }
+
+      function gesture(that, args) {
+        for (var i = 0, n = gestures.length, g; i < n; ++i) {
+          if ((g = gestures[i]).that === that) {
+            return g;
+          }
+        }
+        return new Gesture(that, args);
+      }
+
+      function Gesture(that, args) {
+        this.that = that;
+        this.args = args;
+        this.index = -1;
+        this.active = 0;
+        this.extent = extent.apply(that, args);
+      }
+
+      Gesture.prototype = {
+        start: function() {
+          if (++this.active === 1) {
+            this.index = gestures.push(this) - 1;
+            this.emit("start");
+          }
+          return this;
+        },
+        zoom: function(key, transform) {
+          if (this.mouse && key !== "mouse") this.mouse[1] = transform.invert(this.mouse[0]);
+          if (this.touch0 && key !== "touch") this.touch0[1] = transform.invert(this.touch0[0]);
+          if (this.touch1 && key !== "touch") this.touch1[1] = transform.invert(this.touch1[0]);
+          this.that.__zoom = transform;
+          this.emit("zoom");
+          return this;
+        },
+        end: function() {
+          if (--this.active === 0) {
+            gestures.splice(this.index, 1);
+            this.index = -1;
+            this.emit("end");
+          }
+          return this;
+        },
+        emit: function(type) {
+          customEvent(new ZoomEvent(zoom, type, this.that.__zoom), listeners.apply, listeners, [type, this.that, this.args]);
+        }
+      };
+
+      function wheeled() {
+        if (!filter.apply(this, arguments)) return;
+        var g = gesture(this, arguments),
+            t = this.__zoom,
+            k = Math.max(scaleExtent[0], Math.min(scaleExtent[1], t.k * Math.pow(2, wheelDelta.apply(this, arguments)))),
+            p = mouse(this);
+
+        // If the mouse is in the same location as before, reuse it.
+        // If there were recent wheel events, reset the wheel idle timeout.
+        if (g.wheel) {
+          if (g.mouse[0][0] !== p[0] || g.mouse[0][1] !== p[1]) {
+            g.mouse[1] = t.invert(g.mouse[0] = p);
+          }
+          clearTimeout(g.wheel);
+        }
+
+        // If this wheel event won’t trigger a transform change, ignore it.
+        else if (t.k === k) return;
+
+        // Otherwise, capture the mouse point and location at the start.
+        else {
+          g.mouse = [p, t.invert(p)];
+          interrupt(this);
+          g.start();
+        }
+
+        noevent$2();
+        g.wheel = setTimeout(wheelidled, wheelDelay);
+        g.zoom("mouse", constrain(translate(scale(t, k), g.mouse[0], g.mouse[1]), g.extent, translateExtent));
+
+        function wheelidled() {
+          g.wheel = null;
+          g.end();
+        }
+      }
+
+      function mousedowned() {
+        if (touchending || !filter.apply(this, arguments)) return;
+        var g = gesture(this, arguments),
+            v = select(event.view).on("mousemove.zoom", mousemoved, true).on("mouseup.zoom", mouseupped, true),
+            p = mouse(this),
+            x0 = event.clientX,
+            y0 = event.clientY;
+
+        dragDisable(event.view);
+        nopropagation$2();
+        g.mouse = [p, this.__zoom.invert(p)];
+        interrupt(this);
+        g.start();
+
+        function mousemoved() {
+          noevent$2();
+          if (!g.moved) {
+            var dx = event.clientX - x0, dy = event.clientY - y0;
+            g.moved = dx * dx + dy * dy > clickDistance2;
+          }
+          g.zoom("mouse", constrain(translate(g.that.__zoom, g.mouse[0] = mouse(g.that), g.mouse[1]), g.extent, translateExtent));
+        }
+
+        function mouseupped() {
+          v.on("mousemove.zoom mouseup.zoom", null);
+          yesdrag(event.view, g.moved);
+          noevent$2();
+          g.end();
+        }
+      }
+
+      function dblclicked() {
+        if (!filter.apply(this, arguments)) return;
+        var t0 = this.__zoom,
+            p0 = mouse(this),
+            p1 = t0.invert(p0),
+            k1 = t0.k * (event.shiftKey ? 0.5 : 2),
+            t1 = constrain(translate(scale(t0, k1), p0, p1), extent.apply(this, arguments), translateExtent);
+
+        noevent$2();
+        if (duration > 0) select(this).transition().duration(duration).call(schedule, t1, p0);
+        else select(this).call(zoom.transform, t1);
+      }
+
+      function touchstarted() {
+        if (!filter.apply(this, arguments)) return;
+        var g = gesture(this, arguments),
+            touches$$1 = event.changedTouches,
+            started,
+            n = touches$$1.length, i, t, p;
+
+        nopropagation$2();
+        for (i = 0; i < n; ++i) {
+          t = touches$$1[i], p = touch(this, touches$$1, t.identifier);
+          p = [p, this.__zoom.invert(p), t.identifier];
+          if (!g.touch0) g.touch0 = p, started = true;
+          else if (!g.touch1) g.touch1 = p;
+        }
+
+        // If this is a dbltap, reroute to the (optional) dblclick.zoom handler.
+        if (touchstarting) {
+          touchstarting = clearTimeout(touchstarting);
+          if (!g.touch1) {
+            g.end();
+            p = select(this).on("dblclick.zoom");
+            if (p) p.apply(this, arguments);
+            return;
+          }
+        }
+
+        if (started) {
+          touchstarting = setTimeout(function() { touchstarting = null; }, touchDelay);
+          interrupt(this);
+          g.start();
+        }
+      }
+
+      function touchmoved() {
+        var g = gesture(this, arguments),
+            touches$$1 = event.changedTouches,
+            n = touches$$1.length, i, t, p, l;
+
+        noevent$2();
+        if (touchstarting) touchstarting = clearTimeout(touchstarting);
+        for (i = 0; i < n; ++i) {
+          t = touches$$1[i], p = touch(this, touches$$1, t.identifier);
+          if (g.touch0 && g.touch0[2] === t.identifier) g.touch0[0] = p;
+          else if (g.touch1 && g.touch1[2] === t.identifier) g.touch1[0] = p;
+        }
+        t = g.that.__zoom;
+        if (g.touch1) {
+          var p0 = g.touch0[0], l0 = g.touch0[1],
+              p1 = g.touch1[0], l1 = g.touch1[1],
+              dp = (dp = p1[0] - p0[0]) * dp + (dp = p1[1] - p0[1]) * dp,
+              dl = (dl = l1[0] - l0[0]) * dl + (dl = l1[1] - l0[1]) * dl;
+          t = scale(t, Math.sqrt(dp / dl));
+          p = [(p0[0] + p1[0]) / 2, (p0[1] + p1[1]) / 2];
+          l = [(l0[0] + l1[0]) / 2, (l0[1] + l1[1]) / 2];
+        }
+        else if (g.touch0) p = g.touch0[0], l = g.touch0[1];
+        else return;
+        g.zoom("touch", constrain(translate(t, p, l), g.extent, translateExtent));
+      }
+
+      function touchended() {
+        var g = gesture(this, arguments),
+            touches$$1 = event.changedTouches,
+            n = touches$$1.length, i, t;
+
+        nopropagation$2();
+        if (touchending) clearTimeout(touchending);
+        touchending = setTimeout(function() { touchending = null; }, touchDelay);
+        for (i = 0; i < n; ++i) {
+          t = touches$$1[i];
+          if (g.touch0 && g.touch0[2] === t.identifier) delete g.touch0;
+          else if (g.touch1 && g.touch1[2] === t.identifier) delete g.touch1;
+        }
+        if (g.touch1 && !g.touch0) g.touch0 = g.touch1, delete g.touch1;
+        if (g.touch0) g.touch0[1] = this.__zoom.invert(g.touch0[0]);
+        else g.end();
+      }
+
+      zoom.wheelDelta = function(_) {
+        return arguments.length ? (wheelDelta = typeof _ === "function" ? _ : constant$12(+_), zoom) : wheelDelta;
+      };
+
+      zoom.filter = function(_) {
+        return arguments.length ? (filter = typeof _ === "function" ? _ : constant$12(!!_), zoom) : filter;
+      };
+
+      zoom.touchable = function(_) {
+        return arguments.length ? (touchable = typeof _ === "function" ? _ : constant$12(!!_), zoom) : touchable;
+      };
+
+      zoom.extent = function(_) {
+        return arguments.length ? (extent = typeof _ === "function" ? _ : constant$12([[+_[0][0], +_[0][1]], [+_[1][0], +_[1][1]]]), zoom) : extent;
+      };
+
+      zoom.scaleExtent = function(_) {
+        return arguments.length ? (scaleExtent[0] = +_[0], scaleExtent[1] = +_[1], zoom) : [scaleExtent[0], scaleExtent[1]];
+      };
+
+      zoom.translateExtent = function(_) {
+        return arguments.length ? (translateExtent[0][0] = +_[0][0], translateExtent[1][0] = +_[1][0], translateExtent[0][1] = +_[0][1], translateExtent[1][1] = +_[1][1], zoom) : [[translateExtent[0][0], translateExtent[0][1]], [translateExtent[1][0], translateExtent[1][1]]];
+      };
+
+      zoom.constrain = function(_) {
+        return arguments.length ? (constrain = _, zoom) : constrain;
+      };
+
+      zoom.duration = function(_) {
+        return arguments.length ? (duration = +_, zoom) : duration;
+      };
+
+      zoom.interpolate = function(_) {
+        return arguments.length ? (interpolate = _, zoom) : interpolate;
+      };
+
+      zoom.on = function() {
+        var value = listeners.on.apply(listeners, arguments);
+        return value === listeners ? zoom : value;
+      };
+
+      zoom.clickDistance = function(_) {
+        return arguments.length ? (clickDistance2 = (_ = +_) * _, zoom) : Math.sqrt(clickDistance2);
+      };
+
+      return zoom;
+    }
+
     /*!
      * jQuery JavaScript Library v1.12.4
      * http://jquery.com/
@@ -7496,7 +10015,7 @@
     	}
 
     // Pass this if window is not defined yet
-    }(typeof window !== "undefined" ? window : undefined, function( window, noGlobal ) {
+    }(typeof window !== "undefined" ? window : window, function( window, noGlobal ) {
 
     // Support: Firefox 18+
     // Can't be in strict mode, several libs including ASP.NET trace
@@ -18489,11 +21008,11 @@
     /**
      * An interactive D3.js component to render trees as an SVG flat bubble tree.
      */
-    var BubbleTree = /** @class */ (function () {
-        function BubbleTree() {
+    class BubbleTree {
+        constructor() {
             this.selections = {};
         }
-        BubbleTree.prototype.update = function () {
+        update() {
             this.diameter = Math.min(this.config.container.clientWidth, this.config.container.clientHeight);
             this.width = this.config.container.clientWidth;
             this.height = this.config.container.clientHeight;
@@ -18502,118 +21021,112 @@
                 this.width = 1000;
                 this.height = 1000;
             }
-        };
-        BubbleTree.prototype.buildFromData = function (rootData) {
-            var _this = this;
+        }
+        buildFromData(rootData) {
             this.rootData = rootData;
-            var root = hierarchy(rootData)
-                .sum(function (d) { return d["weight"]; })
-                .sort(function (a, b) { return b.value - a.value; });
+            let root = hierarchy(rootData)
+                .sum(d => d["weight"])
+                .sort((a, b) => b.value - a.value);
             this.focus = root;
-            var nodes = this.pack(root).descendants();
+            let nodes = this.pack(root).descendants();
             this.circle = this.g.selectAll("circle")
                 .data(nodes)
-                .enter().append("circle").each(function (d) { if (d.data.uid == null)
+                .enter().append("circle").each(d => { if (d.data.uid == null)
                 d.data.uid = "__generated_" + (BubbleTree.ID++); })
-                .attr("class", function (d) { return d.parent ? d.children ? "node" : "node node--leaf" : "node node--root"; })
-                .attr("id", function (d) { return d.data.uid ? "circle_" + d.data.uid : null; })
-                .style("display", function (d) { return !d.parent ? _this.config.showRoot ? "inline" : "none" : "inline"; })
+                .attr("class", d => d.parent ? d.children ? "node" : "node node--leaf" : "node node--root")
+                .attr("id", d => d.data.uid ? "circle_" + d.data.uid : null)
+                .style("display", d => !d.parent ? this.config.showRoot ? "inline" : "none" : "inline")
                 .style("stroke", this.circleColor)
-                .style("fill", function (d) { return _this.nodeColor(d); });
-            var handlers = {
-                "click": function (d) {
+                .style("fill", d => this.nodeColor(d));
+            let handlers = {
+                "click": (d) => {
                     if (!d.children) {
-                        if (_this.config.selectOnClick) {
-                            _this.clearSelect().select(d.data.uid);
+                        if (this.config.selectOnClick) {
+                            this.clearSelect().select(d.data.uid);
                         }
-                        if (_this.config.onClick !== undefined) {
-                            _this.config.onClick(d);
+                        if (this.config.onClick !== undefined) {
+                            this.config.onClick(d);
                         }
                         else {
-                            if (_this.focus != d.parent) {
-                                _this.zoom(d.parent);
+                            if (this.focus != d.parent) {
+                                this.zoom(d.parent);
                             }
                         }
                         event.stopPropagation();
                     }
-                    else if (_this.focus !== d) {
-                        if (_this.config.selectOnClick && _this.config.allowParentSelection) {
-                            _this.clearSelect().select(d.data.uid);
+                    else if (this.focus !== d) {
+                        if (this.config.selectOnClick && this.config.allowParentSelection) {
+                            this.clearSelect().select(d.data.uid);
                         }
-                        _this.zoom(d);
+                        this.zoom(d);
                         event.stopPropagation();
                     }
                 },
-                "mouseover": function (d) {
-                    if (_this.getSelections().indexOf(d.data) < 0) {
-                        _this.setCircleFillColor(d, _this.selectedLeafColor(100), 0.3);
+                "mouseover": (d) => {
+                    if (this.getSelections().indexOf(d.data) < 0) {
+                        this.setCircleFillColor(d, this.selectedLeafColor(100), 0.3);
                     }
-                    if (d != _this.focus && _this.focus.ancestors().indexOf(d) < 0) {
-                        _this.showText(d, true);
+                    if (d != this.focus && this.focus.ancestors().indexOf(d) < 0) {
+                        this.showText(d, true);
                         while (d.parent != null /*&& d.parent!=this.focus*/) {
-                            _this.showText(d.parent, false);
+                            this.showText(d.parent, false);
                             d = d.parent;
                         }
                     }
                 },
-                "mouseout": function (d) {
-                    _this.setCircleFillColor(d, _this.nodeColor(d));
-                    _this.showText(d, d.parent === _this.focus);
-                    if (_this.config.nodePopover != null) {
+                "mouseout": (d) => {
+                    this.setCircleFillColor(d, this.nodeColor(d));
+                    this.showText(d, d.parent === this.focus);
+                    if (this.config.nodePopover != null) {
                         $('.popover-node').popover("hide");
                     }
                 }
             };
-            var _loop_1 = function (userHandler) {
+            // merge handlers
+            for (let userHandler in this.config.handlers) {
                 if (handlers[userHandler]) {
-                    var handler_1 = handlers[userHandler];
+                    let handler = handlers[userHandler];
                     // merge with user-defined handler
-                    handlers[userHandler] = function (d) {
-                        handler_1(d);
-                        _this.config.handlers[userHandler](d);
+                    handlers[userHandler] = d => {
+                        handler(d);
+                        this.config.handlers[userHandler](d);
                     };
                 }
                 else {
                     // install user handler
                     handlers[userHandler] =
-                        this_1.config.handlers[userHandler];
+                        this.config.handlers[userHandler];
                 }
-            };
-            var this_1 = this;
-            // merge handlers
-            for (var userHandler in this.config.handlers) {
-                _loop_1(userHandler);
             }
             // apply all handlers
-            for (var handler in handlers) {
+            for (let handler in handlers) {
                 console.info("installing handler " + handler);
                 this.circle.on(handler, handlers[handler]);
             }
             this.g.selectAll("text")
                 .data(nodes)
                 .enter().append("text")
-                .attr("id", function (d) { return d.data.uid ? "text_" + d.data.uid : null; })
-                .style("fill-opacity", function (d) { return d.parent === root ? 1 : 0; })
-                .style("display", function (d) { return d.parent === root ? "inline" : "none"; })
+                .attr("id", d => d.data.uid ? "text_" + d.data.uid : null)
+                .style("fill-opacity", d => d.parent === root ? 1 : 0)
+                .style("display", d => d.parent === root ? "inline" : "none")
                 .style("pointer-events", "none")
                 .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
                 .style("text-anchor", "middle")
                 .style("fill", this.textColor)
-                .text(function (d) { return d.data.name; });
-            this.svg.on("click", function () { return _this.zoom(root); });
+                .text(d => d.data.name);
+            this.svg.on("click", () => this.zoom(root));
             this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
             if (this.config.nodePopover != null) {
-                var self_1 = this;
+                let self = this;
                 this.circle
                     .classed("popover-node", true)
                     .filter(function (d) {
-                    var _this = this;
-                    self_1.config.nodePopover(d, function (popover) {
+                    self.config.nodePopover(d, popover => {
                         if (popover && popover.content) {
-                            _this.setAttribute("data-content", popover.content);
+                            this.setAttribute("data-content", popover.content);
                         }
                         if (popover && popover.title) {
-                            _this.setAttribute("data-original-title", popover.title);
+                            this.setAttribute("data-original-title", popover.title);
                         }
                     });
                     return true;
@@ -18625,20 +21138,19 @@
             if (this.config.onBuilt) {
                 this.config.onBuilt(this);
             }
-        };
+        }
         /**
          * Builds the buble tree diagram as specified by the given configuration.
          *
          * @param {BubbleTreeConfiguration} config - the configuration
          */
-        BubbleTree.prototype.build = function (config) {
-            var _this = this;
-            window.addEventListener("resize", function (e) {
-                _this.update();
-                _this.svg.select("g").remove();
-                _this.g = _this.svg.append("g").attr("transform", "translate(" + _this.width / 2 + "," + _this.height / 2 + ")");
-                _this.pack = index$2()
-                    .size([_this.diameter - _this.config.margin, _this.diameter - _this.config.margin])
+        build(config) {
+            window.addEventListener("resize", e => {
+                this.update();
+                this.svg.select("g").remove();
+                this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
+                this.pack = index$2()
+                    .size([this.diameter - this.config.margin, this.diameter - this.config.margin])
                     .padding(2);
                 // use possible url field for backward compatibility
                 if (config.data == null && config['url'] != null) {
@@ -18646,16 +21158,16 @@
                 }
                 if (typeof config.data === 'string') {
                     // URL case
-                    json(config.data, function (error, rootData) {
+                    json(config.data, (error, rootData) => {
                         console.log(rootData);
                         if (error)
                             throw error;
-                        _this.buildFromData(rootData);
+                        this.buildFromData(rootData);
                     });
                 }
                 else {
                     // data as JavaScript object
-                    _this.buildFromData(config.data);
+                    this.buildFromData(config.data);
                 }
             });
             this.config = config;
@@ -18692,174 +21204,169 @@
             }
             if (typeof config.data === 'string') {
                 // URL case
-                json(config.data, function (error, rootData) {
+                json(config.data, (error, rootData) => {
                     console.log(rootData);
                     if (error)
                         throw error;
-                    _this.buildFromData(rootData);
+                    this.buildFromData(rootData);
                 });
             }
             else {
                 // data as JavaScript object
                 this.buildFromData(config.data);
             }
-        };
+        }
         /**
          * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
          */
-        BubbleTree.prototype.lookupNames = function (names) {
-            var result = [];
-            var root = this.getFocussedData();
-            var lookup = function (d) {
-                if (names.indexOf(d.name) >= 0) {
-                    result.push(d.uid);
-                }
+        lookupNames(names) {
+            let result = [];
+            let root = this.getFocussedData();
+            let upperCasedNames = names.map(n => n.toUpperCase());
+            let lookup = (d) => {
                 if (d.children) {
-                    d.children.forEach(function (d) { return lookup(d); });
+                    d.children.forEach(d => {
+                        if (upperCasedNames.indexOf(d.name.toUpperCase()) >= 0) {
+                            result.push(d.uid);
+                        }
+                    });
+                    d.children.forEach(d => lookup(d));
                 }
             };
             lookup(root);
             return result;
-        };
-        BubbleTree.prototype.selectedLeafColor = function (saturation) {
+        }
+        selectedLeafColor(saturation) {
             return "hsl(" + this.config.baseLeafColorHue + "," + (saturation * 100) + "%," + this.config.baseLeafColorLight + "%)";
-        };
-        BubbleTree.prototype.nodeColor = function (d) {
+        }
+        nodeColor(d) {
             return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(this.selections[d.data.uid] ? this.selections[d.data.uid] : 0);
-        };
+        }
         /**
          * Zooms to a node represented by its uid.
          *
          * @param {string} uid - the uid of the node to be zoomed to
          */
-        BubbleTree.prototype.zoomToId = function (uid) {
+        zoomToId(uid) {
             this.zoom(this.g.select("#circle_" + uid).datum());
             return this;
-        };
+        }
         /**
          * Zooms back to the focussing node's parent.
          */
-        BubbleTree.prototype.zoomBack = function () {
+        zoomBack() {
             this.zoomToId(this.rootData.uid);
-        };
+        }
         /**
          * Selects a node represented by its uid. The weight will determine the intensity of the selection color (0 to 1).
          *
          * @param {string} uid - the uid of the node to be zoomed to
          * @param {number} weight - the selection's weight (color intensity)
          */
-        BubbleTree.prototype.select = function (uid, weight) {
-            var _this = this;
-            if (weight === void 0) { weight = 1; }
+        select(uid, weight = 1) {
             this.selections[uid] = weight;
             this.g.selectAll("circle")
-                .filter(function (d) { return d.data.uid in _this.selections; })
+                .filter(d => d.data.uid in this.selections)
                 .classed("selected", true)
                 .style("opacity", 1)
-                .style("fill", function (d) { return _this.selectedLeafColor(_this.selections[d.data.uid]); });
+                .style("fill", d => this.selectedLeafColor(this.selections[d.data.uid]));
             return this;
-        };
+        }
         /**
          * Selects node(s) accordingly to a selection function. The selection function should return a selection weight between 0 and 1.
          * Returning 0 or undefined means that the node is not selected.
          */
-        BubbleTree.prototype.selectData = function (selector$$1) {
-            var _this = this;
+        selectData(selector$$1) {
             this.g.selectAll("circle")
-                .filter(function (d) { var weight = selector$$1(d.data); if (weight && weight > 0) {
-                _this.selections[d.data.uid] = weight;
+                .filter(d => { let weight = selector$$1(d.data); if (weight && weight > 0) {
+                this.selections[d.data.uid] = weight;
                 return true;
             }
             else
                 return false; })
                 .classed("selected", true)
-                .style("fill", function (d) { return _this.selectedLeafColor(_this.selections[d.data.uid]); });
+                .style("fill", d => this.selectedLeafColor(this.selections[d.data.uid]));
             return this;
-        };
+        }
         /**
          * Clears all the selections.
          *
          * @param {string} uid - the uid of the node to be zoomed to
          * @see #select
          */
-        BubbleTree.prototype.clearSelect = function () {
-            var _this = this;
-            var selections = this.selections;
+        clearSelect() {
+            let selections = this.selections;
             this.selections = {};
             this.g.selectAll("circle")
-                .filter(function (d) { return d.data.uid in selections; })
+                .filter(d => d.data.uid in selections)
                 .classed("selected", false)
-                .style("fill", function (d) { return _this.nodeColor(d); });
+                .style("fill", d => this.nodeColor(d));
             return this;
-        };
-        BubbleTree.prototype.zoomTo = function (v) {
+        }
+        zoomTo(v) {
             if (this.config.nodePopover != null) {
                 $('.popover-node').popover("hide");
             }
             var k = this.diameter / v[2];
             this.view = v;
             var node = this.g.selectAll("circle,text");
-            node.attr("transform", function (d) { return "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")"; });
-            this.circle.attr("r", function (d) { return d.r * k; });
-        };
-        BubbleTree.prototype.zoom = function (d) {
-            var _this = this;
-            var btc = this;
+            node.attr("transform", d => "translate(" + (d.x - v[0]) * k + "," + (d.y - v[1]) * k + ")");
+            this.circle.attr("r", d => d.r * k);
+        }
+        zoom(d) {
+            let btc = this;
             this.focus = d;
             var transition$$1 = transition()
                 .duration(event && event.altKey ? 7500 : 750)
-                .tween("zoom", function () {
-                var i = interpolateZoom(_this.view, [_this.focus.x, _this.focus.y, _this.focus.r * 2 + _this.config.margin]);
-                return function (t) { return _this.zoomTo(i(t)); };
+                .tween("zoom", () => {
+                var i = interpolateZoom(this.view, [this.focus.x, this.focus.y, this.focus.r * 2 + this.config.margin]);
+                return t => this.zoomTo(i(t));
             });
             transition$$1.select("#" + this.config.container.id).selectAll("text")
                 .filter(function (d) { return d.parent && d.parent === btc.focus || this.style.display === "inline"; })
-                .style("fill-opacity", function (d) { return d.parent === _this.focus ? 1 : 0; })
+                .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
                 .on("start", function (d) { if (d.parent === btc.focus)
                 this.style.display = "inline"; })
                 .on("end", function (d) { if (d.parent !== btc.focus)
                 this.style.display = "none"; });
-        };
+        }
         /**
          * Returns the root data as read from the JSON.
          *
          * @see build
          */
-        BubbleTree.prototype.getRootData = function () {
+        getRootData() {
             return this.rootData;
-        };
+        }
         /**
          * Returns the currently focussed node.
          */
-        BubbleTree.prototype.getFocussedData = function () {
-            var data = this.rootData;
+        getFocussedData() {
+            let data = this.rootData;
             if (this.focus) {
                 data = this.focus.data;
             }
             return data;
-        };
+        }
         /**
          * Returns the currently selected nodes uid with associated percentils).
          */
-        BubbleTree.prototype.getSelections = function () {
-            var _this = this;
+        getSelections() {
             return this.g.selectAll("circle")
-                .filter(function (d) { return d.data.uid in _this.selections; }).data().map(function (d) { return d.data; });
-        };
-        BubbleTree.prototype.showText = function (d, show) {
-            if (show === void 0) { show = true; }
-            this.g.selectAll("text").filter(function (data) { return data == d; }).style("fill-opacity", show ? "1" : "0").style("display", show ? "inline" : "none");
-        };
-        BubbleTree.prototype.setCircleColor = function (d, color$$1) {
-            this.g.selectAll("circle").filter(function (data) { return data == d; }).style("stroke", color$$1);
-        };
-        BubbleTree.prototype.setCircleFillColor = function (d, color$$1, opacity) {
-            if (opacity === void 0) { opacity = 1; }
-            this.g.selectAll("circle").filter(function (data) { return data == d; }).style("fill", color$$1).style("opacity", opacity);
-        };
-        BubbleTree.ID = 1;
-        return BubbleTree;
-    }());
+                .filter(d => d.data.uid in this.selections).data().map(d => d.data);
+        }
+        showText(d, show = true) {
+            this.g.selectAll("text").filter(data => data == d).style("fill-opacity", show ? "1" : "0").style("display", show ? "inline" : "none");
+        }
+        setCircleColor(d, color$$1) {
+            this.g.selectAll("circle").filter(data => data == d).style("stroke", color$$1);
+        }
+        setCircleFillColor(d, color$$1, opacity = 1) {
+            this.g.selectAll("circle").filter(data => data == d).style("fill", color$$1).style("opacity", opacity);
+        }
+    }
+    BubbleTree.ID = 1;
+    //# sourceMappingURL=arnd_bubbletree.js.map
 
     /*
      * Visualisation Components - https://github.com/amaris/visualization-components
@@ -18882,23 +21389,21 @@
     /**
      * An interactive D3.js component to render objects in a table.
      */
-    var Table = /** @class */ (function () {
-        function Table() {
-        }
+    class Table {
+        constructor() { }
         /**
          * Builds the table as specified by the given configuration (loads the data if any is given).
          *
          * @param {TableConfiguration} config - the configuration
          */
-        Table.prototype.build = function (config) {
+        build(config) {
             this.config = config;
             this.loadData(config.data);
-        };
+        }
         /**
          * Loads or reloads the data, keeping all the other configuration unchanged.
          */
-        Table.prototype.loadData = function (data, emptyMessage) {
-            var _this = this;
+        loadData(data, emptyMessage) {
             if (typeof data[0] == 'string') {
                 throw new Error("invalid type of data: must be an object array");
             }
@@ -18909,7 +21414,7 @@
                 return;
             }
             this.selection = select(this.config.container);
-            var table = this.selection.append('table') //
+            let table = this.selection.append('table') //
                 .classed('table', true) //
                 .style('border-collapse', "collapse", "important") //
                 .classed('table-sm', this.config.small) //
@@ -18922,51 +21427,51 @@
                 .selectAll('th')
                 .data(Object.keys(this.data[0])).enter()
                 .append('th')
-                .on('click', function (d) {
-                if (_this.config.headerClickHandler != null) {
-                    _this.config.headerClickHandler(Object.keys(_this.data[0]).indexOf(d));
+                .on('click', (d) => {
+                if (this.config.headerClickHandler != null) {
+                    this.config.headerClickHandler(Object.keys(this.data[0]).indexOf(d));
                 }
             })
-                .text(function (column) { return column; });
+                .text(column => column);
             // create a row for each object in the data
             var rows = tbody.selectAll('tr')
                 .data(this.data)
                 .enter()
                 .append('tr')
-                .on('click', function (d) {
-                if (_this.config.selectableRows) {
+                .on('click', (d) => {
+                if (this.config.selectableRows) {
                     rows.classed('table-active', false);
-                    rows.filter(function (data) { return data === d; }).classed('table-active', true);
+                    rows.filter(data => data === d).classed('table-active', true);
                 }
-                if (_this.config.rowClickHandler != null) {
-                    _this.config.rowClickHandler(_this.data.indexOf(d));
+                if (this.config.rowClickHandler != null) {
+                    this.config.rowClickHandler(this.data.indexOf(d));
                 }
             });
             rows.selectAll('td')
-                .data(function (d) {
-                return Object.keys(_this.data[0]).map(function (k) {
+                .data(d => {
+                return Object.keys(this.data[0]).map(function (k) {
                     return { 'value': d[k], 'name': k };
                 });
             }).enter()
                 .append('td')
-                .attr('data-th', function (d) {
+                .attr('data-th', d => {
                 return d.name;
             })
-                .text(function (d) {
+                .text(d => {
                 return d.value;
             });
             if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
                 ($(this.config.container.children[0])).DataTable();
             }
-        };
+        }
         /**
          * Gets the data in the table.
          */
-        Table.prototype.getData = function () {
+        getData() {
             return this.data;
-        };
-        return Table;
-    }());
+        }
+    }
+    //# sourceMappingURL=arnd_table.js.map
 
     /*
      * Visualisation Components - https://github.com/amaris/visualization-components
@@ -18989,23 +21494,21 @@
     /**
      * An interactive D3.js component to render items in a list.
      */
-    var List = /** @class */ (function () {
-        function List() {
-        }
+    class List {
+        constructor() { }
         /**
          * Builds the list as specified by the given configuration (loads the data if any is given).
          *
          * @param {ListConfiguration} config - the configuration
          */
-        List.prototype.build = function (config) {
+        build(config) {
             this.config = config;
             this.loadData(config.data);
-        };
+        }
         /**
          * Loads or reloads the data, keeping all the other configuration unchanged.
          */
-        List.prototype.loadData = function (data, emptyMessage) {
-            var _this = this;
+        loadData(data, emptyMessage) {
             this.data = data;
             this.config.container.innerHTML = "";
             if (!data || data.length == 0) {
@@ -19013,34 +21516,34 @@
                 return;
             }
             this.selection = select(this.config.container);
-            var list = this.selection.append('ul').classed("list-group", true);
+            let list = this.selection.append('ul').classed("list-group", true);
             // create a row for each object in the data
             var rows = list.selectAll('li')
                 .data(this.data)
                 .enter()
                 .append('li')
                 .classed('list-group-item', true)
-                .text(function (d) { return "" + d; })
-                .on('click', function (d) {
-                if (_this.config.selectableRows) {
+                .text(d => "" + d)
+                .on('click', (d) => {
+                if (this.config.selectableRows) {
                     rows.classed('active', false);
-                    rows.filter(function (data) { return data === d; }).classed('active', true);
+                    rows.filter(data => data === d).classed('active', true);
                 }
-                if (_this.config.rowClickHandler != null) {
-                    _this.config.rowClickHandler(_this.data.indexOf(d));
+                if (this.config.rowClickHandler != null) {
+                    this.config.rowClickHandler(this.data.indexOf(d));
                 }
             });
             //list.style('overflow-y', 'scroll');
             //padding:0px;max-height:200px;overflow-y:scroll
-        };
+        }
         /**
          * Gets the data in the list.
          */
-        List.prototype.getData = function () {
+        getData() {
             return this.data;
-        };
-        return List;
-    }());
+        }
+    }
+    //# sourceMappingURL=arnd_list.js.map
 
     /*
      * Visualisation Components - https://github.com/amaris/visualization-components
@@ -19078,6 +21581,7 @@
             return d.hasOwnProperty(k) && d[k] !== null && !isNaN(d[k]);
         };
     }
+    //# sourceMappingURL=time-series-utils.js.map
 
     /*
      * Visualisation Components - https://github.com/amaris/visualization-components
@@ -19100,8 +21604,8 @@
     /**
      * A component to show time series.
      */
-    var TimeSeries = /** @class */ (function () {
-        function TimeSeries() {
+    class TimeSeries {
+        constructor() {
             this.brush = brushX();
             this.yScale = linear$2();
             this.xScale = time();
@@ -19119,7 +21623,7 @@
             this.text_size = 10;
             this.yScaleFormat = this.yScale.tickFormat();
         }
-        TimeSeries.prototype.update = function () {
+        update() {
             this.width = this.container2.clientWidth;
             this.height = this.container2.clientHeight;
             if (NaN === this.width || NaN === this.height) {
@@ -19127,13 +21631,12 @@
                 this.height = 640;
             }
             console.info(this.width + "," + this.height);
-        };
+        }
         /**
          * Builds the time serie with the given configuration.
          * @param config the initial configuration
          */
-        TimeSeries.prototype.build = function (config) {
-            var _this = this;
+        build(config) {
             this.config = config;
             this.container2 = config.container;
             this.container2.innerHTML += "<div class='text-primary bg-warning'></div><div></div>";
@@ -19150,9 +21653,9 @@
                 this.config.circleColor = window.getComputedStyle(this.container2.firstChild).backgroundColor;
             }
             if (typeof config.data === "string") {
-                json(this.config.data, function (error, rootData) {
-                    _this.buildFromData(rootData);
-                    _this.createChart();
+                json(this.config.data, (error, rootData) => {
+                    this.buildFromData(rootData);
+                    this.createChart();
                 });
             }
             else {
@@ -19160,41 +21663,42 @@
                 this.createChart();
             }
             if (this.config.update) {
-                setInterval(this.updateData, this.config.frequency, this);
+                this.update_function = setInterval(this.updateData, this.config.frequency, this);
             }
-        };
-        TimeSeries.prototype.updateData = function (serie) {
-            var _this = this;
-            json(serie.config.update, function (error, rootData) {
+        }
+        remove_update() {
+            clearInterval(this.update_function);
+        }
+        updateData(serie) {
+            json(serie.config.update, (error, rootData) => {
                 if (serie.data[serie.data.length - 1].id != rootData.id) {
                     console.log(serie.data[serie.data.length - 1].id);
                     console.log(rootData.id);
-                    var value = { id: rootData.id, x: new Date(rootData.x), y: rootData.x, a: rootData.a };
+                    let value = { id: rootData.id, x: new Date(rootData.x), y: rootData.y, a: rootData.a };
                     serie.data.push(value);
-                    if (!_this.isZoom) {
-                        _this.createLines();
-                        _this.drawSerie();
-                        _this.drawMiniDrawer();
+                    if (!serie.isZoom) {
+                        serie.createLines();
+                        serie.drawSerie();
+                        serie.drawMiniDrawer();
                     }
                 }
             });
-        };
-        TimeSeries.prototype.buildFromData = function (rootData) {
+        }
+        buildFromData(rootData) {
             if (typeof rootData[0].x === "string") {
-                for (var i = 0; i < rootData.length; ++i) {
+                for (let i = 0; i < rootData.length; ++i) {
                     rootData[i].x = new Date(rootData[i].x);
                 }
             }
             this.data = rootData;
-        };
-        TimeSeries.prototype.createChart = function () {
-            var _this = this;
+        }
+        createChart() {
             this.update();
             // Compute mins max for the serie
-            var extentY = extent(this.data, function (data) { return data.y; });
+            const extentY = extent(this.data, data => data.y);
             this.min = extentY[0];
             this.max = extentY[1];
-            var extentX = extent(this.data, function (data) { return data.x; });
+            const extentX = extent(this.data, data => data.x);
             this.dateMin = extentX[0];
             this.dateMax = extentX[1];
             // Set scales
@@ -19237,7 +21741,7 @@
             // Container for focus area
             this.container = this.svg
                 .insert('g', "rect.mouse-catch")
-                .attr('transform', "translate(" + this.margin.left + "," + this.margin.top + ")")
+                .attr('transform', `translate(${this.margin.left},${this.margin.top})`)
                 .attr('clip-path', 'url(#clip)');
             this.serieContainer = this.container.append('g').attr('class', 'draw-container');
             this.annotationsContainer = this.container.append('g');
@@ -19245,7 +21749,7 @@
             this.drawerContainer = this.svg
                 .append('g')
                 .attr('class', 'mini-draw-container')
-                .attr('transform', "translate(" + this.margin.left + "," + (this.height - this.drawerHeight - this.margin.bottom) + ")");
+                .attr('transform', `translate(${this.margin.left},${(this.height - this.drawerHeight - this.margin.bottom)})`);
             // Vertical line moving with mouse tip
             this.mousevline = this.svg
                 .append('g')
@@ -19262,51 +21766,52 @@
                 .attr('class', 'd3_timeseries mousevline');
             // Update mouse vline
             this.mousevlineUpdate();
-            var xAxis = axisBottom(this.xScale).tickFormat(this.xScale.tickFormat());
-            var yAxis = axisLeft(this.yScale).tickFormat(this.yScaleFormat);
+            const xAxis = axisBottom(this.xScale).tickFormat(this.xScale.tickFormat());
+            const yAxis = axisLeft(this.yScale).tickFormat(this.yScaleFormat);
             this.brush.extent([
                 [this.fullXScale.range()[0], 0],
                 [this.fullXScale.range()[1], this.drawerHeight - this.drawerTopMargin]
             ])
-                .on('brush', function () {
-                _this.isZoom = true;
-                var selection$$1 = event.selection;
-                _this.xScale.domain(selection$$1.map(_this.fullXScale.invert, _this.fullXScale));
-                _this.drawSerie();
-                _this.svg.select(".focus.x.axis").call(xAxis);
-                _this.mousevlineUpdate();
-                _this.updatefocusRing();
+                .on('brush', () => {
+                this.isZoom = true;
+                const selection$$1 = event.selection;
+                this.xScale.domain(selection$$1.map(this.fullXScale.invert, this.fullXScale));
+                this.drawSerie();
+                this.svg.select(".focus.x.axis").call(xAxis);
+                this.mousevlineUpdate();
+                this.updatefocusRing();
             })
-                .on('end', function () {
-                _this.isZoom = false;
-                var selection$$1 = event.selection;
+                .on('end', () => {
+                this.isZoom = false;
+                const selection$$1 = event.selection;
                 if (selection$$1 === null) {
-                    _this.xScale.domain(_this.fullXScale.domain());
-                    _this.drawSerie();
-                    _this.svg.select(".focus.x.axis").call(xAxis);
-                    _this.mousevlineUpdate();
-                    _this.updatefocusRing();
+                    this.xScale.domain(this.fullXScale.domain());
+                    this.drawSerie();
+                    this.svg.select(".focus.x.axis").call(xAxis);
+                    this.mousevlineUpdate();
+                    this.updatefocusRing();
                 }
             });
             this.svg
                 .append('g')
                 .attr('class', 'd3_timeseries focus x axis')
-                .attr("transform", "translate(" + this.margin.left + ",\n          " + (this.height - this.margin.bottom - this.drawerHeight - this.drawerTopMargin) + ")")
+                .attr("transform", `translate(${this.margin.left},
+          ${(this.height - this.margin.bottom - this.drawerHeight - this.drawerTopMargin)})`)
                 .call(xAxis);
             this.drawerContainer
                 .append('g')
                 .attr('class', 'd3_timeseries x axis')
-                .attr("transform", "translate(0, " + this.drawerHeight + ")")
+                .attr("transform", `translate(0, ${this.drawerHeight})`)
                 .call(xAxis);
             this.drawerContainer.append("g")
                 .attr("class", "d3_timeseries brush")
                 .call(this.brush)
-                .attr('transform', "translate(0, " + this.drawerTopMargin + ")")
+                .attr('transform', `translate(0, ${this.drawerTopMargin})`)
                 .attr("height", (this.drawerHeight - this.drawerTopMargin));
             this.svg
                 .append('g')
                 .attr('class', 'd3_timeseries y axis')
-                .attr("transform", "translate(" + this.margin.left + ", " + this.margin.top + ")")
+                .attr("transform", `translate(${this.margin.left}, ${this.margin.top})`)
                 .call(yAxis)
                 .append("text")
                 .attr("transform", "rotate(-90)")
@@ -19332,23 +21837,23 @@
             this.createLines();
             this.drawSerie();
             this.drawMiniDrawer();
-        };
-        TimeSeries.prototype.mousevlineUpdate = function () {
-            var _this = this;
+        }
+        mousevlineUpdate() {
             this.mousevline
-                .attr('transform', function (d) {
-                return "translate(" + (_this.margin.left + _this.xScale(d.x)) + ", " + _this.margin.top + ")";
+                .attr('transform', (d) => {
+                return `translate(${(this.margin.left + this.xScale(d.x))}, ${this.margin.top})`;
             })
-                .style('opacity', function (d) {
+                .style('opacity', (d) => {
                 return d.visible ? 1 : 0;
             });
-        };
-        TimeSeries.prototype.xScaleFormat = function (x) {
+        }
+        ;
+        xScaleFormat(x) {
             return x.toLocaleString();
-        };
-        TimeSeries.prototype.drawSerie = function () {
+        }
+        drawSerie() {
             if (!this.linepath) {
-                var linepath = this.serieContainer
+                const linepath = this.serieContainer
                     .append("path")
                     .datum(this.data)
                     .attr('class', 'd3_timeseries line')
@@ -19368,9 +21873,8 @@
             this.svg.selectAll(".axis").selectAll("path").attr("stroke", this.config.axisColor);
             this.svg.selectAll(".axis").selectAll("line").attr("stroke", this.config.axisColor);
             this.svg.selectAll(".axis").selectAll("text").attr("fill", this.config.axisColor);
-        };
-        TimeSeries.prototype.draw_circles = function () {
-            var _this = this;
+        }
+        draw_circles() {
             select("#" + this.container2.id + " svg").selectAll(".draw-container").selectAll("circle").remove();
             select("#" + this.container2.id + " svg").selectAll(".draw-container")
                 .append("circle")
@@ -19382,21 +21886,20 @@
                 .attr("cx", this.xScale(this.data[0].x))
                 .attr("cy", this.yScale(this.data[0].y));
             //  draw others circle of anomalies
-            var anomalies = select("#" + this.container2.id + " svg").selectAll(".draw-container").selectAll("circle")
+            const anomalies = select("#" + this.container2.id + " svg").selectAll(".draw-container").selectAll("circle")
                 .data(this.data)
                 .enter().append("circle")
-                .attr("r", function (d) { return (!d.a) ? 0 : 5.5; })
+                .attr("r", (d) => (!d.a) ? 0 : 5.5)
                 .attr("fill", "none")
                 .attr('stroke-width', 3.5)
                 .attr('stroke', this.config.circleColor)
                 .attr('stroke-linecap', 'round')
-                .attr("cx", function (d) { return _this.xScale(d.x); })
-                .attr("cy", function (d) { return _this.yScale(d.y); })
+                .attr("cx", (d) => this.xScale(d.x))
+                .attr("cy", (d) => this.yScale(d.y))
                 .attr("visible", false);
-        };
-        TimeSeries.prototype.updatefocusRing = function (xDate) {
-            var _this = this;
-            var s = this.annotationsContainer.selectAll("circle.d3_timeseries.focusring");
+        }
+        updatefocusRing(xDate) {
+            let s = this.annotationsContainer.selectAll("circle.d3_timeseries.focusring");
             if (xDate === null) {
                 s = s.data([]);
             }
@@ -19405,12 +21908,12 @@
                         x: xDate,
                         item: this.config.find(xDate),
                         color: this.config.color
-                    }].filter(function (d) { return d.item && d.item.y; }));
+                    }].filter((d) => d.item && d.item.y));
             }
             s.transition()
                 .duration(50)
-                .attr('cx', function (d) { return _this.xScale(d.item.x); })
-                .attr('cy', function (d) { return _this.yScale(d.item.y); });
+                .attr('cx', (d) => this.xScale(d.item.x))
+                .attr('cy', (d) => this.yScale(d.item.y));
             s.enter()
                 .append("circle")
                 .attr('class', 'd3_timeseries focusring')
@@ -19419,72 +21922,77 @@
                 .attr('r', 5)
                 .attr('stroke', fk('color'));
             s.exit().remove();
-        };
-        TimeSeries.prototype.mouseMove = function () {
-            var x = this.xScale.invert(mouse(this.container.node())[0]);
+        }
+        mouseMove() {
+            const x = this.xScale.invert(mouse(this.container.node())[0]);
             this.mousevline.datum({ x: x, visible: true });
             this.mousevlineUpdate();
             this.updatefocusRing(x);
             this.updateTip(x);
-        };
-        TimeSeries.prototype.mouseOut = function () {
+        }
+        mouseOut() {
             this.mousevline.datum({ x: null, visible: false });
             this.mousevlineUpdate();
             this.updatefocusRing(null);
             this.updateTip(null);
-        };
-        TimeSeries.prototype.updateTip = function (xDate) {
+        }
+        updateTip(xDate) {
             if (xDate === null) {
                 this.tooltipDiv.style('opacity', 0);
             }
             else {
-                var s = {
+                const s = {
                     item: this.config.find(xDate),
                     options: {}
                 };
                 this.tooltipDiv
                     .style('opacity', 0.9)
-                    .style('left', (this.margin.left + 5 + this.xScale(xDate)) + "px")
+                    .style('left', `${(this.margin.left + 5 + this.xScale(xDate))}px`)
                     .style('top', "0px")
                     .html(this.tipFunction(xDate, s));
             }
-        };
-        TimeSeries.prototype.tipFunction = function (date$$1, serieItem) {
-            var spans = '';
+        }
+        tipFunction(date$$1, serieItem) {
+            let spans = '';
             if (serieItem.item && serieItem.item.y) {
-                spans = "<table style=\"border:none\">\n                <tr>\n                  <td style=\"color: " + this.config.axisColor + "\">" + serieItem.options.label + "</td>\n                  <td style=\"color: " + this.config.axisColor + "; text-align:right\">" + this.yScaleFormat(serieItem.item.y) + "</td>\n                </tr>\n              </table>";
+                spans = `<table style="border:none">
+                <tr>
+                  <td style="color: ${this.config.axisColor}">${serieItem.options.label}</td>
+                  <td style="color: ${this.config.axisColor}; text-align:right">${this.yScaleFormat(serieItem.item.y)}</td>
+                </tr>
+              </table>`;
             }
-            return "<h4>" + this.xScaleFormat(day(date$$1)) + "</h4>" + spans;
-        };
-        TimeSeries.prototype.createLines = function () {
-            var _this = this;
+            return `<h4>${this.xScaleFormat(day(date$$1))}</h4>${spans}`;
+        }
+        ;
+        createLines() {
             // https://github.com/d3/d3-shape/blob/master/README.md#curves
             this.interpolationFunction = this.getInterpolationFunction(this.config) || curveLinear;
-            var drawLine = line()
+            const drawLine = line()
                 .x(functorkeyscale('x', this.xScale))
                 .y(functorkeyscale('y', this.yScale))
                 .curve(curveLinear /*serie.interpolationFunction*/)
                 .defined(keyNotNull('y'));
             this.line = drawLine;
-            this.config.find = function (date$$1) {
-                var bisect = bisector(fk('x')).left;
-                var i = bisect(_this.config.data, date$$1) - 1;
+            this.config.find = (date$$1) => {
+                const bisect = bisector(fk('x')).left;
+                const i = bisect(this.config.data, date$$1) - 1;
                 if (i === -1) {
                     return null;
                 }
                 // Look to far after serie is defined
-                if (i === _this.data.length - 1 &&
-                    _this.data.length > 1 &&
-                    Number(date$$1) - Number(_this.data[i].x) > Number(_this.data[i].x) - Number(_this.data[i - 1].x)) {
+                if (i === this.data.length - 1 &&
+                    this.data.length > 1 &&
+                    Number(date$$1) - Number(this.data[i].x) > Number(this.data[i].x) - Number(this.data[i - 1].x)) {
                     return null;
                 }
-                return _this.data[i];
+                return this.data[i];
             };
-        };
-        TimeSeries.prototype.getInterpolationFunction = function (serie) {
+        }
+        getInterpolationFunction(serie) {
             // To uppercase for d3 curve name
-            var curveName = 'curve';
-            var curveNames = [
+            const curveName = 'curve';
+            const curveNames = [
                 { curveLinear: curveLinear },
                 { curveStep: step },
                 { curveStepBefore: stepBefore },
@@ -19494,26 +22002,25 @@
                 { curveMonotoneX: monotoneX },
                 { curveCatmullRom: catmullRom }
             ];
-            var curve = curveNames.filter(function (curve) { return curveName === Object.keys(curve)[0]; });
+            const curve = curveNames.filter((curve) => curveName === Object.keys(curve)[0]);
             return curve[0];
-        };
-        TimeSeries.prototype.drawMiniDrawer = function () {
-            var _this = this;
-            var smallyScale = this.yScale
+        }
+        drawMiniDrawer() {
+            const smallyScale = this.yScale
                 .copy()
                 .range([this.drawerHeight - this.drawerTopMargin, 0]);
-            var serie = this.config;
-            var drawLine = line()
+            const serie = this.config;
+            const drawLine = line()
                 .x(functorkeyscale('x', this.fullXScale))
                 .y(functorkeyscale('y', smallyScale))
                 //.curve(serie.interpolationFunction)
                 .curve(curveLinear)
                 .defined(keyNotNull('y'));
-            var linepath = this.drawerContainer
+            const linepath = this.drawerContainer
                 .insert("path", ":first-child")
                 .datum(this.data)
                 .attr('class', 'd3_timeseries.line')
-                .attr('transform', "translate(0," + this.drawerTopMargin + ")")
+                .attr('transform', `translate(0,${this.drawerTopMargin})`)
                 .attr('d', drawLine)
                 .attr('stroke', this.config.color)
                 .attr('stroke-width', 1.5)
@@ -19529,23 +22036,332 @@
                 .attr("cx", this.xScale(this.data[0].x))
                 .attr("cy", smallyScale(this.data[0].y) + this.drawerTopMargin);
             //  draw others circle of anomalies
-            var anomalies = select("#" + this.container2.id + " svg").selectAll(".mini-draw-container").selectAll("circle")
+            const anomalies = select("#" + this.container2.id + " svg").selectAll(".mini-draw-container").selectAll("circle")
                 .data(this.data)
                 .enter().append("circle")
-                .attr("r", function (d) { return (!d.a) ? 0 : 1.5; })
+                .attr("r", (d) => (!d.a) ? 0 : 1.5)
                 .attr("fill", "none")
                 .attr('stroke-width', 3.5)
                 .attr('stroke', this.config.circleColor)
                 .attr('stroke-linecap', 'round')
-                .attr("cx", function (d) { return _this.fullXScale(d.x); })
-                .attr("cy", function (d) { return smallyScale(d.y) + _this.drawerTopMargin; })
+                .attr("cx", (d) => this.fullXScale(d.x))
+                .attr("cy", (d) => smallyScale(d.y) + this.drawerTopMargin)
                 .attr("visible", false);
             if (serie.hasOwnProperty('stroke-dasharray')) {
                 linepath.attr('stroke-dasharray', serie['stroke-dasharray']);
             }
-        };
-        return TimeSeries;
-    }());
+        }
+    }
+    //# sourceMappingURL=time-series.js.map
+
+    function identity$9(x) {
+      return x;
+    }
+
+    function transform$2(transform) {
+      if (transform == null) return identity$9;
+      var x0,
+          y0,
+          kx = transform.scale[0],
+          ky = transform.scale[1],
+          dx = transform.translate[0],
+          dy = transform.translate[1];
+      return function(input, i) {
+        if (!i) x0 = y0 = 0;
+        var j = 2, n = input.length, output = new Array(n);
+        output[0] = (x0 += input[0]) * kx + dx;
+        output[1] = (y0 += input[1]) * ky + dy;
+        while (j < n) output[j] = input[j], ++j;
+        return output;
+      };
+    }
+
+    function reverse$1(array, n) {
+      var t, j = array.length, i = j - n;
+      while (i < --j) t = array[i], array[i++] = array[j], array[j] = t;
+    }
+
+    function feature(topology, o) {
+      return o.type === "GeometryCollection"
+          ? {type: "FeatureCollection", features: o.geometries.map(function(o) { return feature$1(topology, o); })}
+          : feature$1(topology, o);
+    }
+
+    function feature$1(topology, o) {
+      var id = o.id,
+          bbox = o.bbox,
+          properties = o.properties == null ? {} : o.properties,
+          geometry = object$2(topology, o);
+      return id == null && bbox == null ? {type: "Feature", properties: properties, geometry: geometry}
+          : bbox == null ? {type: "Feature", id: id, properties: properties, geometry: geometry}
+          : {type: "Feature", id: id, bbox: bbox, properties: properties, geometry: geometry};
+    }
+
+    function object$2(topology, o) {
+      var transformPoint = transform$2(topology.transform),
+          arcs = topology.arcs;
+
+      function arc(i, points) {
+        if (points.length) points.pop();
+        for (var a = arcs[i < 0 ? ~i : i], k = 0, n = a.length; k < n; ++k) {
+          points.push(transformPoint(a[k], k));
+        }
+        if (i < 0) reverse$1(points, n);
+      }
+
+      function point(p) {
+        return transformPoint(p);
+      }
+
+      function line(arcs) {
+        var points = [];
+        for (var i = 0, n = arcs.length; i < n; ++i) arc(arcs[i], points);
+        if (points.length < 2) points.push(points[0]); // This should never happen per the specification.
+        return points;
+      }
+
+      function ring(arcs) {
+        var points = line(arcs);
+        while (points.length < 4) points.push(points[0]); // This may happen if an arc has only two points.
+        return points;
+      }
+
+      function polygon(arcs) {
+        return arcs.map(ring);
+      }
+
+      function geometry(o) {
+        var type = o.type, coordinates;
+        switch (type) {
+          case "GeometryCollection": return {type: type, geometries: o.geometries.map(geometry)};
+          case "Point": coordinates = point(o.coordinates); break;
+          case "MultiPoint": coordinates = o.coordinates.map(point); break;
+          case "LineString": coordinates = line(o.arcs); break;
+          case "MultiLineString": coordinates = o.arcs.map(line); break;
+          case "Polygon": coordinates = polygon(o.arcs); break;
+          case "MultiPolygon": coordinates = o.arcs.map(polygon); break;
+          default: return null;
+        }
+        return {type: type, coordinates: coordinates};
+      }
+
+      return geometry(o);
+    }
+
+    function stitch(topology, arcs) {
+      var stitchedArcs = {},
+          fragmentByStart = {},
+          fragmentByEnd = {},
+          fragments = [],
+          emptyIndex = -1;
+
+      // Stitch empty arcs first, since they may be subsumed by other arcs.
+      arcs.forEach(function(i, j) {
+        var arc = topology.arcs[i < 0 ? ~i : i], t;
+        if (arc.length < 3 && !arc[1][0] && !arc[1][1]) {
+          t = arcs[++emptyIndex], arcs[emptyIndex] = i, arcs[j] = t;
+        }
+      });
+
+      arcs.forEach(function(i) {
+        var e = ends(i),
+            start = e[0],
+            end = e[1],
+            f, g;
+
+        if (f = fragmentByEnd[start]) {
+          delete fragmentByEnd[f.end];
+          f.push(i);
+          f.end = end;
+          if (g = fragmentByStart[end]) {
+            delete fragmentByStart[g.start];
+            var fg = g === f ? f : f.concat(g);
+            fragmentByStart[fg.start = f.start] = fragmentByEnd[fg.end = g.end] = fg;
+          } else {
+            fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
+          }
+        } else if (f = fragmentByStart[end]) {
+          delete fragmentByStart[f.start];
+          f.unshift(i);
+          f.start = start;
+          if (g = fragmentByEnd[start]) {
+            delete fragmentByEnd[g.end];
+            var gf = g === f ? f : g.concat(f);
+            fragmentByStart[gf.start = g.start] = fragmentByEnd[gf.end = f.end] = gf;
+          } else {
+            fragmentByStart[f.start] = fragmentByEnd[f.end] = f;
+          }
+        } else {
+          f = [i];
+          fragmentByStart[f.start = start] = fragmentByEnd[f.end = end] = f;
+        }
+      });
+
+      function ends(i) {
+        var arc = topology.arcs[i < 0 ? ~i : i], p0 = arc[0], p1;
+        if (topology.transform) p1 = [0, 0], arc.forEach(function(dp) { p1[0] += dp[0], p1[1] += dp[1]; });
+        else p1 = arc[arc.length - 1];
+        return i < 0 ? [p1, p0] : [p0, p1];
+      }
+
+      function flush(fragmentByEnd, fragmentByStart) {
+        for (var k in fragmentByEnd) {
+          var f = fragmentByEnd[k];
+          delete fragmentByStart[f.start];
+          delete f.start;
+          delete f.end;
+          f.forEach(function(i) { stitchedArcs[i < 0 ? ~i : i] = 1; });
+          fragments.push(f);
+        }
+      }
+
+      flush(fragmentByEnd, fragmentByStart);
+      flush(fragmentByStart, fragmentByEnd);
+      arcs.forEach(function(i) { if (!stitchedArcs[i < 0 ? ~i : i]) fragments.push([i]); });
+
+      return fragments;
+    }
+
+    function mesh(topology) {
+      return object$2(topology, meshArcs.apply(this, arguments));
+    }
+
+    function meshArcs(topology, object, filter) {
+      var arcs, i, n;
+      if (arguments.length > 1) arcs = extractArcs(topology, object, filter);
+      else for (i = 0, arcs = new Array(n = topology.arcs.length); i < n; ++i) arcs[i] = i;
+      return {type: "MultiLineString", arcs: stitch(topology, arcs)};
+    }
+
+    function extractArcs(topology, object, filter) {
+      var arcs = [],
+          geomsByArc = [],
+          geom;
+
+      function extract0(i) {
+        var j = i < 0 ? ~i : i;
+        (geomsByArc[j] || (geomsByArc[j] = [])).push({i: i, g: geom});
+      }
+
+      function extract1(arcs) {
+        arcs.forEach(extract0);
+      }
+
+      function extract2(arcs) {
+        arcs.forEach(extract1);
+      }
+
+      function extract3(arcs) {
+        arcs.forEach(extract2);
+      }
+
+      function geometry(o) {
+        switch (geom = o, o.type) {
+          case "GeometryCollection": o.geometries.forEach(geometry); break;
+          case "LineString": extract1(o.arcs); break;
+          case "MultiLineString": case "Polygon": extract2(o.arcs); break;
+          case "MultiPolygon": extract3(o.arcs); break;
+        }
+      }
+
+      geometry(object);
+
+      geomsByArc.forEach(filter == null
+          ? function(geoms) { arcs.push(geoms[0].i); }
+          : function(geoms) { if (filter(geoms[0].g, geoms[geoms.length - 1].g)) arcs.push(geoms[0].i); });
+
+      return arcs;
+    }
+
+    class DHelpers {
+        // Helper function: cross product of two vectors v0&v1
+        static cross(v0, v1) {
+            return [v0[1] * v1[2] - v0[2] * v1[1], v0[2] * v1[0] - v0[0] * v1[2], v0[0] * v1[1] - v0[1] * v1[0]];
+        }
+        //Helper function: dot product of two vectors v0&v1
+        static dot(v0, v1) {
+            for (var i = 0, sum = 0; v0.length > i; ++i)
+                sum += v0[i] * v1[i];
+            return sum;
+        }
+        // Helper function: 
+        // This function converts a [lon, lat] coordinates into a [x,y,z] coordinate 
+        // the [x, y, z] is Cartesian, with origin at lon/lat (0,0) center of the earth
+        static lonlat2xyz(coord) {
+            var lon = coord[0] * DHelpers.to_radians;
+            var lat = coord[1] * DHelpers.to_radians;
+            var x = Math.cos(lat) * Math.cos(lon);
+            var y = Math.cos(lat) * Math.sin(lon);
+            var z = Math.sin(lat);
+            return [x, y, z];
+        }
+        // Helper function: 
+        // This function computes a quaternion representation for the rotation between to vectors
+        // https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Euler_angles_.E2.86.94_Quaternion
+        static quaternion(v0, v1) {
+            if (v0 && v1) {
+                var w = DHelpers.cross(v0, v1), // vector pendicular to v0 & v1
+                w_len = Math.sqrt(DHelpers.dot(w, w)); // length of w     
+                if (w_len == 0)
+                    return;
+                var theta = .5 * Math.acos(Math.max(-1, Math.min(1, DHelpers.dot(v0, v1)))), qi = w[2] * Math.sin(theta) / w_len, qj = -w[1] * Math.sin(theta) / w_len, qk = w[0] * Math.sin(theta) / w_len, qr = Math.cos(theta);
+                return theta && [qr, qi, qj, qk];
+            }
+        }
+        // Helper function: 
+        // This functions converts euler angles to quaternion
+        // https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Euler_angles_.E2.86.94_Quaternion
+        static euler2quat(e) {
+            if (!e)
+                return;
+            var roll = .5 * e[0] * DHelpers.to_radians, pitch = .5 * e[1] * DHelpers.to_radians, yaw = .5 * e[2] * DHelpers.to_radians, sr = Math.sin(roll), cr = Math.cos(roll), sp = Math.sin(pitch), cp = Math.cos(pitch), sy = Math.sin(yaw), cy = Math.cos(yaw), qi = sr * cp * cy - cr * sp * sy, qj = cr * sp * cy + sr * cp * sy, qk = cr * cp * sy - sr * sp * cy, qr = cr * cp * cy + sr * sp * sy;
+            return [qr, qi, qj, qk];
+        }
+        // This functions computes a quaternion multiply
+        // Geometrically, it means combining two quant rotations
+        // http://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/arithmetic/index.htm
+        static quatMultiply(q1, q2) {
+            if (!q1 || !q2)
+                return;
+            var a = q1[0], b = q1[1], c = q1[2], d = q1[3], e = q2[0], f = q2[1], g = q2[2], h = q2[3];
+            return [
+                a * e - b * f - c * g - d * h,
+                b * e + a * f + c * h - d * g,
+                a * g - b * h + c * e + d * f,
+                a * h + b * g - c * f + d * e
+            ];
+        }
+        // This function computes quaternion to euler angles
+        // https://en.wikipedia.org/wiki/Rotation_formalisms_in_three_dimensions#Euler_angles_.E2.86.94_Quaternion
+        static quat2euler(t) {
+            if (!t)
+                return;
+            return [Math.atan2(2 * (t[0] * t[1] + t[2] * t[3]), 1 - 2 * (t[1] * t[1] + t[2] * t[2])) * DHelpers.to_degrees,
+                Math.asin(Math.max(-1, Math.min(1, 2 * (t[0] * t[2] - t[3] * t[1])))) * DHelpers.to_degrees,
+                Math.atan2(2 * (t[0] * t[3] + t[1] * t[2]), 1 - 2 * (t[2] * t[2] + t[3] * t[3])) * DHelpers.to_degrees
+            ];
+        }
+        /*  This function computes the euler angles when given two vectors, and a rotation
+            This is really the only math function called with d3 code.
+        
+            v0 - starting pos in lon/lat, commonly obtained by projection.invert
+            v1 - ending pos in lon/lat, commonly obtained by projection.invert
+            o0 - the projection rotation in euler angles at starting pos (v0), commonly obtained by projection.rotate
+        */
+        static eulerAngles(v0, v1, o0) {
+            /*
+                The math behind this:
+                - first calculate the quaternion rotation between the two vectors, v0 & v1
+                - then multiply this rotation onto the original rotation at v0
+                - finally convert the resulted quat angle back to euler angles for d3 to rotate
+            */
+            var t = DHelpers.quatMultiply(DHelpers.euler2quat(o0), DHelpers.quaternion(DHelpers.lonlat2xyz(v0), DHelpers.lonlat2xyz(v1)));
+            return DHelpers.quat2euler(t);
+        }
+    }
+    DHelpers.to_radians = Math.PI / 180;
+    DHelpers.to_degrees = 180 / Math.PI;
+    //# sourceMappingURL=DHelpers.js.map
 
     /*
     * Visualisation Components - https://github.com/amaris/visualization-components
@@ -19565,12 +22381,177 @@
     * along with this program; if not, write to the Free Software Foundation,
     * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
     */
+    //# sourceMappingURL=index.js.map
+
+    /*
+    * Visualisation Components - https://github.com/amaris/visualization-components
+    * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
+    *
+    * This program is free software; you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation; either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    * GNU General Public License for more details.
+    *
+    * You should have received a copy of the GNU General Public License
+    * along with this program; if not, write to the Free Software Foundation,
+    * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    */
+    class Earth$$1 {
+        build(config) {
+            this.config = config;
+            if (typeof this.config.container == "string") {
+                this.container = document.getElementById(this.config.container);
+            }
+            else {
+                this.container = this.config.container;
+            }
+            if (!this.config.bakcgroundColor) {
+                this.config.bakcgroundColor = "#000";
+            }
+            if (!this.config.foregroundColor) {
+                this.config.foregroundColor = "#f3de84";
+            }
+            if (!this.config.onclick) {
+                this.config.onclick = this.onClickDefault;
+            }
+            if (typeof this.config.data == "string") {
+                json(this.config.data, (error, rootData) => {
+                    this.buildFromData(rootData);
+                });
+            }
+            else {
+                this.data = this.config.data;
+                this.createEarth();
+            }
+        }
+        createEarth() {
+            this.svg = select(this.container)
+                .append('svg')
+                .attr('width', this.container.clientWidth)
+                .attr('height', this.container.clientHeight)
+                .attr('viewBox', '0, 0, ' + this.container.clientWidth + ', ' + this.container.clientHeight);
+            this.projection = orthographic()
+                .scale(300)
+                .translate([this.container.clientWidth / 2, this.container.clientHeight / 2])
+                .clipAngle(90)
+                .precision(10);
+            this.path = index$1()
+                .projection(this.projection);
+            let graticule$$1 = graticule();
+            this.svg.append("def")
+                .datum({ type: "Sphere" })
+                .attr("class", "sphere")
+                .attr("d", this.path);
+            this.svg.append("defs").append("path")
+                .datum({ type: "Sphere" })
+                .attr("id", "sphere")
+                .attr("fill", "#2a468c")
+                .attr("d", this.path);
+            this.svg.append("use")
+                .attr("class", "stroke")
+                .attr("fill", "none")
+                .attr("stroke", "none")
+                .attr("stroke-width", "1px")
+                .attr("xlink:href", "#sphere");
+            this.svg.append("use")
+                .attr("class", "fill")
+                .attr("fill", this.config.bakcgroundColor)
+                .attr("xlink:href", "#sphere");
+            this.svg.append("path")
+                .datum(graticule$$1)
+                .attr("class", "graticule")
+                .attr("fill", "none")
+                .attr("stroke", this.config.foregroundColor)
+                .attr("stroke-width", ".2px")
+                .attr("stroke-opacity", ".2")
+                .attr("d", this.path);
+            var drag$$1 = drag()
+                .on("start", () => this.gpos0 = this.projection.invert(mouse(this.container)))
+                .on("drag", () => {
+                var gpos1 = this.projection.invert(mouse(this.container));
+                var rotation$$1 = this.projection.rotate();
+                var eulerRotation = DHelpers.eulerAngles(this.gpos0, gpos1, rotation$$1);
+                this.projection.rotate(eulerRotation);
+                this.svg.selectAll("path").attr("d", this.path);
+            });
+            var zoom$$1 = zoom().scaleExtent([0.1, 7.0])
+                .on("zoom", () => {
+                this.svg.selectAll("path").attr("transform", event.transform);
+            });
+            this.svg.call(zoom$$1)
+                .on("mousedown.zoom", null)
+                .on("touchstart.zoom", null)
+                .on("touchmove.zoom", null)
+                .on("touchend.zoom", null);
+            this.svg.call(drag$$1);
+            json("/components/3Dmodel/world-110m.v1.json", (error, world) => {
+                this.stratLoaded(error, world, this.svg);
+            });
+        }
+        stratLoaded(error, world, svg) {
+            if (error)
+                throw error;
+            var land = feature(world, world.objects.land), countries = feature(world, world.objects.countries), borders = mesh(world, world.objects.countries, function (a, b) { return a !== b; });
+            countries = countries.features;
+            svg.insert("path", ".graticule")
+                .datum(feature(world, world.objects.land))
+                .attr("class", "land")
+                .attr("fill", this.config.foregroundColor)
+                .attr("d", this.path);
+            for (var j = 0; j < countries.length; j++) {
+                svg.insert("path", ".graticule")
+                    .datum(countries[j])
+                    .attr("fill", this.config.foregroundColor)
+                    .attr("d", this.path)
+                    .attr("class", "clickable")
+                    .attr("data-country-id", j);
+            }
+            svg.insert("path", ".graticule")
+                .datum(mesh(world, world.objects.countries, function (a, b) { return a !== b; }))
+                .attr("class", "boundary")
+                .attr("fill", "none")
+                .attr("stroke", this.config.bakcgroundColor)
+                .attr("stroke-width", ".5px")
+                .attr("d", this.path);
+        }
+        buildFromData(rootData) {
+        }
+        onClickDefault() {
+        }
+    }
+
+    /*
+    * Visualisation Components - https://github.com/amaris/visualization-components
+    * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
+    *
+    * This program is free software; you can redistribute it and/or modify
+    * it under the terms of the GNU General Public License as published by
+    * the Free Software Foundation; either version 3 of the License, or
+    * (at your option) any later version.
+    *
+    * This program is distributed in the hope that it will be useful,
+    * but WITHOUT ANY WARRANTY; without even the implied warranty of
+    * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    * GNU General Public License for more details.
+    *
+    * You should have received a copy of the GNU General Public License
+    * along with this program; if not, write to the Free Software Foundation,
+    * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+    */
+    //# sourceMappingURL=index.js.map
 
     exports.SimpleSpeechRecognition = SimpleSpeechRecognition;
     exports.BubbleTree = BubbleTree;
     exports.Table = Table;
     exports.List = List;
     exports.TimeSeries = TimeSeries;
+    exports.Earth = Earth$$1;
+    exports.DHelpers = DHelpers;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

@@ -74,6 +74,7 @@ export declare class TimeSeries<D extends TimeSerieData> {
     private max;
     private dateMin;
     private dateMax;
+    private update_function;
     private yScale;
     private xScale;
     private fullXScale;
@@ -99,6 +100,7 @@ export declare class TimeSeries<D extends TimeSerieData> {
      * @param config the initial configuration
      */
     build(config: ConfigurationTimeSerie<D>): void;
+    remove_update(): void;
     private updateData(serie);
     private buildFromData(rootData);
     private createChart();

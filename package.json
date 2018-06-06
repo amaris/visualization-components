@@ -39,9 +39,11 @@
     "typescript": "^2.8.1"
   },
   "dependencies": {
+    "@types/topojson-client": "^3.0.0",
     "bootstrap": "^4.0.0",
     "d3": "^4.13.0",
     "datatables-bootstrap": "0.0.1",
-    "jquery": "^1.12.4"
+    "jquery": "^1.12.4",
+    "topojson-client": "^3.0.0"
   }
 }
