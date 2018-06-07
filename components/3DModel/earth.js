@@ -24,9 +24,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const d3 = require("d3");
 require("jquery");
 const topojson = require("topojson-client");
+require("leaflet");
 __export(require("./DHelpers"));
 const index_1 = require("../index");
-const L = require("leaflet");
 class Earth {
     build(config) {
         this.config = config;
@@ -59,10 +59,10 @@ class Earth {
             .attr('height', this.container.clientHeight)
             .attr('viewBox', '0, 0, ' + this.container.clientWidth + ', ' + this.container.clientHeight);
         this.simpleMap = $(this.container).append('<div class="simple-map"></div>').get(0);
-        var map = L.map(this.simpleMap, {
-            center: [51.505, -0.09],
-            zoom: 13
-        });
+        /*  var map = L.map(this.simpleMap, {
+              center: [51.505, -0.09],
+              zoom: 13
+          });*/
         this.projection = d3.geoOrthographic()
             .scale(300)
             .translate([this.container.clientWidth / 2, this.container.clientHeight / 2])

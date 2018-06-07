@@ -19,12 +19,19 @@
 
 import * as d3 from 'd3';
 import 'jquery';
+
 import * as topojson from 'topojson-client';
+
+import  'leaflet';
 
 export * from "./DHelpers";
 
-import { queue } from 'd3';
+
+
 import { DHelpers } from '../index';
+
+
+
 
 
 
@@ -115,10 +122,10 @@ export class Earth<D extends GeoData>{
 
         this.simpleMap = $(this.container).append('<div class="simple-map"></div>').get(0);
 
-        var map = L.map(this.simpleMap, {
-            center: [51.505, -0.09],
-            zoom: 13
-        });
+          /*  var map = L.map(this.simpleMap, {
+                center: [51.505, -0.09],
+                zoom: 13
+            });*/
 
         this.projection = d3.geoOrthographic()
             .scale(300)

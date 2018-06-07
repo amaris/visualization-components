@@ -1,4 +1,5 @@
 import 'jquery';
+import 'leaflet';
 export * from "./DHelpers";
 export interface GeoData {
     uid: string;
