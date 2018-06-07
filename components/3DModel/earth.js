@@ -26,6 +26,7 @@ require("jquery");
 const topojson = require("topojson-client");
 __export(require("./DHelpers"));
 const index_1 = require("../index");
+const L = require("leaflet");
 class Earth {
     build(config) {
         this.config = config;
@@ -40,9 +41,6 @@ class Earth {
         }
         if (!this.config.foregroundColor) {
             this.config.foregroundColor = "#f3de84";
-        }
-        if (!this.config.onclick) {
-            this.config.onclick = this.onClickDefault;
         }
         if (typeof this.config.data == "string") {
             d3.json(this.config.data, (error, rootData) => {
@@ -60,6 +58,11 @@ class Earth {
             .attr('width', this.container.clientWidth)
             .attr('height', this.container.clientHeight)
             .attr('viewBox', '0, 0, ' + this.container.clientWidth + ', ' + this.container.clientHeight);
+        this.simpleMap = $(this.container).append('<div class="simple-map"></div>').get(0);
+        var map = L.map(this.simpleMap, {
+            center: [51.505, -0.09],
+            zoom: 13
+        });
         this.projection = d3.geoOrthographic()
             .scale(300)
             .translate([this.container.clientWidth / 2, this.container.clientHeight / 2])
@@ -95,6 +98,8 @@ class Earth {
             .attr("stroke-width", ".2px")
             .attr("stroke-opacity", ".2")
             .attr("d", this.path);
+        this.markerGroup = this.svg.append('g')
+            .attr("class", "marker-group");
         var drag = d3.drag()
             .on("start", () => this.gpos0 = this.projection.invert(d3.mouse(this.container)))
             .on("drag", () => {
@@ -103,10 +108,34 @@ class Earth {
             var eulerRotation = index_1.DHelpers.eulerAngles(this.gpos0, gpos1, rotation);
             this.projection.rotate(eulerRotation);
             this.svg.selectAll("path").attr("d", this.path);
+            this.markerGroup.selectAll('circle')
+                .data(this.data)
+                .attr('cx', (d) => this.projection([d.long, d.lat])[0])
+                .attr('cy', (d) => this.projection([d.long, d.lat])[1])
+                .attr('fill', (d) => {
+                var gdistance = d3.geoDistance([d.long, d.lat], this.projection.invert([this.container.clientWidth / 2, this.container.clientHeight / 2]));
+                return gdistance > 1.2 ? 'none' : 'steelblue';
+            })
+                .attr('r', 7);
+            this.svg.selectAll(".marker-group")
+                .selectAll("text")
+                .data(this.data)
+                .attr("x", (d) => this.projection([d.long, d.lat])[0])
+                .attr("y", (d) => this.projection([d.long, d.lat])[1] - 5)
+                .attr("fill", (d) => {
+                var gdistance = d3.geoDistance([d.long, d.lat], this.projection.invert([this.container.clientWidth / 2, this.container.clientHeight / 2]));
+                return gdistance > 1.57 ? 'none' : '#000';
+            })
+                .attr("font-size", "14px")
+                .attr("font-family", "sans-serif")
+                .attr("text-anchor", "middle")
+                .text((d) => d.value);
         });
         var zoom = d3.zoom().scaleExtent([0.1, 7.0])
             .on("zoom", () => {
             this.svg.selectAll("path").attr("transform", d3.event.transform);
+            this.svg.selectAll("circle").attr("transform", d3.event.transform);
+            this.svg.selectAll("text").attr("transform", d3.event.transform);
         });
         this.svg.call(zoom)
             .on("mousedown.zoom", null)
@@ -115,12 +144,45 @@ class Earth {
             .on("touchend.zoom", null);
         this.svg.call(drag);
         d3.json("/components/3Dmodel/world-110m.v1.json", (error, world) => {
-            this.stratLoaded(error, world, this.svg);
+            d3.tsv("/components/3Dmodel/world-country-names.tsv", (error, names) => {
+                this.stratLoaded(error, world, this.svg, names);
+                this.svg.selectAll(".marker-group")
+                    .selectAll("circle")
+                    .data(this.data)
+                    .enter()
+                    .append("circle")
+                    .attr('cx', (d) => this.projection([d.long, d.lat])[0])
+                    .attr('cy', (d) => this.projection([d.long, d.lat])[1])
+                    .attr('fill', (d) => {
+                    var gdistance = d3.geoDistance([d.long, d.lat], this.projection.invert([this.container.clientWidth / 2, this.container.clientHeight / 2]));
+                    return gdistance > 1.57 ? 'none' : 'steelblue';
+                })
+                    .attr('r', 7);
+                this.svg.selectAll(".marker-group")
+                    .selectAll("text")
+                    .data(this.data)
+                    .enter()
+                    .append("text")
+                    .attr("x", (d) => this.projection([d.long, d.lat])[0])
+                    .attr("y", (d) => this.projection([d.long, d.lat])[1] - 5)
+                    .attr("fill", (d) => {
+                    var gdistance = d3.geoDistance([d.long, d.lat], this.projection.invert([this.container.clientWidth / 2, this.container.clientHeight / 2]));
+                    return gdistance > 1.57 ? 'none' : '#000';
+                })
+                    .attr("font-size", "14px")
+                    .attr("font-family", "sans-serif")
+                    .attr("text-anchor", "middle")
+                    .text((d) => d.value);
+            });
         });
     }
-    stratLoaded(error, world, svg) {
+    stratLoaded(error, world, svg, names) {
         if (error)
             throw error;
+        var nameMap = new Map();
+        for (var i = 0; i < names.length; i++) {
+            nameMap.set(parseInt(names[i].id), names[i].name);
+        }
         var globe = { type: "Sphere" }, land = topojson.feature(world, world.objects.land), countries = topojson.feature(world, world.objects.countries), borders = topojson.mesh(world, world.objects.countries, function (a, b) { return a !== b; });
         countries = countries.features;
         svg.insert("path", ".graticule")
@@ -134,7 +196,19 @@ class Earth {
                 .attr("fill", this.config.foregroundColor)
                 .attr("d", this.path)
                 .attr("class", "clickable")
-                .attr("data-country-id", j);
+                .attr("data-country-id", nameMap.get(parseInt(countries[j].id)) ? nameMap.get(parseInt(countries[j].id)) : countries[j].id)
+                .on("mousemove", function () {
+                var c = d3.select(this);
+                c.attr("fill", "red");
+            })
+                .on("mouseout", function () {
+                var c = d3.select(this);
+                d3.select(this).attr("fill", "#f3de84");
+            })
+                .on("click", function () {
+                var c = d3.select(this);
+                console.log(c.attr("data-country-id"));
+            });
         }
         svg.insert("path", ".graticule")
             .datum(topojson.mesh(world, world.objects.countries, function (a, b) { return a !== b; }))
@@ -145,8 +219,6 @@ class Earth {
             .attr("d", this.path);
     }
     buildFromData(rootData) {
-    }
-    onClickDefault() {
     }
 }
 exports.Earth = Earth;

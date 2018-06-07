@@ -9,22 +9,22 @@ export interface GeoData {
 }
 export interface EarthConfiguration<D extends GeoData> {
     container: HTMLElement | string;
-    data: string | D;
+    data: string | Array<D>;
     bakcgroundColor?: string;
     foregroundColor?: string;
-    onclick?: Function;
 }
 export declare class Earth<D extends GeoData> {
     private svg;
     private config;
     private projection;
     private path;
+    private simpleMap;
     private container;
+    private markerGroup;
     private data;
     private gpos0;
     build(config: EarthConfiguration<D>): void;
     private createEarth();
-    private stratLoaded(error, world, svg);
+    private stratLoaded(error, world, svg, names);
     private buildFromData(rootData);
-    private onClickDefault();
 }
