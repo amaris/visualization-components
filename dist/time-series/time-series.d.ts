@@ -18,6 +18,7 @@ export interface TimeSerieData {
      * An anomaly value. // TODO: have a better name?
      */
     a: number;
+    description?: string;
 }
 export interface Margin {
     top: number;

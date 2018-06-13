@@ -42,6 +42,8 @@ export interface TimeSerieData {
      * An anomaly value. // TODO: have a better name?
      */
     a: number;
+
+    description?: string;
 }
 
 export interface Margin {
@@ -511,11 +513,14 @@ export class TimeSeries<D extends TimeSerieData>{
 
     private tipFunction(date: Date, serieItem: any) {
         let spans = '';
+        let noDescription="No Description"
         if (serieItem.item && serieItem.item.y) {
             spans = `<table style="border:none">
+                <tr
+                  <td style="color: ${this.config.axisColor}; text-align:right"> Value : ${this.yScaleFormat(serieItem.item.y)}</td>
+                </tr>
                 <tr>
-                  <td style="color: ${this.config.axisColor}">${serieItem.options.label}</td>
-                  <td style="color: ${this.config.axisColor}; text-align:right">${this.yScaleFormat(serieItem.item.y)}</td>
+                  <td style="color: ${this.config.axisColor}">${serieItem.item.description ? serieItem.item.description : noDescription }</td>
                 </tr>
               </table>`
         }

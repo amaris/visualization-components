@@ -22,7 +22,7 @@ import 'jquery';
 
 import * as topojson from 'topojson-client';
 
-import  'leaflet';
+import * as L from 'leaflet';
 
 export * from "./DHelpers";
 
@@ -120,12 +120,9 @@ export class Earth<D extends GeoData>{
             .attr('height', this.container.clientHeight)
             .attr('viewBox', '0, 0, ' + this.container.clientWidth + ', ' + this.container.clientHeight);
 
-        this.simpleMap = $(this.container).append('<div class="simple-map"></div>').get(0);
+        this.simpleMap = $(this.container).append('<div id="simple-map" style="height:500px" ></div>').children().get(1);
 
-          /*  var map = L.map(this.simpleMap, {
-                center: [51.505, -0.09],
-                zoom: 13
-            });*/
+
 
         this.projection = d3.geoOrthographic()
             .scale(300)
@@ -208,7 +205,7 @@ export class Earth<D extends GeoData>{
                     .text((d: any) => d.value);
             });
 
-        var zoom = d3.zoom().scaleExtent([0.1, 7.0])
+        var zoom = d3.zoom().scaleExtent([0.1, 20.0])
             .on("zoom", () => {
                 this.svg.selectAll("path").attr("transform", d3.event.transform);
                 this.svg.selectAll("circle").attr("transform", d3.event.transform);
@@ -274,10 +271,10 @@ export class Earth<D extends GeoData>{
         var globe = { type: "Sphere" },
             land = topojson.feature(world, world.objects.land),
             countries: any = topojson.feature(world, world.objects.countries),
-            borders = topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; });
+            borders = topojson.mesh(world, world.objects.countries, function (a, b) { return a !== b; });
 
         countries = countries.features
-
+        console.log(countries);
         svg.insert("path", ".graticule")
             .datum(topojson.feature(world, world.objects.land))
             .attr("class", "land")
@@ -285,28 +282,38 @@ export class Earth<D extends GeoData>{
             .attr("d", this.path);
 
         for (var j = 0; j < countries.length; j++) {
-                    svg.insert("path", ".graticule")
-                        .datum(countries[j])
-                        .attr("fill", this.config.foregroundColor)
-                        .attr("d", this.path)
-                        .attr("class", "clickable")
-                        .attr("data-country-id", nameMap.get(parseInt(countries[j].id)) ? nameMap.get(parseInt(countries[j].id)) : countries[j].id)
-                        .on("mousemove", function() {
-                            var c = d3.select(this);
-                            c.attr("fill", "red");
-                        })
-                        .on("mouseout", function() {
-                            var c = d3.select(this);
-                            d3.select(this).attr("fill", "#f3de84");
-                        })
-                        .on("click", function() {
-                            var c = d3.select(this);
-                            console.log(c.attr("data-country-id"));
-                        });
+            svg.insert("path", ".graticule")
+                .datum(countries[j])
+                .attr("fill", this.config.foregroundColor)
+                .attr("d", this.path)
+                .attr("class", "clickable")
+                .attr("center-lat", d3.geoCentroid(countries[j])[0])
+                .attr("center-long", d3.geoCentroid(countries[j])[1])
+                .attr("data-country-id", nameMap.get(parseInt(countries[j].id)) ? nameMap.get(parseInt(countries[j].id)) : countries[j].id)
+                .on("mousemove", function () {
+                    var c = d3.select(this);
+                    c.attr("fill", "red");
+                })
+                .on("mouseout", function () {
+                    var c = d3.select(this);
+                    d3.select(this).attr("fill", "#f3de84");
+                })
+                .on("click", () => {
+                    var c = d3.select(d3.event.currentTarget);
+                    console.log(c.attr("data-country-id"));
+                    
+                    var osmBase = L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png');
+                    this.simpleMap.innerHTML = '';
+                    var map = L.map(this.simpleMap, {
+                        center: [parseFloat(c.attr("center-long")), parseFloat(c.attr("center-lat"))],
+                        zoom: 5,
+                        layers: [osmBase]
+                    });
+                });
         }
 
         svg.insert("path", ".graticule")
-            .datum(topojson.mesh(world, world.objects.countries, function(a, b) { return a !== b; }))
+            .datum(topojson.mesh(world, world.objects.countries, function (a, b) { return a !== b; }))
             .attr("class", "boundary")
             .attr("fill", "none")
             .attr("stroke", this.config.bakcgroundColor)
