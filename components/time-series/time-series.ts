@@ -44,6 +44,8 @@ export interface TimeSerieData {
     a: number;
 
     description?: string;
+
+    anomaly_description?: string;
 }
 
 export interface Margin {
@@ -520,7 +522,10 @@ export class TimeSeries<D extends TimeSerieData>{
                   <td style="color: ${this.config.axisColor}; text-align:right"> Value : ${this.yScaleFormat(serieItem.item.y)}</td>
                 </tr>
                 <tr>
-                  <td style="color: ${this.config.axisColor}">${serieItem.item.description ? serieItem.item.description : noDescription }</td>
+                  <td style="color: ${this.config.color}">${serieItem.item.description ? serieItem.item.description : noDescription }</td>
+                </tr>
+                <tr>
+                  <td style="color: ${this.config.circleColor}">${serieItem.item.anomaly_description ? serieItem.item.anomaly_description : noDescription }</td>
                 </tr>
               </table>`
         }

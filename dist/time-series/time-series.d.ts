@@ -19,6 +19,7 @@ export interface TimeSerieData {
      */
     a: number;
     description?: string;
+    anomaly_description?: string;
 }
 export interface Margin {
     top: number;
