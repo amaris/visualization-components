@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Visualisation Components - https://github.com/amaris/visualization-components
  * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
@@ -17,13 +16,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-const d3 = require("d3");
-const time_series_utils_1 = require("./time-series-utils");
+import * as d3 from 'd3';
+import { fk, functorkeyscale, keyNotNull } from './time-series-utils';
 /**
  * A component to show time series.
  */
-class TimeSeries {
+export class TimeSeries {
     constructor() {
         this.brush = d3.brushX();
         this.yScale = d3.scaleLinear();
@@ -339,7 +337,7 @@ class TimeSeries {
             .attr('fill', 'none')
             .attr('stroke-width', 2)
             .attr('r', 5)
-            .attr('stroke', time_series_utils_1.fk('color'));
+            .attr('stroke', fk('color'));
         s.exit().remove();
     }
     mouseMove() {
@@ -394,13 +392,13 @@ class TimeSeries {
         // https://github.com/d3/d3-shape/blob/master/README.md#curves
         this.interpolationFunction = this.getInterpolationFunction(this.config) || d3.curveLinear;
         const drawLine = d3.line()
-            .x(time_series_utils_1.functorkeyscale('x', this.xScale))
-            .y(time_series_utils_1.functorkeyscale('y', this.yScale))
+            .x(functorkeyscale('x', this.xScale))
+            .y(functorkeyscale('y', this.yScale))
             .curve(d3.curveLinear /*serie.interpolationFunction*/)
-            .defined(time_series_utils_1.keyNotNull('y'));
+            .defined(keyNotNull('y'));
         this.line = drawLine;
         this.config.find = (date) => {
-            const bisect = d3.bisector(time_series_utils_1.fk('x')).left;
+            const bisect = d3.bisector(fk('x')).left;
             const i = bisect(this.config.data, date) - 1;
             if (i === -1) {
                 return null;
@@ -436,10 +434,11 @@ class TimeSeries {
             .range([this.drawerHeight - this.drawerTopMargin, 0]);
         const serie = this.config;
         const drawLine = d3.line()
-            .x(time_series_utils_1.functorkeyscale('x', this.fullXScale))
-            .y(time_series_utils_1.functorkeyscale('y', smallyScale))
+            .x(functorkeyscale('x', this.fullXScale))
+            .y(functorkeyscale('y', smallyScale))
+            //.curve(serie.interpolationFunction)
             .curve(d3.curveLinear)
-            .defined(time_series_utils_1.keyNotNull('y'));
+            .defined(keyNotNull('y'));
         const linepath = this.drawerContainer
             .insert("path", ":first-child")
             .datum(this.data)
@@ -476,5 +475,4 @@ class TimeSeries {
         }
     }
 }
-exports.TimeSeries = TimeSeries;
 //# sourceMappingURL=time-series.js.map

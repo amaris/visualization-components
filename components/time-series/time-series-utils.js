@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Visualisation Components - https://github.com/amaris/visualization-components
  * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
@@ -17,14 +16,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-Object.defineProperty(exports, "__esModule", { value: true });
-function fk(v) {
+export function fk(v) {
     return function (d) {
         return d[v];
     };
 }
-exports.fk = fk;
-function functorkeyscale(v, scale) {
+export function functorkeyscale(v, scale) {
     var f = typeof v === "function" ? v : function (d) {
         return d[v];
     };
@@ -32,11 +29,9 @@ function functorkeyscale(v, scale) {
         return scale(f(d));
     };
 }
-exports.functorkeyscale = functorkeyscale;
-function keyNotNull(k) {
+export function keyNotNull(k) {
     return function (d) {
         return d.hasOwnProperty(k) && d[k] !== null && !isNaN(d[k]);
     };
 }
-exports.keyNotNull = keyNotNull;
 //# sourceMappingURL=time-series-utils.js.map

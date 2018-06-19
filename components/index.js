@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Visualisation Components - https://github.com/amaris/visualization-components
  * Copyright (C) 2018 Amaris <rpawlak@amaris.com>
@@ -17,14 +16,10 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(require("./util/speech-recognition"));
-__export(require("./bubbletree/arnd_bubbletree"));
-__export(require("./table/arnd_table"));
-__export(require("./list/arnd_list"));
-__export(require("./time-series/time-series"));
-__export(require("./3DModel/earth"));
+export * from "./util/speech-recognition";
+export * from "./bubbletree/arnd_bubbletree";
+export * from "./table/arnd_table";
+export * from "./list/arnd_list";
+export * from "./time-series/time-series";
+//export * from "./3DModel/earth";
 //# sourceMappingURL=index.js.map

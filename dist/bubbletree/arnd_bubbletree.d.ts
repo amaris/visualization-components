@@ -120,7 +120,7 @@ export declare class BubbleTree<D extends Data> {
     /**
      * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
      */
-    lookupNames(names: string[]): string[];
+    lookupNames(names: string[]): Data[];
     private selectedLeafColor(saturation);
     private nodeColor(d);
     /**

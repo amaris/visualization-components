@@ -356,15 +356,15 @@ export class BubbleTree<D extends Data> {
     /**
      * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
      */
-    lookupNames(names: string[]): string[] {
-        let result: string[] = [];
+    lookupNames(names: string[]): Data[] {
+        let result: Data[] = [];
         let root = this.getFocussedData();
         let upperCasedNames = names.map(n => n.toUpperCase());
         let lookup = (d: Data) => {
             if (d.children) {
                 d.children.forEach(d => {
                     if (upperCasedNames.indexOf(d.name.toUpperCase()) >= 0) {
-                        result.push(d.uid);
+                        result.push(d);
                     }
                 });
                 d.children.forEach(d => lookup(d));
