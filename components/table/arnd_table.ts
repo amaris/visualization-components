@@ -148,7 +148,7 @@ export class Table<D> {
             .attr('data-th', d => {
                 return d.name;
             })
-            .text(d => {
+            .html(d => {
                 return d.value;
             });
 

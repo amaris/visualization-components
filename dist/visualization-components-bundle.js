@@ -18932,7 +18932,7 @@
                 .attr('data-th', d => {
                 return d.name;
             })
-                .text(d => {
+                .html(d => {
                 return d.value;
             });
             if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
