@@ -18891,6 +18891,7 @@
             this.selection = select(this.config.container);
             let table = this.selection.append('table') //
                 .classed('table', true) //
+                .classed('table-responsive', true)
                 .style('border-collapse', "collapse", "important") //
                 .classed('table-sm', this.config.small) //
                 .classed("table-striped", this.config.striped) //
