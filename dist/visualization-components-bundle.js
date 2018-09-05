@@ -18891,15 +18891,17 @@
             this.selection = select(this.config.container);
             let table = this.selection.append('table') //
                 .classed('table', true) //
-                .classed('table-responsive', true)
+                .classed('table-responsive', this.config.responsive)
                 .style('border-collapse', "collapse", "important") //
                 .classed('table-sm', this.config.small) //
                 .classed("table-striped", this.config.striped) //
-                .classed("table-bordered", this.config.bordered);
+                .classed("table-bordered", this.config.bordered) //
+                .classed(this.config.tableClasses, this.config.tableClasses != null);
             var thead = table.append('thead');
             var tbody = table.append('tbody');
             // append the header row
             thead.append('tr')
+                .classed(this.config.headerClasses, this.config.headerClasses != null)
                 .selectAll('th')
                 .data(Object.keys(this.data[0])).enter()
                 .append('th')
@@ -18937,7 +18939,7 @@
                 return d.value;
             });
             if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
-                ($(this.config.container.children[0])).DataTable();
+                this.dataTableApi = ($(this.config.container.children[0])).DataTable(this.config.dataTableSettings);
             }
         }
         /**

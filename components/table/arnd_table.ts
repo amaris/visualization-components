@@ -63,6 +63,22 @@ export interface TableConfiguration<D> {
      * Sets the optional title.
      */
     title?: string;
+    /**
+     * Makes the table responsive.
+     */
+    responsive?: boolean;
+    /**
+     * Custom table classes.
+     */
+    tableClasses?: string
+    /**
+    * Custom header classes.
+    */
+    headerClasses?: string;
+    /**
+     * Sets the DataTable settings. 
+     */
+    dataTableSettings?: DataTables.Settings;
 }
 
 /**
@@ -73,6 +89,8 @@ export class Table<D> {
     private config: TableConfiguration<D>;
     private data: D[];
     private selection: d3.Selection<any, D, any, any>;
+
+    public dataTableApi: DataTables.Api;
 
     public constructor() { }
 
@@ -104,16 +122,18 @@ export class Table<D> {
 
         let table = this.selection.append('table') //
             .classed('table', true) //
-            .classed('table-responsive',true)
+            .classed('table-responsive', this.config.responsive)
             .style('border-collapse', "collapse", "important") //
             .classed('table-sm', this.config.small) //
             .classed("table-striped", this.config.striped) //
-            .classed("table-bordered", this.config.bordered);
+            .classed("table-bordered", this.config.bordered) //
+            .classed(this.config.tableClasses, this.config.tableClasses != null);
         var thead = table.append('thead');
         var tbody = table.append('tbody');
 
         // append the header row
         thead.append('tr')
+            .classed(this.config.headerClasses, this.config.headerClasses != null)
             .selectAll('th')
             .data(Object.keys(this.data[0])).enter()
             .append('th')
@@ -141,7 +161,7 @@ export class Table<D> {
 
         rows.selectAll('td')
             .data(d => {
-                return Object.keys(this.data[0]).map(function(k) {
+                return Object.keys(this.data[0]).map(function (k) {
                     return { 'value': d[k], 'name': k };
                 });
             }).enter()
@@ -154,9 +174,8 @@ export class Table<D> {
             });
 
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
-            ($(this.config.container.children[0])).DataTable();
+            this.dataTableApi = ($(this.config.container.children[0])).DataTable(this.config.dataTableSettings);
         }
-
     }
 
     /**
@@ -165,5 +184,4 @@ export class Table<D> {
     public getData(): D[] {
         return this.data;
     }
-
 }
