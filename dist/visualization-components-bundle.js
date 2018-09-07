@@ -18943,7 +18943,12 @@
                 return this.config.columns.find(x => x.target == d.name).name;
             })
                 .html(d => {
-                return d.value;
+                if (d.value instanceof Object) {
+                    return JSON.stringify(d.value);
+                }
+                else {
+                    return d.value;
+                }
             });
             if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
                 this.dataTableApi = ($(this.config.container.children[0])).DataTable(this.config.dataTableSettings);

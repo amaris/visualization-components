@@ -183,7 +183,12 @@ export class Table<D> {
                 return this.config.columns.find(x => x.target == d.name).name;
             })
             .html(d => {
-                return d.value;
+                if (d.value instanceof Object) {
+                    return JSON.stringify(d.value);
+                }
+                else {
+                    return d.value;
+                }
             });
 
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
