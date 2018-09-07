@@ -59,6 +59,13 @@ export interface TableConfiguration<D> {
      * Sets the DataTable settings.
      */
     dataTableSettings?: DataTables.Settings;
+    /**
+    * Reorder data column.
+    */
+    columns?: {
+        name: string;
+        target: string;
+    }[];
 }
 /**
  * An interactive D3.js component to render objects in a table.

@@ -35,6 +35,9 @@
     <h2>Table component even more</h2>
     <div id="table2">
     </div>
+    <h2>Table component even more</h2>
+    <div id="table3">
+    </div>
 
     <h2>List component</h2>
     <div id="list" style="max-height:300px;overflow-y:scroll"></div>
@@ -280,20 +283,61 @@
             headerClasses: "table-dark h6",
             dataTableSettings: {
                 lengthMenu: [5, 10, 15],
-                columnDefs: [{
-                    targets: -1,
-                    render: function (data, type, row, meta) {
-                        return '<button class="btn btn-primary officiss" data="' + data + '">' + data + '</button>';
-                    }
-                }],
-                stateSave: true
+                colReorder: {
+                    order: [1, 0, 2, 3, 4, 5, 6]
+                },
+                columnDefs: [
+                    {
+                        targets: "col-Ipsum",
+                        name: "ipsumnidoni",
+                        "visible": true
+                    },
+                    {
+                        targets: "col-dolor",
+                        //name: "Dolorinou", // Not working.
+                        render: function (data, type, row, meta) {
+                            return '<button class="btn btn-primary officiss" data="' + data + '">' + data + '</button>';
+                        }
+                    },
+                ]
+
+                //stateSave: true
             }
         });
         console.log(t2.dataTableApi);
 
+
+
         $('#table2 button.officiss').on('click', function () {
             var data = $(this).attr("data");
             alert("officiss is " + data);
+        });
+
+        var t3 = new arnd.Table();
+        t3.build({
+            container: document.getElementById("table3"),
+            striped: false,
+            bordered: false,
+            responsive: false,
+            selectableRows: true,
+            rowClickHandler: function (r) { console.info(r); },
+            data: tableData,
+            headerClasses: "table-dark h6",
+            columns: [
+                { name: "IpSumpopulis", target: "sit" },
+                { name: "Tolo", target: "Lorem" },
+                { name: "IpSumpopuliss", target: "Ipsum" }
+            ],
+            dataTableSettings: {
+                columnDefs: [
+                    {
+                        targets: "col-IpSumpopuliss",
+                        render: function (data, type, row, meta) {
+                            return '<button class="btn btn-primary officiss" data="' + data + '">' + data + '</button>';
+                        }
+                    }
+                ]
+            }
         });
 
         l = new arnd.List();
@@ -334,11 +378,11 @@
             }
         });
 
-        /* var earth = new arnd.Earth();
-        earth.build({
-            container: document.getElementById("earth-3d"),
-            data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
-        });*/
+                                                /* var earth = new arnd.Earth();
+                                                earth.build({
+                                                    container: document.getElementById("earth-3d"),
+                                                    data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
+                                                });*/
 
     </script>
 </body>

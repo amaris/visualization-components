@@ -18883,6 +18883,12 @@
                 throw new Error("invalid type of data: must be an object array");
             }
             this.data = data;
+            if (this.config.columns == null) {
+                //this.config.columns = [];
+                this.config.columns = Object.keys(this.config.data[0]).map(function (item) {
+                    return { target: item, name: item };
+                });
+            }
             this.config.container.innerHTML = "";
             if (!data || data.length == 0) {
                 this.config.container.innerHTML = emptyMessage ? emptyMessage : "Empty data";
@@ -18903,14 +18909,15 @@
             thead.append('tr')
                 .classed(this.config.headerClasses, this.config.headerClasses != null)
                 .selectAll('th')
-                .data(Object.keys(this.data[0])).enter()
+                .data(this.config.columns.map(x => x.target)).enter()
                 .append('th')
                 .on('click', (d) => {
                 if (this.config.headerClickHandler != null) {
-                    this.config.headerClickHandler(Object.keys(this.data[0]).indexOf(d));
+                    this.config.headerClickHandler(this.config.columns.map(x => x.target).indexOf(d));
                 }
             })
-                .text(column => column);
+                .text(column => this.config.columns.find(x => x.target == column).name)
+                .attr('class', column => 'col-' + this.config.columns.find(x => x.target == column).name);
             // create a row for each object in the data
             var rows = tbody.selectAll('tr')
                 .data(this.data)
@@ -18927,13 +18934,13 @@
             });
             rows.selectAll('td')
                 .data(d => {
-                return Object.keys(this.data[0]).map(function (k) {
+                return this.config.columns.map(x => x.target).map(function (k) {
                     return { 'value': d[k], 'name': k };
                 });
             }).enter()
                 .append('td')
                 .attr('data-th', d => {
-                return d.name;
+                return this.config.columns.find(x => x.target == d.name).name;
             })
                 .html(d => {
                 return d.value;
