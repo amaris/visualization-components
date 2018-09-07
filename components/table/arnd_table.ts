@@ -155,7 +155,7 @@ export class Table<D> {
                 }
             })
             .text(column => this.config.columns.find(x => x.target == column).name)
-            .attr('class', column => 'col-' + this.config.columns.find(x => x.target == column).name);
+            .attr('class', column => 'col-' + column);
 
         // create a row for each object in the data
         var rows = tbody.selectAll('tr')
