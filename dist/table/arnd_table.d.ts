@@ -1,4 +1,5 @@
 /// <reference types="datatables.net" />
+import 'list/arnd_list';
 /**
  * Typing for the table configuration object (to be passed to the table constructor).
  */
@@ -66,6 +67,10 @@ export interface TableConfiguration<D> {
         name: string;
         target: string;
     }[];
+    /**
+    * Will display array objects as lists if set to true.
+    */
+    arrayAutoRender?: boolean;
 }
 /**
  * An interactive D3.js component to render objects in a table.

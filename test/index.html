@@ -35,8 +35,11 @@
     <h2>Table component even more</h2>
     <div id="table2">
     </div>
-    <h2>Table component even more</h2>
+    <h2>Table component even even more</h2>
     <div id="table3">
+    </div>
+    <h2>Table component even even even more</h2>
+    <div id="table4">
     </div>
 
     <h2>List component</h2>
@@ -282,6 +285,99 @@
                 },
             ];
 
+        var tableDataArray =
+            [
+                {
+                    "Ipsum": "Xanthus",
+                    "officiisYOlo": [
+                        "toto",
+                        "l'asticot",
+                        "yolo"
+                    ],
+                    "officiisPartoutatis": [
+                        {
+                            "A": "1",
+                            "B": "2",
+                            "Touché": "Coulé",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },
+                        {
+                            "A": "3",
+                            "B": "4",
+                            "?": "Flotte",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },                        
+                    ]
+                },
+                {
+                    "Ipsum": "Xanthus radius",
+                    "officiisYOlo": [
+                        "timon",
+                        "et",
+                        "poumba"
+                    ],
+                    "officiisPartoutatis": [
+                        {
+                            "A": "1",
+                            "B": "2",
+                            "Touché": "Coulé",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },
+                        {
+                            "A": "3",
+                            "B": "4",
+                            "?": "Flotte",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },                        
+                    ],
+
+                }
+            ];
+
         c = new arnd.BubbleTree();
         c.build({
             container: document.getElementById("bubbletree1"),
@@ -396,6 +492,18 @@
             }
         });
 
+        var t4 = new arnd.Table();
+        t4.build({
+            container: document.getElementById("table4"),
+            striped: false,
+            bordered: false,
+            responsive: false,
+            selectableRows: true,
+            data: tableDataArray,
+            headerClasses: "table-dark h6",
+            arrayAutoRender: true
+        });
+
         l = new arnd.List();
         l.build({
             container: document.getElementById("list"),
@@ -434,11 +542,11 @@
             }
         });
 
-        /* var earth = new arnd.Earth();
-        earth.build({
-            container: document.getElementById("earth-3d"),
-            data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
-        });*/
+                    /* var earth = new arnd.Earth();
+                    earth.build({
+                        container: document.getElementById("earth-3d"),
+                        data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
+                    });*/
 
     </script>
 </body>

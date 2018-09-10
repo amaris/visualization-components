@@ -18,6 +18,8 @@
  */
 
 import * as d3 from 'd3';
+import 'list/arnd_list';
+import { List } from '../list/arnd_list';
 
 /**
  * Typing for the table configuration object (to be passed to the table constructor).
@@ -83,6 +85,10 @@ export interface TableConfiguration<D> {
     * Reorder data column.
     */
     columns?: { name: string, target: string }[];
+    /**
+    * Will display array objects as lists if set to true.
+    */
+    arrayAutoRender?: boolean;
 }
 
 /**
@@ -172,23 +178,42 @@ export class Table<D> {
                 }
             });
 
+        let arrayAutoRender = this.config.arrayAutoRender;
         rows.selectAll('td')
             .data(d => {
                 return this.config.columns.map(x => x.target).map(function (k) {
                     return { 'value': d[k], 'name': k };
                 });
             }).enter()
-            .append('td')
-            .attr('data-th', d => {
-                return this.config.columns.find(x => x.target == d.name).name;
-            })
-            .html(d => {
-                if (d.value instanceof Object) {
-                    return JSON.stringify(d.value);
+            .append(function (d) {
+                var td = document.createElement("td");
+                if (d.value instanceof Array && arrayAutoRender) {
+                    if (d.value[0] instanceof Object) {
+                        let t = new Table();
+                        t.build({
+                            container: td,
+                            arrayAutoRender: arrayAutoRender,
+                            data: d.value
+                        });
+                    }
+                    else {
+                        let l = new List();
+                        l.build({
+                            container: td,
+                            data: d.value
+                        });
+                    }
+                }
+                else if (d.value instanceof Object) {
+                    td.innerHTML = JSON.stringify(d.value);
                 }
                 else {
-                    return d.value;
+                    td.innerHTML = d.value;
                 }
+                return td;
+            })
+            .attr('data-th', d => {
+                return this.config.columns.find(x => x.target == d.name).name;
             });
 
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
