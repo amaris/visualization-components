@@ -18,6 +18,8 @@
  */
 
 import * as d3 from 'd3';
+import 'list/arnd_list';
+import { List } from '../list/arnd_list';
 
 /**
  * Typing for the table configuration object (to be passed to the table constructor).
@@ -63,6 +65,30 @@ export interface TableConfiguration<D> {
      * Sets the optional title.
      */
     title?: string;
+    /**
+     * Makes the table responsive.
+     */
+    responsive?: boolean;
+    /**
+     * Custom table classes.
+     */
+    tableClasses?: string
+    /**
+    * Custom header classes.
+    */
+    headerClasses?: string;
+    /**
+     * Sets the DataTable settings. 
+     */
+    dataTableSettings?: DataTables.Settings;
+    /**
+    * Reorder data column.
+    */
+    columns?: { name: string, target: string }[];
+    /**
+    * Will display array objects as lists if set to true.
+    */
+    arrayAutoRender?: boolean;
 }
 
 /**
@@ -73,6 +99,8 @@ export class Table<D> {
     private config: TableConfiguration<D>;
     private data: D[];
     private selection: d3.Selection<any, D, any, any>;
+
+    public dataTableApi: DataTables.Api;
 
     public constructor() { }
 
@@ -95,6 +123,14 @@ export class Table<D> {
         }
 
         this.data = data;
+
+        if (this.config.columns == null) {
+            //this.config.columns = [];
+            this.config.columns = Object.keys(this.config.data[0]).map(function (item) {
+                return { target: item, name: item };
+            });
+        }
+
         this.config.container.innerHTML = "";
         if (!data || data.length == 0) {
             this.config.container.innerHTML = emptyMessage ? emptyMessage : "Empty data";
@@ -104,25 +140,28 @@ export class Table<D> {
 
         let table = this.selection.append('table') //
             .classed('table', true) //
-            .classed('table-responsive',true)
+            .classed('table-responsive', this.config.responsive)
             .style('border-collapse', "collapse", "important") //
             .classed('table-sm', this.config.small) //
             .classed("table-striped", this.config.striped) //
-            .classed("table-bordered", this.config.bordered);
+            .classed("table-bordered", this.config.bordered) //
+            .classed(this.config.tableClasses, this.config.tableClasses != null);
         var thead = table.append('thead');
         var tbody = table.append('tbody');
 
         // append the header row
         thead.append('tr')
+            .classed(this.config.headerClasses, this.config.headerClasses != null)
             .selectAll('th')
-            .data(Object.keys(this.data[0])).enter()
+            .data(this.config.columns.map(x => x.target)).enter()
             .append('th')
             .on('click', (d) => {
                 if (this.config.headerClickHandler != null) {
-                    this.config.headerClickHandler(Object.keys(this.data[0]).indexOf(d));
+                    this.config.headerClickHandler(this.config.columns.map(x => x.target).indexOf(d));
                 }
             })
-            .text(column => column);
+            .text(column => this.config.columns.find(x => x.target == column).name)
+            .attr('class', column => 'col-' + column);
 
         // create a row for each object in the data
         var rows = tbody.selectAll('tr')
@@ -139,24 +178,47 @@ export class Table<D> {
                 }
             });
 
+        let arrayAutoRender = this.config.arrayAutoRender;
         rows.selectAll('td')
             .data(d => {
-                return Object.keys(this.data[0]).map(function(k) {
+                return this.config.columns.map(x => x.target).map(function (k) {
                     return { 'value': d[k], 'name': k };
                 });
             }).enter()
-            .append('td')
-            .attr('data-th', d => {
-                return d.name;
+            .append(function (d) {
+                var td = document.createElement("td");
+                if (d.value instanceof Array && arrayAutoRender) {
+                    if (d.value[0] instanceof Object) {
+                        let t = new Table();
+                        t.build({
+                            container: td,
+                            arrayAutoRender: arrayAutoRender,
+                            data: d.value
+                        });
+                    }
+                    else {
+                        let l = new List();
+                        l.build({
+                            container: td,
+                            data: d.value
+                        });
+                    }
+                }
+                else if (d.value instanceof Object) {
+                    td.innerHTML = JSON.stringify(d.value);
+                }
+                else {
+                    td.innerHTML = d.value;
+                }
+                return td;
             })
-            .html(d => {
-                return d.value;
+            .attr('data-th', d => {
+                return this.config.columns.find(x => x.target == d.name).name;
             });
 
         if (!this.config.useBoostrapDataTable || this.config.useBoostrapDataTable === true) {
-            ($(this.config.container.children[0])).DataTable();
+            this.dataTableApi = ($(this.config.container.children[0])).DataTable(this.config.dataTableSettings);
         }
-
     }
 
     /**
@@ -165,5 +227,4 @@ export class Table<D> {
     public getData(): D[] {
         return this.data;
     }
-
 }

@@ -32,6 +32,15 @@
     <h2>Table component</h2>
     <div id="table">
     </div>
+    <h2>Table component even more</h2>
+    <div id="table2">
+    </div>
+    <h2>Table component even even more</h2>
+    <div id="table3">
+    </div>
+    <h2>Table component even even even more</h2>
+    <div id="table4">
+    </div>
 
     <h2>List component</h2>
     <div id="list" style="max-height:300px;overflow-y:scroll"></div>
@@ -48,10 +57,10 @@
     <script src="../lib/bootstrap.bundle.min.js"></script>
     <script src="../lib/jquery.dataTables.min.js"></script>
     <script src="../lib/dataTables.bootstrap4.min.js"></script>
-    
+
     <script>
 
-        var data = {
+        var bubbleTreeData = {
             "name": "clustering",
             "children": [
                 {
@@ -104,10 +113,275 @@
             ]
         };
 
+        var tableData =
+            [
+                {
+                    "Lorem": "698313830",
+                    "Ipsum": "Xanthus",
+                    "dolor": "Jan 2, 2018",
+                    "sit": "Ullamcorper Nisl Arcu Incorporated",
+                    "amet": new Date(),
+                    "officiis": -0.2367870763,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "829779479",
+                    "Ipsum": "Howard",
+                    "dolor": "Sep 27, 2017",
+                    "sit": "Tempor Corp.",
+                    "amet": new Date(),
+                    "officiis": -0.0780838465,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "072668981",
+                    "Ipsum": "Linus",
+                    "dolor": "May 24, 2018",
+                    "sit": "Nulla Aliquet Incorporated",
+                    "amet": new Date(),
+                    "officiis": 0.1852768345,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "406092213",
+                    "Ipsum": "Brendan",
+                    "dolor": "May 21, 2019",
+                    "sit": "Diam Eu Dolor Corporation",
+                    "amet": new Date(),
+                    "officiis": -0.2503316448,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "047000666",
+                    "Ipsum": "Uriel",
+                    "dolor": "Dec 8, 2017",
+                    "sit": "Est Limited",
+                    "amet": new Date(),
+                    "officiis": 0.2206112327,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "410603930",
+                    "Ipsum": "Rahim",
+                    "dolor": "Jan 8, 2019",
+                    "sit": "Nulla Tincidunt Neque Incorporated",
+                    "amet": new Date(),
+                    "officiis": -0.0112811601,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "078174497",
+                    "Ipsum": "Zachary",
+                    "dolor": "Nov 29, 2017",
+                    "sit": "Nunc LLC",
+                    "amet": new Date(),
+                    "officiis": 0.1599164292,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "459407813",
+                    "Ipsum": "Ray",
+                    "dolor": "Mar 30, 2018",
+                    "sit": "Orci Inc.",
+                    "amet": new Date(),
+                    "officiis": -0.2883012861,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "057352775",
+                    "Ipsum": "Murphy",
+                    "dolor": "Aug 27, 2018",
+                    "sit": "Feugiat Metus Incorporated",
+                    "amet": new Date(),
+                    "officiis": -0.2757983266,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "817808819",
+                    "Ipsum": "Nathaniel",
+                    "dolor": "Sep 13, 2017",
+                    "sit": "Blandit Congue In Corporation",
+                    "amet": new Date(),
+                    "officiis": 0.0893031741,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "496304213",
+                    "Ipsum": "Caldwell",
+                    "dolor": "Aug 2, 2018",
+                    "sit": "Est Consulting",
+                    "amet": new Date(),
+                    "officiis": 0.253696892,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "724343637",
+                    "Ipsum": "Castor",
+                    "dolor": "Jan 1, 2019",
+                    "sit": "Ridiculus Mus Foundation",
+                    "amet": new Date(),
+                    "officiis": 0.3909680066,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "250937547",
+                    "Ipsum": "Nehru",
+                    "dolor": "Mar 24, 2018",
+                    "sit": "Sem Vitae Foundation",
+                    "amet": new Date(),
+                    "officiis": 0.0708214355,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+                {
+                    "Lorem": "110174075",
+                    "Ipsum": "Benedict",
+                    "dolor": "Jul 29, 2018",
+                    "sit": "Sed Corporation",
+                    "amet": new Date(),
+                    "officiis": -0.096744018,
+                    "officiisYOlo": {
+                        Toto: "texttext text",
+                        Tutu: new Date()
+                    }
+                },
+            ];
+
+        var tableDataArray =
+            [
+                {
+                    "Ipsum": "Xanthus",
+                    "officiisYOlo": [
+                        "toto",
+                        "l'asticot",
+                        "yolo"
+                    ],
+                    "officiisPartoutatis": [
+                        {
+                            "A": "1",
+                            "B": "2",
+                            "Touché": "Coulé",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },
+                        {
+                            "A": "3",
+                            "B": "4",
+                            "?": "Flotte",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },                        
+                    ]
+                },
+                {
+                    "Ipsum": "Xanthus radius",
+                    "officiisYOlo": [
+                        "timon",
+                        "et",
+                        "poumba"
+                    ],
+                    "officiisPartoutatis": [
+                        {
+                            "A": "1",
+                            "B": "2",
+                            "Touché": "Coulé",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },
+                        {
+                            "A": "3",
+                            "B": "4",
+                            "?": "Flotte",
+                            "Ah": [
+                                {
+                                    "A": "1",
+                                    "B": "2",
+                                    "Touché": "Coulé"
+                                },
+                                {
+                                    "A": "3",
+                                    "B": "4",
+                                    "?": "Flotte"
+                                }
+                            ]
+                        },                        
+                    ],
+
+                }
+            ];
+
         c = new arnd.BubbleTree();
         c.build({
             container: document.getElementById("bubbletree1"),
-            data: data,
+            data: bubbleTreeData,
             handlers: {
                 "click": function (d) {
                     console.info(">> " + d.data);
@@ -122,7 +396,7 @@
         c = new arnd.BubbleTree();
         c.build({
             container: document.getElementById("bubbletree2"),
-            data: data,
+            data: bubbleTreeData,
             handlers: {
                 "click": function (d) {
                     console.info(">> " + d.data);
@@ -142,10 +416,93 @@
         t.build({
             container: document.getElementById("table"),
             striped: true,
-            bordered: true,
+            bordered: false,
+            responsive: false,
             selectableRows: true,
             rowClickHandler: function (r) { console.info(r); },
-            data: [{ "a": "1", "b": "2" }, { "a": "3", "b": "4" }]
+            data: tableData
+        });
+
+        var t2 = new arnd.Table();
+        t2.build({
+            container: document.getElementById("table2"),
+            striped: false,
+            bordered: false,
+            responsive: false,
+            selectableRows: true,
+            rowClickHandler: function (r) { console.info(r); },
+            data: tableData,
+            headerClasses: "table-dark h6",
+            dataTableSettings: {
+                lengthMenu: [5, 10, 15],
+                colReorder: {
+                    order: [1, 0, 2, 3, 4, 5, 6]
+                },
+                columnDefs: [
+                    {
+                        targets: "col-Ipsum",
+                        name: "ipsumnidoni",
+                        "visible": true
+                    },
+                    {
+                        targets: "col-dolor",
+                        //name: "Dolorinou", // Not working.
+                        render: function (data, type, row, meta) {
+                            return '<button class="btn btn-primary officiss" data="' + data + '">' + data + '</button>';
+                        }
+                    },
+                ]
+
+                //stateSave: true
+            }
+        });
+        console.log(t2.dataTableApi);
+
+
+
+        $('#table2 button.officiss').on('click', function () {
+            var data = $(this).attr("data");
+            alert("officiss is " + data);
+        });
+
+        var t3 = new arnd.Table();
+        t3.build({
+            container: document.getElementById("table3"),
+            striped: false,
+            bordered: false,
+            responsive: false,
+            selectableRows: true,
+            rowClickHandler: function (r) { console.info(r); },
+            data: tableData,
+            headerClasses: "table-dark h6",
+            columns: [
+                { name: "IpSumpopulis", target: "sit" },
+                { name: "Tolo", target: "Lorem" },
+                { name: "IpSumpop uliss", target: "Ipsum" }
+            ],
+            dataTableSettings: {
+                lengthMenu: [[10, 100, -1], ["a few", "a lot", "all"]],
+                columnDefs: [
+                    {
+                        targets: "col-Ipsum",
+                        render: function (data, type, row, meta) {
+                            return '<button class="btn btn-primary officiss" data="' + data + '">' + data + '</button>';
+                        }
+                    }
+                ]
+            }
+        });
+
+        var t4 = new arnd.Table();
+        t4.build({
+            container: document.getElementById("table4"),
+            striped: false,
+            bordered: false,
+            responsive: false,
+            selectableRows: true,
+            data: tableDataArray,
+            headerClasses: "table-dark h6",
+            arrayAutoRender: true
         });
 
         l = new arnd.List();
@@ -159,7 +516,7 @@
         l = new arnd.TimeSeries();
         l.build({
             container: document.getElementById("ts"),
-            data: [{ x: new Date("2018-1-1"), y: 10 , description:"This is a description"}, { x: new Date("2018-2-1"), y: 10, a: 1 }, { x: new Date("2018-3-1"), y: 8 }, { x: new Date("2018-4-1"), y: 11 }, { x: new Date("2018-5-1"), y: 9 }],
+            data: [{ x: new Date("2018-1-1"), y: 10, description: "This is a description" }, { x: new Date("2018-2-1"), y: 10, a: 1 }, { x: new Date("2018-3-1"), y: 8 }, { x: new Date("2018-4-1"), y: 11 }, { x: new Date("2018-5-1"), y: 9 }],
             options: {}
         });
 
@@ -186,11 +543,11 @@
             }
         });
 
-       /* var earth = new arnd.Earth();
-        earth.build({
-            container: document.getElementById("earth-3d"),
-            data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
-        });*/
+                    /* var earth = new arnd.Earth();
+                    earth.build({
+                        container: document.getElementById("earth-3d"),
+                        data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
+                    });*/
 
     </script>
 </body>
