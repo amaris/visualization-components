@@ -7,7 +7,7 @@ export interface Data {
     /**
      * The name of the data, or label of the node.
      */
-    name: string;
+    name?: string;
     /**
      * The children.
      */
@@ -37,6 +37,14 @@ export interface BubbleTreeConfiguration<D extends Data> {
      * The data holding the tree.
      */
     data: string | D;
+    /**
+     * The field holding the name in the data (defaults to "name").
+     */
+    nameField?: string;
+    /**
+     * The field holding the children in the data (defaults to "children").
+     */
+    childrenField?: string;
     /**
      * The color hue for base leafs (default is 110). See http://hslpicker.com/ to check out the meaning of hue.
      */
@@ -117,6 +125,7 @@ export declare class BubbleTree<D extends Data> {
      * @param {BubbleTreeConfiguration} config - the configuration
      */
     build(config: BubbleTreeConfiguration<D>): void;
+    adaptChildrenField(root: Data): void;
     /**
      * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
      */

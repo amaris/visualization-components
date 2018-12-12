@@ -2045,7 +2045,7 @@
       };
     }
 
-    function reinterpolate(a, b) {
+    function interpolateNumber(a, b) {
       return a = +a, b -= a, function(t) {
         return a + b * t;
       };
@@ -2113,7 +2113,7 @@
           else s[++i] = bm;
         } else { // interpolate non-matching numbers
           s[++i] = null;
-          q.push({i: i, x: reinterpolate(am, bm)});
+          q.push({i: i, x: interpolateNumber(am, bm)});
         }
         bi = reB.lastIndex;
       }
@@ -2139,13 +2139,13 @@
     function interpolateValue(a, b) {
       var t = typeof b, c;
       return b == null || t === "boolean" ? constant$3(b)
-          : (t === "number" ? reinterpolate
+          : (t === "number" ? interpolateNumber
           : t === "string" ? ((c = color(b)) ? (b = c, interpolateRgb) : interpolateString)
           : b instanceof color ? interpolateRgb
           : b instanceof Date ? date
           : Array.isArray(b) ? array$1
           : typeof b.valueOf !== "function" && typeof b.toString !== "function" || isNaN(b) ? object
-          : reinterpolate)(a, b);
+          : interpolateNumber)(a, b);
     }
 
     function interpolateRound(a, b) {
@@ -2214,7 +2214,7 @@
       function translate(xa, ya, xb, yb, s, q) {
         if (xa !== xb || ya !== yb) {
           var i = s.push("translate(", null, pxComma, null, pxParen);
-          q.push({i: i - 4, x: reinterpolate(xa, xb)}, {i: i - 2, x: reinterpolate(ya, yb)});
+          q.push({i: i - 4, x: interpolateNumber(xa, xb)}, {i: i - 2, x: interpolateNumber(ya, yb)});
         } else if (xb || yb) {
           s.push("translate(" + xb + pxComma + yb + pxParen);
         }
@@ -2223,7 +2223,7 @@
       function rotate(a, b, s, q) {
         if (a !== b) {
           if (a - b > 180) b += 360; else if (b - a > 180) a += 360; // shortest path
-          q.push({i: s.push(pop(s) + "rotate(", null, degParen) - 2, x: reinterpolate(a, b)});
+          q.push({i: s.push(pop(s) + "rotate(", null, degParen) - 2, x: interpolateNumber(a, b)});
         } else if (b) {
           s.push(pop(s) + "rotate(" + b + degParen);
         }
@@ -2231,7 +2231,7 @@
 
       function skewX(a, b, s, q) {
         if (a !== b) {
-          q.push({i: s.push(pop(s) + "skewX(", null, degParen) - 2, x: reinterpolate(a, b)});
+          q.push({i: s.push(pop(s) + "skewX(", null, degParen) - 2, x: interpolateNumber(a, b)});
         } else if (b) {
           s.push(pop(s) + "skewX(" + b + degParen);
         }
@@ -2240,7 +2240,7 @@
       function scale(xa, ya, xb, yb, s, q) {
         if (xa !== xb || ya !== yb) {
           var i = s.push(pop(s) + "scale(", null, ",", null, ")");
-          q.push({i: i - 4, x: reinterpolate(xa, xb)}, {i: i - 2, x: reinterpolate(ya, yb)});
+          q.push({i: i - 4, x: interpolateNumber(xa, xb)}, {i: i - 2, x: interpolateNumber(ya, yb)});
         } else if (xb !== 1 || yb !== 1) {
           s.push(pop(s) + "scale(" + xb + "," + yb + ")");
         }
@@ -2743,7 +2743,7 @@
 
     function interpolate(a, b) {
       var c;
-      return (typeof b === "number" ? reinterpolate
+      return (typeof b === "number" ? interpolateNumber
           : b instanceof color ? interpolateRgb
           : (c = color(b)) ? (b = c, interpolateRgb)
           : interpolateString)(a, b);
@@ -3829,7 +3829,7 @@
         }
 
         // Or, is (x1,y1) coincident with (x0,y0)? Do nothing.
-        else if (!(l01_2 > epsilon$1)) {}
+        else if (!(l01_2 > epsilon$1)) ;
 
         // Or, are (x0,y0), (x1,y1) and (x2,y2) collinear?
         // Equivalently, is (x1,y1) coincident with (x2,y2)?
@@ -4421,7 +4421,7 @@
       if (next = node.next) delete node.next;
 
       // If there are multiple coincident points, remove just the point.
-      if (previous) return next ? previous.next = next : delete previous.next, this;
+      if (previous) return (next ? previous.next = next : delete previous.next), this;
 
       // If this is the root point, remove it.
       if (!parent) return this._root = next, this;
@@ -5682,21 +5682,21 @@
       };
     }
 
-    function reinterpolateClamp(reinterpolate$$1) {
+    function reinterpolateClamp(reinterpolate) {
       return function(a, b) {
-        var r = reinterpolate$$1(a = +a, b = +b);
+        var r = reinterpolate(a = +a, b = +b);
         return function(t) { return t <= 0 ? a : t >= 1 ? b : r(t); };
       };
     }
 
-    function bimap(domain, range, deinterpolate, reinterpolate$$1) {
+    function bimap(domain, range, deinterpolate, reinterpolate) {
       var d0 = domain[0], d1 = domain[1], r0 = range[0], r1 = range[1];
-      if (d1 < d0) d0 = deinterpolate(d1, d0), r0 = reinterpolate$$1(r1, r0);
-      else d0 = deinterpolate(d0, d1), r0 = reinterpolate$$1(r0, r1);
+      if (d1 < d0) d0 = deinterpolate(d1, d0), r0 = reinterpolate(r1, r0);
+      else d0 = deinterpolate(d0, d1), r0 = reinterpolate(r0, r1);
       return function(x) { return r0(d0(x)); };
     }
 
-    function polymap(domain, range, deinterpolate, reinterpolate$$1) {
+    function polymap(domain, range, deinterpolate, reinterpolate) {
       var j = Math.min(domain.length, range.length) - 1,
           d = new Array(j),
           r = new Array(j),
@@ -5710,7 +5710,7 @@
 
       while (++i < j) {
         d[i] = deinterpolate(domain[i], domain[i + 1]);
-        r[i] = reinterpolate$$1(range[i], range[i + 1]);
+        r[i] = reinterpolate(range[i], range[i + 1]);
       }
 
       return function(x) {
@@ -5729,7 +5729,7 @@
 
     // deinterpolate(a, b)(x) takes a domain value x in [a,b] and returns the corresponding parameter t in [0,1].
     // reinterpolate(a, b)(t) takes a parameter t in [0,1] and returns the corresponding domain value x in [a,b].
-    function continuous(deinterpolate, reinterpolate$$1) {
+    function continuous(deinterpolate, reinterpolate) {
       var domain = unit,
           range = unit,
           interpolate$$1 = interpolateValue,
@@ -5749,7 +5749,7 @@
       }
 
       scale.invert = function(y) {
-        return (input || (input = piecewise(range, domain, deinterpolateLinear, clamp ? reinterpolateClamp(reinterpolate$$1) : reinterpolate$$1)))(+y);
+        return (input || (input = piecewise(range, domain, deinterpolateLinear, clamp ? reinterpolateClamp(reinterpolate) : reinterpolate)))(+y);
       };
 
       scale.domain = function(_) {
@@ -5860,7 +5860,7 @@
     }
 
     function linear$2() {
-      var scale = continuous(deinterpolateLinear, reinterpolate);
+      var scale = continuous(deinterpolateLinear, interpolateNumber);
 
       scale.copy = function() {
         return copy(scale, linear$2());
@@ -5978,6 +5978,7 @@
         return (end - start) / k;
       });
     };
+    var milliseconds = millisecond.range;
 
     var durationSecond = 1e3;
     var durationMinute = 6e4;
@@ -5994,6 +5995,7 @@
     }, function(date) {
       return date.getUTCSeconds();
     });
+    var seconds = second.range;
 
     var minute = newInterval(function(date) {
       date.setTime(Math.floor(date / durationMinute) * durationMinute);
@@ -6004,6 +6006,7 @@
     }, function(date) {
       return date.getMinutes();
     });
+    var minutes = minute.range;
 
     var hour = newInterval(function(date) {
       var offset = date.getTimezoneOffset() * durationMinute % durationHour;
@@ -6016,6 +6019,7 @@
     }, function(date) {
       return date.getHours();
     });
+    var hours = hour.range;
 
     var day = newInterval(function(date) {
       date.setHours(0, 0, 0, 0);
@@ -6026,6 +6030,7 @@
     }, function(date) {
       return date.getDate() - 1;
     });
+    var days = day.range;
 
     function weekday(i) {
       return newInterval(function(date) {
@@ -6046,6 +6051,8 @@
     var friday = weekday(5);
     var saturday = weekday(6);
 
+    var sundays = sunday.range;
+
     var month = newInterval(function(date) {
       date.setDate(1);
       date.setHours(0, 0, 0, 0);
@@ -6056,6 +6063,7 @@
     }, function(date) {
       return date.getMonth();
     });
+    var months = month.range;
 
     var year = newInterval(function(date) {
       date.setMonth(0, 1);
@@ -6078,6 +6086,7 @@
         date.setFullYear(date.getFullYear() + step * k);
       });
     };
+    var years = year.range;
 
     var utcMinute = newInterval(function(date) {
       date.setUTCSeconds(0, 0);
@@ -6088,6 +6097,7 @@
     }, function(date) {
       return date.getUTCMinutes();
     });
+    var utcMinutes = utcMinute.range;
 
     var utcHour = newInterval(function(date) {
       date.setUTCMinutes(0, 0, 0);
@@ -6098,6 +6108,7 @@
     }, function(date) {
       return date.getUTCHours();
     });
+    var utcHours = utcHour.range;
 
     var utcDay = newInterval(function(date) {
       date.setUTCHours(0, 0, 0, 0);
@@ -6108,6 +6119,7 @@
     }, function(date) {
       return date.getUTCDate() - 1;
     });
+    var utcDays = utcDay.range;
 
     function utcWeekday(i) {
       return newInterval(function(date) {
@@ -6128,6 +6140,8 @@
     var utcFriday = utcWeekday(5);
     var utcSaturday = utcWeekday(6);
 
+    var utcSundays = utcSunday.range;
+
     var utcMonth = newInterval(function(date) {
       date.setUTCDate(1);
       date.setUTCHours(0, 0, 0, 0);
@@ -6138,6 +6152,7 @@
     }, function(date) {
       return date.getUTCMonth();
     });
+    var utcMonths = utcMonth.range;
 
     var utcYear = newInterval(function(date) {
       date.setUTCMonth(0, 1);
@@ -6160,6 +6175,7 @@
         date.setUTCFullYear(date.getUTCFullYear() + step * k);
       });
     };
+    var utcYears = utcYear.range;
 
     function localDate(d) {
       if (0 <= d.y && d.y < 100) {
@@ -6851,7 +6867,7 @@
     }
 
     function calendar(year$$1, month$$1, week, day$$1, hour$$1, minute$$1, second$$1, millisecond$$1, format) {
-      var scale = continuous(deinterpolateLinear, reinterpolate),
+      var scale = continuous(deinterpolateLinear, interpolateNumber),
           invert = scale.invert,
           domain = scale.domain;
 
@@ -6999,7 +7015,7 @@
 
     var plasma = ramp(colors("0d088710078813078916078a19068c1b068d1d068e20068f2206902406912605912805922a05932c05942e05952f059631059733059735049837049938049a3a049a3c049b3e049c3f049c41049d43039e44039e46039f48039f4903a04b03a14c02a14e02a25002a25102a35302a35502a45601a45801a45901a55b01a55c01a65e01a66001a66100a76300a76400a76600a76700a86900a86a00a86c00a86e00a86f00a87100a87201a87401a87501a87701a87801a87a02a87b02a87d03a87e03a88004a88104a78305a78405a78606a68707a68808a68a09a58b0aa58d0ba58e0ca48f0da4910ea3920fa39410a29511a19613a19814a099159f9a169f9c179e9d189d9e199da01a9ca11b9ba21d9aa31e9aa51f99a62098a72197a82296aa2395ab2494ac2694ad2793ae2892b02991b12a90b22b8fb32c8eb42e8db52f8cb6308bb7318ab83289ba3388bb3488bc3587bd3786be3885bf3984c03a83c13b82c23c81c33d80c43e7fc5407ec6417dc7427cc8437bc9447aca457acb4679cc4778cc4977cd4a76ce4b75cf4c74d04d73d14e72d24f71d35171d45270d5536fd5546ed6556dd7566cd8576bd9586ada5a6ada5b69db5c68dc5d67dd5e66de5f65de6164df6263e06363e16462e26561e26660e3685fe4695ee56a5de56b5de66c5ce76e5be76f5ae87059e97158e97257ea7457eb7556eb7655ec7754ed7953ed7a52ee7b51ef7c51ef7e50f07f4ff0804ef1814df1834cf2844bf3854bf3874af48849f48948f58b47f58c46f68d45f68f44f79044f79143f79342f89441f89540f9973ff9983ef99a3efa9b3dfa9c3cfa9e3bfb9f3afba139fba238fca338fca537fca636fca835fca934fdab33fdac33fdae32fdaf31fdb130fdb22ffdb42ffdb52efeb72dfeb82cfeba2cfebb2bfebd2afebe2afec029fdc229fdc328fdc527fdc627fdc827fdca26fdcb26fccd25fcce25fcd025fcd225fbd324fbd524fbd724fad824fada24f9dc24f9dd25f8df25f8e125f7e225f7e425f6e626f6e826f5e926f5eb27f4ed27f3ee27f3f027f2f227f1f426f1f525f0f724f0f921"));
 
-    function constant$10(x) {
+    function constant$a(x) {
       return function constant() {
         return x;
       };
@@ -7051,7 +7067,7 @@
     function line() {
       var x$$1 = x$3,
           y$$1 = y$3,
-          defined = constant$10(true),
+          defined = constant$a(true),
           context = null,
           curve = curveLinear,
           output = null;
@@ -7077,15 +7093,15 @@
       }
 
       line.x = function(_) {
-        return arguments.length ? (x$$1 = typeof _ === "function" ? _ : constant$10(+_), line) : x$$1;
+        return arguments.length ? (x$$1 = typeof _ === "function" ? _ : constant$a(+_), line) : x$$1;
       };
 
       line.y = function(_) {
-        return arguments.length ? (y$$1 = typeof _ === "function" ? _ : constant$10(+_), line) : y$$1;
+        return arguments.length ? (y$$1 = typeof _ === "function" ? _ : constant$a(+_), line) : y$$1;
       };
 
       line.defined = function(_) {
-        return arguments.length ? (defined = typeof _ === "function" ? _ : constant$10(!!_), line) : defined;
+        return arguments.length ? (defined = typeof _ === "function" ? _ : constant$a(!!_), line) : defined;
       };
 
       line.curve = function(_) {
@@ -18499,6 +18515,7 @@
             }
         }
         buildFromData(rootData) {
+            this.adaptChildrenField(rootData);
             this.rootData = rootData;
             let root = hierarchy(rootData)
                 .sum(d => d["weight"])
@@ -18589,7 +18606,7 @@
                 .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
                 .style("text-anchor", "middle")
                 .style("fill", this.textColor)
-                .text(d => d.data.name);
+                .text(d => d.data[this.config.nameField]);
             this.svg.on("click", () => this.zoom(root));
             this.zoomTo([root.x, root.y, root.r * 2 + this.config.margin]);
             if (this.config.nodePopover != null) {
@@ -18668,6 +18685,10 @@
             this.svg = select(config.container);
             if (!this.config.margin)
                 this.config.margin = 20;
+            if (!this.config.childrenField)
+                this.config.childrenField = "children";
+            if (!this.config.nameField)
+                this.config.nameField = "name";
             this.update();
             console.info("diameter: " + this.diameter);
             this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
@@ -18692,6 +18713,17 @@
                 this.buildFromData(config.data);
             }
         }
+        adaptChildrenField(root) {
+            if (this.config.childrenField == "children")
+                return;
+            let adapt = (d) => {
+                if (d[this.config.childrenField]) {
+                    d.children = d[this.config.childrenField];
+                    d.children.forEach(d => adapt(d));
+                }
+            };
+            adapt(root);
+        }
         /**
          * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
          */
@@ -18702,7 +18734,7 @@
             let lookup = (d) => {
                 if (d.children) {
                     d.children.forEach(d => {
-                        if (upperCasedNames.indexOf(d.name.toUpperCase()) >= 0) {
+                        if (upperCasedNames.indexOf(d[this.config.nameField].toUpperCase()) >= 0) {
                             result.push(d);
                         }
                     });

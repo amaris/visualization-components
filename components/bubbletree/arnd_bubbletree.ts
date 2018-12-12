@@ -29,7 +29,7 @@ export interface Data {
     /**
      * The name of the data, or label of the node.
      */
-    name: string;
+    name?: string;
     /**
      * The children.
      */
@@ -60,6 +60,14 @@ export interface BubbleTreeConfiguration<D extends Data> {
      * The data holding the tree.
      */
     data: string | D;
+    /**
+     * The field holding the name in the data (defaults to "name").
+     */
+    nameField?: string;
+    /**
+     * The field holding the children in the data (defaults to "children").
+     */
+    childrenField?: string;
     /**
      * The color hue for base leafs (default is 110). See http://hslpicker.com/ to check out the meaning of hue.
      */
@@ -144,6 +152,7 @@ export class BubbleTree<D extends Data> {
     }
 
     private buildFromData(rootData: Data) {
+        this.adaptChildrenField(rootData);
         this.rootData = rootData;
         let root = <any>d3.hierarchy(rootData)
             .sum(d => d["weight"])
@@ -237,7 +246,7 @@ export class BubbleTree<D extends Data> {
             .style("font", "15px 'Helvetica Neue', Helvetica, Arial, sans-serif")
             .style("text-anchor", "middle")
             .style("fill", this.textColor)
-            .text(d => d.data.name);
+            .text(d => d.data[this.config.nameField]);
 
         this.svg.on("click", () => this.zoom(root));
 
@@ -326,6 +335,9 @@ export class BubbleTree<D extends Data> {
         this.config.baseLeafColorLight = this.config.baseLeafColorLight ? this.config.baseLeafColorLight : 50;
         this.svg = d3.select(config.container);
         if (!this.config.margin) this.config.margin = 20;
+        if (!this.config.childrenField) this.config.childrenField = "children";
+        if (!this.config.nameField) this.config.nameField = "name";
+
         this.update();
         console.info("diameter: " + this.diameter);
         this.g = this.svg.append("g").attr("transform", "translate(" + this.width / 2 + "," + this.height / 2 + ")");
@@ -353,6 +365,17 @@ export class BubbleTree<D extends Data> {
 
     }
 
+    adaptChildrenField(root: Data) {
+        if (this.config.childrenField == "children") return;
+        let adapt = (d: Data) => {
+            if (d[this.config.childrenField]) {
+                d.children = d[this.config.childrenField];
+                    d.children.forEach(d => adapt(d));
+                }
+            }
+        adapt(root);
+    }
+
     /**
      * Get all the uids of the nodes matching the given names. Lookup is done within the chilren of the currently focussed node.
      */
@@ -363,7 +386,7 @@ export class BubbleTree<D extends Data> {
         let lookup = (d: Data) => {
             if (d.children) {
                 d.children.forEach(d => {
-                    if (upperCasedNames.indexOf(d.name.toUpperCase()) >= 0) {
+                    if (upperCasedNames.indexOf(d[this.config.nameField].toUpperCase()) >= 0) {
                         result.push(d);
                     }
                 });
