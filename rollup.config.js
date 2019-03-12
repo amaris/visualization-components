@@ -7,7 +7,8 @@ export default {
     output: {
         file: 'dist/visualization-components-bundle.js',
         format: 'umd',
-        sourcemap: true
+        sourcemap: true,
+        name: "arnd"
     },
     plugins: [
         typescript(),

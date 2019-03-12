@@ -196,17 +196,34 @@ export class BubbleTree<D extends Data> {
                 if (this.getSelections().indexOf(d.data) < 0) {
                     this.setCircleFillColor(d, this.selectedLeafColor(100), 0.3);
                 }
-                if (d != this.focus && this.focus.ancestors().indexOf(d) < 0) {
-                    this.showText(d, true);
-                    while (d.parent != null /*&& d.parent!=this.focus*/) {
-                        this.showText(d.parent, false);
-                        d = d.parent;
-                    }
+
+                //if(d != this.focus && this.focus.ancestors().indexOf(d) < 0) {
+                let displayed = false;
+                if (d.children != null) {
+                    const nonTerminalNodes = d.children.filter(c => c.children != null && c.children.length > 0);
+                    displayed = nonTerminalNodes.length !== 0 || d == this.focus;
+                    d.children.forEach(c => {
+                        this.showText(c, displayed);
+                        if (c.children != null && c.children.length > 0) {
+                            c.children.forEach(b => {
+                                this.showText(b, false);
+                            });
+                        }
+                    });
                 }
+                this.showText(d, !displayed);
+
+                while (d.parent != null /*&& d.parent!=this.focus*/) {
+                    this.showText(d.parent, false);
+                    d = d.parent;
+                }
+                //}
             },
             "mouseout": (d: d3.HierarchyNode<Data>) => {
-                this.setCircleFillColor(d, this.nodeColor(d));
-                this.showText(d, d.parent === this.focus);
+                if (this.getSelections().indexOf(d.data) < 0) {
+                    this.setCircleFillColor(d, this.nodeColor(d));
+                }
+                //this.showText(d, d.parent === this.focus);
                 if (this.config.nodePopover != null) {
                     $('.popover-node').popover("hide");
                 }
@@ -370,9 +387,9 @@ export class BubbleTree<D extends Data> {
         let adapt = (d: Data) => {
             if (d[this.config.childrenField]) {
                 d.children = d[this.config.childrenField];
-                    d.children.forEach(d => adapt(d));
-                }
+                d.children.forEach(d => adapt(d));
             }
+        }
         adapt(root);
     }
 
@@ -402,7 +419,7 @@ export class BubbleTree<D extends Data> {
     }
 
     private nodeColor(d: d3.HierarchyNode<Data>): string {
-        return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(this.selections[d.data.uid] ? this.selections[d.data.uid]:0);
+        return d.data.color ? d.data.color : d.children ? this.defaultColor : this.selectedLeafColor(this.selections[d.data.uid] ? this.selections[d.data.uid] : 0);
     }
 
     /**
@@ -489,10 +506,10 @@ export class BubbleTree<D extends Data> {
             });
 
         transition.select("#" + this.config.container.id).selectAll<any, d3.HierarchyNode<D>>("text")
-            .filter(function(d) { return d.parent && d.parent === btc.focus || this.style.display === "inline"; })
+            .filter(function (d) { return d.parent && d.parent === btc.focus || this.style.display === "inline"; })
             .style("fill-opacity", d => d.parent === this.focus ? 1 : 0)
-            .on("start", function(d) { if (d.parent === btc.focus) this.style.display = "inline"; })
-            .on("end", function(d) { if (d.parent !== btc.focus) this.style.display = "none"; });
+            .on("start", function (d) { if (d.parent === btc.focus) this.style.display = "inline"; })
+            .on("end", function (d) { if (d.parent !== btc.focus) this.style.display = "none"; });
     }
 
     /**

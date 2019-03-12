@@ -17,7 +17,7 @@
 <body>
     <h1>D3.js-based Visualization components</h1>
     <h2>Bubble Tree component</h2>
-    <button onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='test1'?1:d.name=='test2'?0.5:0; })">Click me to select nodes</button>
+    <button onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='cluster 1' ? 0.2 : d.name=='test1'? 1:d.name=='test2'?0.5:0; })">Click me to select nodes</button>
     <span id="sr"></span>
 
     <div style="display: flex; flex-direction: row;height: 300px">
