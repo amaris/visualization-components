@@ -18556,13 +18556,7 @@
                   config.data = config['url'];
               }
               if (typeof config.data === 'string') {
-                  // URL case
-                  json(config.data, (error, rootData) => {
-                      console.log(rootData);
-                      if (error)
-                          throw error;
-                      this.buildFromData(rootData);
-                  });
+                  this.buildFromData(config.dataCache);
               }
               else {
                   // data as JavaScript object
@@ -18609,6 +18603,7 @@
               // URL case
               json(config.data, (error, rootData) => {
                   console.log(rootData);
+                  this.config.dataCache = rootData;
                   if (error)
                       throw error;
                   this.buildFromData(rootData);

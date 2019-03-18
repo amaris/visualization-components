@@ -318,12 +318,7 @@ export class BubbleTree<D extends Data> {
             }
 
             if (typeof config.data === 'string') {
-                // URL case
-                d3.json(<string>config.data, (error, rootData: Data) => {
-                    console.log(rootData);
-                    if (error) throw error;
-                    this.buildFromData(rootData);
-                });
+                this.buildFromData((<any>config).dataCache);
             } else {
                 // data as JavaScript object
                 this.buildFromData(<D>config.data);
@@ -340,7 +335,6 @@ export class BubbleTree<D extends Data> {
         //this.circleColor = this.defaultLeafColor;
         this.selectedCircleColor = window.getComputedStyle(<HTMLElement>this.config.container.firstChild).color;
         console.info(this.selectedCircleColor);
-
 
         this.config.container.setAttribute("width", "100%");
         this.config.container.setAttribute("height", "100%");
@@ -372,6 +366,7 @@ export class BubbleTree<D extends Data> {
             // URL case
             d3.json(<string>config.data, (error, rootData: Data) => {
                 console.log(rootData);
+                (<any>this.config).dataCache = rootData;
                 if (error) throw error;
                 this.buildFromData(rootData);
             });
