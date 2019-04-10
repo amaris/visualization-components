@@ -78,6 +78,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="lib\bootstrap-slate.min.css" />
     <Content Include="lib\d3.v4.min.js" />
     <Content Include="test\index.html" />
     <Content Include="Web.config">
