@@ -1,56 +1,60 @@
-﻿<!-- This HTML file shows how to embed a bubbletree component in a regular HTML page -->
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <link rel="stylesheet" href="../lib/bootstrap-superhero.min.css" />
     <link rel="stylesheet" href="../lib/dataTables.bootstrap4.min.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.3.1/dist/leaflet.css"
-          integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
-          crossorigin="" />
+        integrity="sha512-Rksm5RenBEKSKFjgI3a41vrjkw4EVPlJ3+OiI65vTjIdo9brlAacEuKOiQ5OFh7cOI1bkDwLqdLw3Zg0cRJAAQ=="
+        crossorigin="" />
     <style>
         h2 {
             padding-top: 1em;
         }
     </style>
 </head>
+
 <body>
-    <h1>D3.js-based Visualization components</h1>
-    <h2>Bubble Tree component</h2>
-    <button onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='cluster 1' ? 0.2 : d.name=='test1'? 1:d.name=='test2'?0.5:0; })">Click me to select nodes</button>
-    <span id="sr"></span>
+    <div class="container">
+        <h1>D3.js-based Visualization components</h1>
+        <h2>Bubble Tree component</h2>
+        <button
+            onclick="c.selectData(function(d) { console.info(d); console.info(d.name=='test1'?1:d.name=='test2'?0.5:0); return d.name=='cluster 1' ? 0.2 : d.name=='test1'? 1:d.name=='test2'?0.5:0; })">Click
+            me to select nodes</button>
+        <span id="sr"></span>
 
-    <div style="display: flex; flex-direction: row;height: 300px">
-        <div style="display: flex; flex-direction: column; width: 30%; border: black dotted 1px;">
-            <svg id="bubbletree1"></svg>
+        <div style="display: flex; flex-direction: row;height: 300px">
+            <div style="display: flex; flex-direction: column; width: 30%; border: black dotted 1px;">
+                <svg id="bubbletree1"></svg>
+            </div>
+            <div style="display: flex; flex-direction: column; width: 70%; border: black dotted 1px;">
+                <svg id="bubbletree2"></svg>
+            </div>
         </div>
-        <div style="display: flex; flex-direction: column; width: 70%; border: black dotted 1px;">
-            <svg id="bubbletree2"></svg>
+
+        <h2>Table component</h2>
+        <div id="table">
         </div>
-    </div>
+        <h2>Table component even more</h2>
+        <div id="table2">
+        </div>
+        <h2>Table component even even more</h2>
+        <div id="table3">
+        </div>
+        <h2>Table component even even even more</h2>
+        <div id="table4">
+        </div>
 
-    <h2>Table component</h2>
-    <div id="table">
-    </div>
-    <h2>Table component even more</h2>
-    <div id="table2">
-    </div>
-    <h2>Table component even even more</h2>
-    <div id="table3">
-    </div>
-    <h2>Table component even even even more</h2>
-    <div id="table4">
-    </div>
+        <h2>List component</h2>
+        <div id="list" style="max-height:300px;overflow-y:scroll"></div>
 
-    <h2>List component</h2>
-    <div id="list" style="max-height:300px;overflow-y:scroll"></div>
+        <h2>Time Series component</h2>
+        <div id="ts" style="width:100%;height:400px"></div>
 
-    <h2>Time Series component</h2>
-    <div id="ts" style="width:100%;height:400px"></div>
-
-    <h2>Earth Model</h2>
-    <div id="earth-3d" style="width:100%;height:600px"></div>
-
+        <!-- <h2>Earth Model</h2>
+        <div id="earth-3d" style="width:100%;height:600px"></div> -->
+    </div>
     <!--<script src="../lib/d3.v4.min.js"></script>
     <script src="../lib/jquery-1.12.4.js"></script>-->
     <script src="../dist/visualization-components-bundle.js"></script>
@@ -328,7 +332,7 @@
                                     "?": "Flotte"
                                 }
                             ]
-                        },                        
+                        },
                     ]
                 },
                 {
@@ -372,7 +376,7 @@
                                     "?": "Flotte"
                                 }
                             ]
-                        },                        
+                        },
                     ],
 
                 }
@@ -527,28 +531,29 @@
             'saucisse'
         ];
  /*       var sr = new arnd.SimpleSpeechRecognition();
-        sr.build({
-            container: document.getElementById("sr"),
-            language: "fr-FR",
-            onSpeechRecognized: function (results) {
-                let uids = c.lookupNames(results);
-                //console.info(uids);
-                if (uids.length > 0) {
-                    c.zoomToId(uids[0]);
-                } else {
-                    if (unzoomAction_FR.indexOf(results[0]) >= 0) {
-                        c.zoomBack();
-                    }
-                }
-            }
-        });*/
+                             sr.build({
+                                 container: document.getElementById("sr"),
+                                 language: "fr-FR",
+                                 onSpeechRecognized: function (results) {
+                                     let uids = c.lookupNames(results);
+                                     //console.info(uids);
+                                     if (uids.length > 0) {
+                                         c.zoomToId(uids[0]);
+                                     } else {
+                                         if (unzoomAction_FR.indexOf(results[0]) >= 0) {
+                                             c.zoomBack();
+                                         }
+                                     }
+                                 }
+                             });*/
 
-                    /* var earth = new arnd.Earth();
-                    earth.build({
-                        container: document.getElementById("earth-3d"),
-                        data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
-                    });*/
+        /* var earth = new arnd.Earth();
+        earth.build({
+            container: document.getElementById("earth-3d"),
+            data: [{ uid: "paris", value: "paris", lat: 48.866667, long: 2.333333 }, { uid: "madrid", value: "madrid", lat: 40.416775, long: -3.703790 }, { uid: "new-york", value: "new-york", lat: 40.730610, long: -73.935242 }],
+        });*/
 
     </script>
 </body>
+
 </html>
